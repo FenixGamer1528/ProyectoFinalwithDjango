@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="./tablet/tablet.css" media="(min-width: 930px)">
+    <title>Glamoure</title>
+</head>
+<body>
+    <header>
+            <nav>
+                <ul class="menu">
+                    <li><a href="#">Hombres</a></li>
+                    <li><a href="#">Mujeres</a></li>                        
+                    <li><a href="#">Zapatos</a></li>
+                    <li><a href="#">Ofertas</a></li>
+                </ul>
+                <div class="logo-izquierda">
+                    <img src={% static "imagenes/Logo.png" %} alt="Logo">
+                </div>
+                <div>
+                    <ul class="menu">
+                        <a href="#" class="logo-izquierda"><img src= {% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt=""></a>
+                        <li><a href="#">Iniciar Sesion</a></li>
+                        <li><a href="#">Registrarse</a></li>
+                    </ul>
+                </div>
+            </nav>
+    </header>
+    <main>
+        <section class="bienvenida">
+            <div class="bienvenida-texto">
+                <h1>¡Bienvenido a Glamoure!</h1>
+                 <p>La tienda de ropa más exclusiva de la ciudad</p>
+             </div>
+            <div class="bienvenida-imagen">
+                <img src={% static "imagenes/señora.png" %} alt="Ropa Mujer">
+                <img src={% static "imagenes/zapatos.avif" %} alt="Zapatos">
+                <img src={% static "imagenes/principalhombre.png" %} alt="Ropa Hombre">
+            </div>
+            <hr>
+        </section>
+        
+        <section class="video">
+            <div class="video-interno">
+                <h2>Te ofrecemos gran variedad de prendas</h2>
+                <p>Nuestra marca busca ofrecer la mejor variedad de productos del mercado, incluyendo comodidad y frescura para ti.</p>
+                <video src={% static "Videos/69986-533438262_small.mp4" %} controls autoplay muted loop></video>
+            </div>
+        </section>
+        <hr>
+        <section class="lo-mas-vendido">
+            <div class="mas-vendidos">
+                <h2>🔥 Lo más vendido 🔥</h2>
+                <div class="productos">
+                    <div class="producto">
+                        <img src={% static "imagenes/Buso negro.webp" %} alt="Buzo negro">
+                        <p>Buzo negro</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa2">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/zapatos.jpg" %} alt="Ropa3">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/busorojo.jpg" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/zapatonegro.jpg" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/sudadero.jpg" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/laroca.jpg" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="lo-mas-vendido">
+            <div class="mas-vendidos">
+                <h2>🎉Ofertas especiales🎉</h2>
+                <div class="productos">
+                    <div class="producto">
+                        <img src={% static "imagenes/Buso negro.webp" %} alt="Buzo negro">
+                        <p>Buzo negro</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa2">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Buso negro.webp" %} alt="Ropa3">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                    <div class="producto">
+                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
+                        <p>Camisa de vestir</p>
+                        <p>$50.00</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <section class="izquierda">
+            <ul>
+                <li><a href="#">Acerca de nosotros</a></li>
+                <li><a href="#">Contactanos</a></li>
+                <li><a href="#">Servicio al cliente</a></li>
+                <li><a href="#">Todos los derechos estan reservados</a></li>
+            </ul>
+        </section>
+        <section class="derecha">
+            <img src={% static "imagenes/Simbolo-transparente.png" %} alt="Logo de Glamoure">
+        </section>
+    </footer>
+</body>
+</html>

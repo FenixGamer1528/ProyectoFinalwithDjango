@@ -1,0 +1,4 @@
+nav .menu a:hover {
+    background-color: var(--tono-dorado);
+    border-radius: 5px;
+}
