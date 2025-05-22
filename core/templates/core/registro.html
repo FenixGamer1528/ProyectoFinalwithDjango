@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/stylelogin.css' %}">
+    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
+    <title>Registro</title>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Registro de Usuario</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Registrarse</button>
+        </form>
+    </div>
+</body>
+</html>

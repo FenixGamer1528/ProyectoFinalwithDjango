@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/stylelogin.css' %}">
+    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
+    <title>Iniciar sesion</title>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Inicio de sesion</h2>
+        {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+        {% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="usuario">Usuario:</label>
+                {{ form.usuario }}
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                {{ form.password }}
+            </div>
+            <button type="submit">Iniciar sesion</button>
+        </form>
+    </div>
+</body>
+</html>

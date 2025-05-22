@@ -24,8 +24,13 @@
                 <div>
                     <ul class="menu">
                         <a href="#" class="logo-izquierda"><img src= {% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt=""></a>
-                        <li><a href="#">Iniciar Sesion</a></li>
-                        <li><a href="#">Registrarse</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                         <li><span>Hola, {{ user.username }}</span></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+                        <li><a href="{% url 'registro' %}">Registrarse</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </nav>
