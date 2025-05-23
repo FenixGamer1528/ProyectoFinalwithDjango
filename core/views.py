@@ -1,6 +1,8 @@
 from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import render,HttpResponse, redirect
 from .forms import LoginForm, RegistroForm 
+from .models import Producto,Pedido, UsuarioPersonalizado
+
 
 
 def login_view(request):
@@ -27,6 +29,24 @@ def logout_view(request):
 
 def dashboard_view(request):
     return render(request, 'dashboard.html')
+
+def admin_dashboard(request):
+    total_usuarios = UsuarioPersonalizado.objects.count()
+    total_productos = Producto.objects.count()
+    total_pedidos = Pedido.objects.count()
+
+    context = {
+        'total_usuarios': total_usuarios,
+        'total_productos': total_productos,
+        'total_pedidos': total_pedidos,
+    }
+    return render(request, 'core/dashboard.html', context)
+def gestion_productos(request):
+    productos = Producto.objects.all()
+    return render(request, 'core/gestion_productos.html', {'productos': productos})
+def gestion_pedidos(request):
+    pedidos = Pedido.objects.all()
+    return render(request, 'core/gestion_pedidos.html', {'pedidos': pedidos})
 
 #Registro de usuario
 
