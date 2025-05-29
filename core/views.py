@@ -11,16 +11,21 @@ def login_view(request):
         if form.is_valid():
             usuario = form.cleaned_data['usuario']
             password = form.cleaned_data['password']
-
             user = authenticate(request, username=usuario, password=password)
+
             if user is not None:
-                login(request, user)
-                return redirect('index')  # Redirige al home
+                login(request, user)  # <- LOGIN SIEMPRE QUE SEA VÁLIDO
+                
+                if user.is_staff:
+                    return redirect('dashboard')  # vista del admin
+                else:
+                    return redirect('index')   # vista del usuario normal
             else:
                 error_message = "Datos inválidos"
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
     else:
         form = LoginForm()
+
     return render(request, 'login.html', {'form': form})
 
 def logout_view(request):
