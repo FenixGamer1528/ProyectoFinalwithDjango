@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="./tablet/tablet.css" media="(min-width: 930px)">
+   <!-- <link rel="stylesheet" href="./tablet/tablet.css" media="(min-width: 930px)">-->
     <title>Glamoure</title>
 </head>
 <body>
@@ -24,8 +24,13 @@
                 <div>
                     <ul class="menu">
                         <a href="#" class="logo-izquierda"><img src= {% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt=""></a>
-                        <li><a href="#">Iniciar Sesion</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                         <li><span>Hola, {{ user.username }}</span></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
                         <li><a href="#">Registrarse</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </nav>
@@ -53,47 +58,22 @@
         </section>
         <hr>
         <section class="lo-mas-vendido">
-            <div class="mas-vendidos">
-                <h2>🔥 Lo más vendido 🔥</h2>
-                <div class="productos">
-                    <div class="producto">
-                        <img src={% static "imagenes/Buso negro.webp" %} alt="Buzo negro">
-                        <p>Buzo negro</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa2">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/zapatos.jpg" %} alt="Ropa3">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/busorojo.jpg" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/zapatonegro.jpg" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/sudadero.jpg" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/laroca.jpg" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
+    <div class="mas-vendidos">
+        <h2>🔥 Lo más vendido 🔥</h2>
+        <div class="productos">
+            
+           {% for producto in productos %}
+
+                <div class="producto">
+                    <img src={{producto.imagen.url}} alt="{{ producto.nombre }}"/>
+                    <p>{{ producto.nombre }}</p>
+                    <p>${{ producto.precio }}</p>
                 </div>
-            </div>
-        </section>
+           
+            {% endfor %}
+        </div>
+    </div>
+</section>
         <section class="lo-mas-vendido">
             <div class="mas-vendidos">
                 <h2>🎉Ofertas especiales🎉</h2>
