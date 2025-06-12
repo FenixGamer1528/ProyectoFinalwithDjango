@@ -1,12 +1,7 @@
 from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import render,HttpResponse, redirect
-<<<<<<< HEAD
-from .forms import LoginForm 
-from .models import Usuario,Producto
-=======
 from .forms import LoginForm, RegistroForm 
 from .models import Producto,Pedido, UsuarioPersonalizado
->>>>>>> 4a0f18c3d850a59a49289a69804614ac2703d9b7
 
 
 def home(request):

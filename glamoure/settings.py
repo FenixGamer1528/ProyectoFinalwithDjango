@@ -82,11 +82,11 @@ DATABASES = {
     }
 }
 
-<<<<<<< HEAD
+
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
-=======
+
 AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
->>>>>>> 4a0f18c3d850a59a49289a69804614ac2703d9b7
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 

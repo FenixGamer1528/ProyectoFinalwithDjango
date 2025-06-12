@@ -29,11 +29,7 @@
                          <li><span>Hola, {{ user.username }}</span></li>
                         {% else %}
                         <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
-<<<<<<< HEAD
-                        <li><a href="#">Registrarse</a></li>
-=======
                         <li><a href="{% url 'registro' %}">Registrarse</a></li>
->>>>>>> 4a0f18c3d850a59a49289a69804614ac2703d9b7
                         {% endif %}
                     </ul>
                 </div>
