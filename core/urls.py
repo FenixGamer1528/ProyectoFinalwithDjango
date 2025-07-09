@@ -13,4 +13,11 @@ urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
     path('gestion_pedidos/', views.gestion_pedidos, name='gestion_pedidos'),
+    path('lista_productos/', views.lista_productos, name='lista_productos'),
+    path('carrito/', views.ver_carrito, name='ver_carrito'),
+    path('carrito/agregar/<int:producto_id>/', views.agregar_al_carrito, name='agregar_al_carrito'),
+    path('carrito/eliminar/<int:item_id>/', views.eliminar_item, name='eliminar_item'),
+    path('carrito/modal/', views.carrito_modal, name='carrito_modal'),
+    path('producto/<int:product_id>/', views.producto, name='producto'),
+    path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
 ]

@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
+
+
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
@@ -31,3 +34,19 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre
+
+#Carrito
+
+class Carrito(models.Model):
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def total(self):
+        return sum(item.subtotal() for item in self.items.all())
+
+class ItemCarrito(models.Model):
+    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField(default=1)
+
+    def subtotal(self):
+        return self.producto.precio * self.cantidad
