@@ -11,22 +11,6 @@
     --tono-pastel: #fdf8e1;
 }
 
-::-webkit-scrollbar {
-    width: 10px; /* Ancho de la barra de desplazamiento */
-}
-
-/* Estilo del "thumb" (la parte que se mueve) */
-::-webkit-scrollbar-thumb {
-    background: rgba(37, 40, 42, 0.5); /* Color dorado */
-    border-radius: 5px;
-}
-
-/* Estilo del "track" (el fondo de la barra) */
-::-webkit-scrollbar-track {
-    background: rgba(37, 40, 42, 0.2); /* Color del fondo */
-    border-radius: 10px;
-}
-
 nav {
     display: flex;
     justify-content: space-between;
