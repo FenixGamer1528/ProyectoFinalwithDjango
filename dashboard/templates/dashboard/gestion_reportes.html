@@ -1,0 +1,272 @@
+{% extends '<core>
+<base href="">.html' %}
+
+{% block title %}Gestión de Reportes - Glamoure{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="display-4 mb-4">Gestión de Reportes</h1>
+    
+    <!-- Resumen Estadístico -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-users me-2"></i>Usuarios Registrados
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">{{ usuarios.count }}</h3>
+                    <p class="card-text">Total de usuarios en el sistema</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-boxes me-2"></i>Productos Disponibles
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">{{ productos.count }}</h3>
+                    <p class="card-text">Total de productos en inventario</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-shopping-cart me-2"></i>Pedidos Realizados
+                </div>
+                <div class="card-body">
+                    <h3 class="card-title">{{ pedidos.count }}</h3>
+                    <p class="card-text">Total de pedidos en el sistema</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de Usuarios -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                <i class="fas fa-user-friends me-2"></i>Usuarios Registrados
+            </h2>
+            <button class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-download me-1"></i>Exportar
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Fecha Registro</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.username }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.telefono|default:"-" }}</td>
+                            <td>{{ usuario.date_joined|date:"d/m/Y" }}</td>
+                            <td>
+                                <span class="badge bg-{% if usuario.is_active %}success{% else %}secondary{% endif %}">
+                                    {% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay usuarios registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de Productos -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                <i class="fas fa-box-open me-2"></i>Inventario de Productos
+            </h2>
+            <button class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-download me-1"></i>Exportar
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for producto in productos %}
+                        <tr>
+                            <td>{{ producto.id }}</td>
+                            <td>{{ producto.nombre }}</td>
+                            <td>${{ producto.precio }}</td>
+                            <td>
+                                <span class="badge bg-{% if producto.stock > 10 %}success{% elif producto.stock > 0 %}warning{% else %}danger{% endif %}">
+                                    {{ producto.stock }}
+                                </span>
+                            </td>
+                            <td>{{ producto.categoria|default:"-" }}</td>
+                            <td>
+                                <span class="badge bg-{% if producto.activo %}success{% else %}secondary{% endif %}">
+                                    {% if producto.activo %}Activo{% else %}Inactivo{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay productos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sección de Pedidos -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                <i class="fas fa-receipt me-2"></i>Historial de Pedidos
+            </h2>
+            <button class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-download me-1"></i>Exportar
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Productos</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>#{{ pedido.id }}</td>
+                            <td>{{ pedido.usuario.username }}</td>
+                            <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <span class="badge bg-primary rounded-pill">{{ pedido.items.count }}</span>
+                            </td>
+                            <td>${{ pedido.total }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if pedido.estado == 'pendiente' %}bg-secondary
+                                    {% elif pedido.estado == 'procesando' %}bg-info
+                                    {% elif pedido.estado == 'enviado' %}bg-warning
+                                    {% elif pedido.estado == 'entregado' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ pedido.get_estado_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay pedidos registrados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón de impresión -->
+<div class="fixed-bottom mb-4 me-4 d-print-none" style="right: 0;">
+    <button class="btn btn-primary btn-lg rounded-circle shadow-lg" onclick="window.print()">
+        <i class="fas fa-print"></i>
+    </button>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .card-header {
+        font-weight: 600;
+    }
+    .table th {
+        font-weight: 600;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    .badge {
+        padding: 0.5em 0.75em;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+    @media print {
+        .fixed-bottom {
+            display: none;
+        }
+        .container-fluid {
+            padding: 0;
+        }
+        .card {
+            border: none;
+            box-shadow: none;
+        }
+        .card-header {
+            background-color: white !important;
+            color: #000 !important;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .btn {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Font Awesome para íconos -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        // Activar tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+        
+        // Botones de exportación (ejemplo)
+        $('.btn-outline-primary').click(function() {
+            alert('Funcionalidad de exportación en desarrollo');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-indigo-700 mb-2">Gestión de Productos</h1>
+            
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Panel de control -->
+            <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Acciones</h2>
+                
+                <button id="addProductBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md mb-4 transition-all flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i> Agregar Producto
+                </button>
+
+                <div class="mb-6">
+                    <h3 class="text-md font-medium mb-2 text-gray-700">Buscar Producto</h3>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <i class="fas fa-search absolute right-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-md font-medium mb-2 text-gray-700">Filtrar por categoría</h3>
+                    <select id="categoryFilter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">Todas las categorías ropa</option>
+                        <option value="Electrónica">blusa</option>
+                        <option value="Ropa">zapatos</option>
+                        <option value="Hogar">chaquetas</option>
+                        <option value="Alimentos">pantalones</option>
+                       
+                    </select>
+                </div>
+            </div>
+
+            <!-- Lista de productos -->
+            <div class="lg:col-span-2">
+                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Los productos se cargarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar producto -->
+    <div id="productModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modalTitle" class="text-xl font-semibold text-gray-800">Agregar Nuevo Producto</h2>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="productForm" class="space-y-4">
+                <input type="hidden" id="productId">
+                
+                <div>
+                    <label for="productName" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                    <input type="text" id="productName" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label for="productCategory" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select id="productCategory" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        
+                        <option value="Ropa">Ropa</option>
+                       
+                      
+                    </select>
+                </div>
+
+                <div>
+                    <label for="productPrice" class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                    <input type="number" id="productPrice" min="0" step="0.01" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label for="productStock" class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input type="number" id="productStock" min="0" required class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label for="productDescription" class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea id="productDescription" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                </div>
+
+                <div>
+                    <label for="productImage" class="block text-sm font-medium text-gray-700 mb-1">Imagen del Producto</label>
+                    <input type="text" id="productImage" placeholder="URL de la imagen" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-all">Cancelar</button>
+                    <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo
+        let products = [
+            
+            {
+                id: 2,
+                name: "Zapatos Deportivos",
+                category: "Ropa",
+                price: 89.99,
+                stock: 30,
+                description: "Zapatos cómodos para correr",
+                image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0043739d-113e-4eaa-a18f-46c844bf65cd.png"
+            },
+           
+            
+        ];
+
+        // Elementos del DOM
+        const productsContainer = document.getElementById('productsContainer');
+        const searchInput = document.getElementById('searchInput');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const productModal = document.getElementById('productModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const productForm = document.getElementById('productForm');
+        const productId = document.getElementById('productId');
+        const productName = document.getElementById('productName');
+        const productCategory = document.getElementById('productCategory');
+        const productPrice = document.getElementById('productPrice');
+        const productStock = document.getElementById('productStock');
+        const productDescription = document.getElementById('productDescription');
+        const productImage = document.getElementById('productImage');
+        const addProductBtn = document.getElementById('addProductBtn');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        // Mostrar productos
+        function renderProducts(productsToRender) {
+            productsContainer.innerHTML = '';
+            
+            if (productsToRender.length === 0) {
+                productsContainer.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-8">No se encontraron productos</p>';
+                return;
+            }
+
+            productsToRender.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-lg shadow-md overflow-hidden transition-all';
+                productCard.innerHTML = `
+                    <div class="h-48 bg-gray-100 overflow-hidden">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover" onerror="this.src='https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/678f9d47-4bd1-464d-8950-d7948b027dd8.png'">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-semibold text-lg text-gray-800">${product.name}</h3>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">${product.category}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-3 line-clamp-2">${product.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-indigo-600">$${product.price.toFixed(2)}</span>
+                            <span class="text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}">
+                                ${product.stock > 0 ? `${product.stock} en stock` : 'Agotado'}
+                            </span>
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-4">
+                            <button onclick="editProduct(${product.id})" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteProduct(${product.id})" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                productsContainer.appendChild(productCard);
+            });
+        }
+
+        // Filtrar productos
+        function filterProducts() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const category = categoryFilter.value;
+            
+            let filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                     product.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = category === 'all' || product.category === category;
+                return matchesSearch && matchesCategory;
+            });
+            
+            renderProducts(filteredProducts);
+        }
+
+        // Abrir modal para nuevo producto
+        function openAddProductModal() {
+            productId.value = '';
+            productForm.reset();
+            modalTitle.textContent = 'Agregar Nuevo Producto';
+            saveBtn.textContent = 'Agregar';
+            productModal.classList.remove('hidden');
+        }
+
+        // Abrir modal para editar producto
+        window.editProduct = function(id) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                productId.value = product.id;
+                productName.value = product.name;
+                productCategory.value = product.category;
+                productPrice.value = product.price;
+                productStock.value = product.stock;
+                productDescription.value = product.description;
+                productImage.value = product.image;
+                
+                modalTitle.textContent = 'Editar Producto';
+                saveBtn.textContent = 'Actualizar';
+                productModal.classList.remove('hidden');
+            }
+        }
+
+        // Eliminar producto
+        window.deleteProduct = function(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                products = products.filter(product => product.id !== id);
+                renderProducts(products);
+            }
+        }
+
+        // Guardar producto (agregar o actualizar)
+        function saveProduct(e) {
+            e.preventDefault();
+            
+            const productData = {
+                name: productName.value,
+                category: productCategory.value,
+                price: parseFloat(productPrice.value),
+                stock: parseInt(productStock.value),
+                description: productDescription.value,
+                image: productImage.value || 'https://placehold.co/600x400?text=Imagen+no+disponible'
+            };
+            
+            if (productId.value) {
+                // Actualizar producto existente
+                const index = products.findIndex(p => p.id === parseInt(productId.value));
+                if (index !== -1) {
+                    products[index] = { ...products[index], ...productData };
+                }
+            } else {
+                // Agregar nuevo producto
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({ id: newId, ...productData });
+            }
+            
+            renderProducts(products);
+            productModal.classList.add('hidden');
+        }
+
+        // Event listeners
+        addProductBtn.addEventListener('click', openAddProductModal);
+        closeModal.addEventListener('click', () => productModal.classList.add('hidden'));
+        cancelBtn.addEventListener('click', () => productModal.classList.add('hidden'));
+        productForm.addEventListener('submit', saveProduct);
+        searchInput.addEventListener('input', filterProducts);
+        categoryFilter.addEventListener('change', filterProducts);
+
+        // Inicializar
+        renderProducts(products);
+    </script>
+</body>
+</html>

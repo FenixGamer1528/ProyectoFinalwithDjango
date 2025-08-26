@@ -1,22 +1,32 @@
 function mostrarCarrito() {
-    fetch('/carrito/modal/')
+    fetch('/carrito/carrito/modal/')
         .then(response => response.json())
         .then(data => {
             let contenido = '';
             data.items.forEach(item => {
                 contenido += `
-                    <p>
-                        ${item.producto} x ${item.cantidad} = $${item.subtotal}
-                        <button onclick="eliminarItem(${item.id})">❌</button>
-                    </p>
+                    <div class="item-carrito">
+                        <img src="${item.imagen}" alt="${item.producto}" class="img-carrito">
+                        <div class="info-carrito">
+                            <p><strong>${item.producto}</strong></p>
+                            <p>$${item.precio} x ${item.cantidad} = <strong>$${item.subtotal}</strong></p>
+                            <div class="acciones">
+                                <button onclick="cambiarCantidad(${item.id}, 'menos')">➖</button>
+                                <button onclick="cambiarCantidad(${item.id}, 'mas')">➕</button>
+                                <button onclick="eliminarItem(${item.id})">❌</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
                 `;
             });
-            contenido += `<hr><p><strong>Total:</strong> $${data.total}</p>`;
+            contenido += `<p style="text-align:right"><strong>Total:</strong> $${data.total}</p>`;
 
             document.getElementById('carritoContenido').innerHTML = contenido;
-            document.getElementById('carritoModal').style.display = 'block';
+            document.getElementById('carritoModal').style.display = 'flex';
         });
 }
+
 
 function eliminarItem(itemId) {
     fetch(`/carrito/eliminar/${itemId}/`)
@@ -27,4 +37,11 @@ function eliminarItem(itemId) {
 
 function cerrarModal() {
     document.getElementById('carritoModal').style.display = 'none';
+}
+
+function cambiarCantidad(itemId, accion) {
+    fetch(`/carrito/cambiar/${itemId}/${accion}/`)
+        .then(() => {
+            mostrarCarrito(); // refresca el modal
+        });
 }
