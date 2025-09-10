@@ -1,8 +1,7 @@
 /* ====== Estilos generales ====== */
 body {
     font-family: 'Poppins', sans-serif;
-    background: url("../imagenes/pexels-steve-29708304.jpg") no-repeat center center fixed;
-    background-size: cover;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
     display: flex;
@@ -58,17 +57,12 @@ body {
     border: 1px solid #ccc;
     outline: none;
     font-size: 14px;
-    transition: all 0.25s ease;
-    background-color: rgba(255,255,255,0.95);
+    transition: all 0.3s ease;
 }
 
-/* ====== Focus animado: sombra dorada pulsante ====== */
 .form-group input:focus {
     border-color: #d4af37; /* Dorado */
-    /* sombra base para cuando se hace focus */
-    box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
-    /* animación pulsante mientras el input mantiene el focus */
-    animation: glow 0.9s ease-in-out infinite alternate;
+    box-shadow: 0px 0px 6px rgba(212, 175, 55, 0.6);
 }
 
 /* ====== Botón ====== */
@@ -99,14 +93,4 @@ button[type="submit"]:hover {
     border-radius: 8px;
     margin-bottom: 15px;
     font-size: 13px;
-}
-
-/* ====== Keyframes para el glow dorado ====== */
-@keyframes glow {
-    from {
-        box-shadow: 0 0 6px rgba(212, 175, 55, 0.5), 0 0 0px rgba(212,175,55,0.08) inset;
-    }
-    to {
-        box-shadow: 0 0 18px rgba(212, 175, 55, 1), 0 0 6px rgba(212,175,55,0.12) inset;
-    }
 }
