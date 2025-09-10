@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-   <!-- <link rel="stylesheet" href="./tablet/tablet.css" media="(min-width: 930px)">-->
+    <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
     <title>Glamoure</title>
 </head>
 <body>
@@ -133,13 +133,14 @@
         </section>
     </footer>
     <!-- modal oculto -->
-     <div id="carritoModal" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar" onclick="cerrarModal()">&times;</span>
-            <h2>Carrito de compras</h2>
-            <div id="carritoContenido"></div>
-        </div>
+    <div id="carritoModal" class="modal">
+    <div class="modal-contenido">
+        <span class="cerrar" onclick="cerrarModal()">&times;</span>
+        <h2>Carrito de compras</h2>
+        <div id="carritoContenido"></div>
     </div>
+</div>
+
     <script src="{% static 'js/modal.js' %}"></script>
 
     </html>
