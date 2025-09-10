@@ -54,6 +54,7 @@ def carrito_modal(request):
     datos = [{
         'id': item.id,
         'producto': item.producto.nombre,
+        'imagen': item.producto.imagen.url if item.producto.imagen else '',
         'precio': float(item.producto.precio),
         'cantidad': item.cantidad,
         'subtotal': float(item.subtotal())
