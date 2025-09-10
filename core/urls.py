@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import ReporteListView, exportar_excel, exportar_pdf
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -12,6 +13,11 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('registro/', views.registro_view, name='registro'),
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
-    path('gestion_pedidos/', views.gestion_pedidos, name='gestion_pedidos'),
+  
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
+
+
+    path('reportes/', ReporteListView.as_view(), name='lista_reportes'),
+    path('reportes/exportar/excel/', exportar_excel, name='exportar_excel'),
+    path('reportes/exportar/pdf/', exportar_pdf, name='exportar_pdf'),
 ]

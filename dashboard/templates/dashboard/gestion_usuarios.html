@@ -39,6 +39,7 @@
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
+                
                 <p class="text-gray-600">Administra los usuarios registrados en el sistema</p>
             </div>
             <button onclick="openModal('create')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -131,6 +132,8 @@
     </tr>
     {% endfor %}
 </tbody>
+
+
 
             <!-- Paginación -->
             <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
@@ -241,6 +244,7 @@
                         </div>
                     </div>
                 </div>
+                
 
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
@@ -250,6 +254,7 @@
         </div>
     </div>
 </div>
+
 
     <!-- Modal de confirmación para eliminar -->
 <div id="deleteModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
@@ -272,6 +277,7 @@
               </div>
             </div>
           </div>
+
         </div>
 
         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
@@ -286,6 +292,7 @@
     </div>
   </div>
 </div>
+
 
 
 
@@ -396,6 +403,11 @@
 
     </script>
     
+<!-- Botón Volver al Dashboard -->
+<a href="{% url 'dashboard' %}" 
+   class="fixed bottom-4 right-4 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors shadow-md z-50">
+    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+</a>
 
 </body>
 </html>

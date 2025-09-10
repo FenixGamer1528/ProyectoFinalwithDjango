@@ -85,15 +85,12 @@ def admin_dashboard(request):
     context = {
         'total_usuarios': total_usuarios,
         'total_productos': total_productos,
-        'total_pedidos': total_pedidos,
+        
     }
     return render(request, 'dashboard/dashboard.html', context)
 def gestion_productos(request):
     productos = Producto.objects.all()
     return render(request, 'dashboard/gestion_productos.html', {'productos': productos})
-def gestion_pedidos(request):
-    pedidos = Pedido.objects.all()
-    return render(request, 'dashboard/gestion_pedidos.html', {'pedidos': pedidos})
 
 #Registro de usuario
 
@@ -122,6 +119,90 @@ def contact(request):
 
 
 
+
+
+from django.views.generic import ListView
+from .models import Reporte
+import openpyxl
+from reportlab.pdfgen import canvas
+from django.utils.timezone import localtime
+from django.db.models import Q
+
+class ReporteListView(ListView):
+    model = Reporte
+    template_name = 'reportes/lista_reportes.html'
+    context_object_name = 'reportes'
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        q = self.request.GET.get('q', '')
+        estado = self.request.GET.get('estado', '')
+        fecha_desde = self.request.GET.get('fecha_desde', '')
+        fecha_hasta = self.request.GET.get('fecha_hasta', '')
+
+        if q:
+            queryset = queryset.filter(
+                Q(titulo__icontains=q) | Q(categoria__icontains=q)
+            )
+        if estado:
+            queryset = queryset.filter(estado=estado)
+        if fecha_desde:
+            queryset = queryset.filter(fecha_creacion__date__gte=fecha_desde)
+        if fecha_hasta:
+            queryset = queryset.filter(fecha_creacion__date__lte=fecha_hasta)
+
+        return queryset.order_by('-fecha_creacion')
+
+def exportar_excel(request):
+    reportes = Reporte.objects.all().order_by('-fecha_creacion')
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Reportes"
+
+    headers = ['ID', 'Título', 'Categoría', 'Fecha de Creación', 'Estado']
+    ws.append(headers)
+
+    for r in reportes:
+        ws.append([
+            r.id,
+            r.titulo,
+            r.categoria,
+            localtime(r.fecha_creacion).strftime('%d/%m/%Y %H:%M'),
+            r.get_estado_display()
+        ])
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=reportes.xlsx'
+    wb.save(response)
+    return response
+
+def exportar_pdf(request):
+    reportes = Reporte.objects.all().order_by('-fecha_creacion')
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename=reportes.pdf'
+
+    p = canvas.Canvas(response)
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, 800, "Reporte de Reportes")
+
+    y = 760
+    p.setFont("Helvetica", 10)
+
+    for r in reportes:
+        texto = f"ID: {r.id} | Título: {r.titulo} | Categoría: {r.categoria} | Fecha: {localtime(r.fecha_creacion).strftime('%d/%m/%Y %H:%M')} | Estado: {r.get_estado_display()}"
+        p.drawString(30, y, texto)
+        y -= 20
+
+        if y < 50:
+            p.showPage()
+            y = 800
+
+    p.showPage()
+    p.save()
+    return response
 # Carrito de compras.
 
 
