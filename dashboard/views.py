@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import get_user_model
-from carrito.models import UsuarioPersonalizado, Producto, Pedido  # Ajusta 'core' a tu app de modelos
+from carrito.models import UsuarioPersonalizado, Producto, Pedido  
 
 User = get_user_model()
 
@@ -53,9 +53,9 @@ def crear_usuario(request):
         email = request.POST.get('email')
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        role = request.POST.get('role')  # Puedes guardarlo en perfil extendido si lo tienes
+        role = request.POST.get('role') 
         is_active = request.POST.get('status') == 'on'
-        password = User.objects.make_random_password()  # O pide un password
+        password = User.objects.make_random_password()  
 
         User.objects.create_user(
             username=username,

@@ -55,6 +55,7 @@ def carrito_modal(request):
         'id': item.id,
         'producto': item.producto.nombre,
         'precio': float(item.producto.precio),
+        'imagen': item.producto.imagen.url if item.producto.imagen else '',
         'cantidad': item.cantidad,
         'subtotal': float(item.subtotal())
     } for item in items]
@@ -70,7 +71,6 @@ def add_to_cart(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 1))
-        # Logic to add product to cart (e.g., session-based or database-based cart)
         messages.success(request, 'Producto añadido al carrito')
         return redirect('index')
     return redirect('index')
