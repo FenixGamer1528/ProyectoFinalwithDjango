@@ -16,7 +16,8 @@ urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
   
-    path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
+    
+    
 
 
     path('reportes/', ReporteListView.as_view(), name='lista_reportes'),

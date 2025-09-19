@@ -81,6 +81,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'HOST': 'db',
+        'ENGINE': 'djongo',
+        'NAME': 'mydb',  # nombre de tu base de datos en MongoDB
+        'ENFORCE_SCHEMA': False,
+        'CLIENT': {
+            'host': 'mongodb://myuser:mypassword@mongodb:27017/mydb?authSource=admin',
+        },
     }
 }
 
