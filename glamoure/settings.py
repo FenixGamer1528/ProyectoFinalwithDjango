@@ -79,8 +79,11 @@ WSGI_APPLICATION = 'glamoure.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'glamoure',  # nombre de tu base de datos (puedes cambiarlo)
+        'CLIENT': {
+            'host': 'mongodb+srv://suaza:1234@glamoure.cqwegal.mongodb.net/?retryWrites=true&w=majority&appName=Glamoure',
+        }
     }
 }
 
