@@ -1,4 +1,6 @@
-.modal {
+
+/* Modal fondo */
+#carritoModal.modal {
     display: none;
     position: fixed;
     z-index: 1000;
@@ -6,29 +8,93 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.6);
+    background-color: rgba(0, 0, 0, 0.4);
     justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenido del modal */
+.modal-contenido {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* Botón cerrar */
+.cerrar {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 28px;
+    color: #ccc;
+    cursor: pointer;
+}
+.cerrar:hover {
+    color: #000;
+}
+
+
+.item-carrito {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
     align-items: center;
 }
 
-.modal-contenido {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    width: 400px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    animation: aparecer 0.3s ease-in-out;
+.img-carrito {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: #f0f0f0;
 }
 
-@keyframes aparecer {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+.info-carrito {
+    flex: 1;
 }
 
-.cerrar {
-    float: right;
-    font-size: 24px;
+.info-carrito p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.acciones {
+    display: flex;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.acciones button {
+    background-color: #e6f0fb;
+    border: 1px solid #cce4f6;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
     cursor: pointer;
+    color: #1a73e8;
+    transition: background-color 0.3s ease;
+}
+
+.acciones button:hover {
+    background-color: #d1e9ff;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.total-carrito {
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a73e8;
+    margin-top: 20px;
 }

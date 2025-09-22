@@ -1,146 +1,110 @@
-:root {
-    --fondo-gris: #25282a;
-    --tono-dorado: #C0A76B;
-    --tono-pastel: #fdf8e1;
-}
-body{
-    font-family: Arial, Helvetica, sans-serif;
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: url("/static/imagenes/pexels-steve-29708304.jpg") no-repeat center center fixed;
+    background-size: cover;
     margin: 0;
     padding: 0;
-    background-color: white;
-}
-.dashboard-container, .login-container{
-    max-width: 1000px;
-    margin: 50px auto;
-    background-color: var(--tono-pastel);
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-}
-.login-container{
-    width: 100%;
-    max-width: 400px;
-    padding: 30px;
-}
-h2 {
-    text-align: center;
-    color: #333;
-    font-size: 24px;
-    margin: 0;
-}
-.form-group {
-    margin-bottom: 20px;
-}
-label {
-    font-size: 14px;
-    color: #555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-input[type="text"], input[type="password"]{
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-button{
-    width: 100%;
-    padding: 10px;
-    background-color: var(--fondo-gris);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-button:hover{
-    background-color: var(--tono-dorado);
-}
-.error-message{
-    color: red;
-    font-size: 14px;
+
+.login-container {
+    background: #fefefe;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+    padding: 40px 35px;
+    width: 350px;
     text-align: center;
-    margin-top: 10px;
+    position: relative;
 }
-header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+.login-container .logo {
+    width: 70px;
+    margin-bottom: 15px;
+}
+
+
+.login-container h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #000;
+}
+
+
+.form-group {
     margin-bottom: 20px;
+    text-align: left;
 }
-header h2{
-    color: #333;
-    font-size: 24px;
-    margin: 0;
-}
-header .logout-button{
-    background-color: #dc3545;
-    color: white;
-    padding: 10px 15px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-header .logout-button:hover{
-    background-color: #c82333;
-}
-.main-content{
-    display: flex;
-    justify-content: space-between;
-}
-.menu-column{
-    width: 25%;
-    background-color: #f4f4f4;
-    padding: 15px;
-    border-radius: 8px;
-}
-.menu-column ul{
-    list-style: none;
-    padding: 0;
-}
-.menu-column li{
-    margin: 15px 0;
-}
-.menu-column a{
-    text-decoration: none;
-    font-size: 18px;
-    color: #007bff;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #007bff;
+
+.form-group label {
     display: block;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #000;
 }
-.menu-column a:hover{
-    background-color: #007bff;
-    color: white;
-}
-.content-column{
-    width: 70%;
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-}
-.content-column p{
-    font-size: 18px;
-    color: #333;
-    line-height: 1.6;
-}
-a{
-    text-decoration: none;
-    color: #007bff;
-}
-a:hover{
-    color: #0056b3;
-}
-header .header-content{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+.form-group input {
     width: 100%;
-    margin-bottom: 20px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    background-color: rgba(255,255,255,0.95);
+}
+
+
+.form-group input:focus {
+    border-color: #d4af37; 
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+    
+    animation: glow 0.9s ease-in-out infinite alternate;
+}
+
+
+button[type="submit"] {
+    background-color: #000;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #d4af37; 
+    color: #000;
+}
+
+
+.error-message {
+    background-color: #fbeaea;
+    border: 1px solid #f5c2c7;
+    color: #b02a37;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 6px rgba(212, 175, 55, 0.5), 0 0 0px rgba(212,175,55,0.08) inset;
+    }
+    to {
+        box-shadow: 0 0 18px rgba(212, 175, 55, 1), 0 0 6px rgba(212,175,55,0.12) inset;
+    }
 }

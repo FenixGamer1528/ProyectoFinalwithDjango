@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from bson.decimal128 import Decimal128
 
 # Create your models here.
 class Producto(models.Model):
@@ -39,4 +40,7 @@ class ItemCarrito(models.Model):
     cantidad = models.PositiveIntegerField(default=1)
 
     def subtotal(self):
-        return self.producto.precio * self.cantidad
+        precio = self.producto.precio
+        if isinstance(precio, Decimal128):
+            precio = precio.to_decimal()
+        return precio * self.cantidad

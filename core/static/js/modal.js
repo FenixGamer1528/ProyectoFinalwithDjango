@@ -31,7 +31,7 @@ function mostrarCarrito() {
 function eliminarItem(itemId) {
     fetch(`/carrito/eliminar/${itemId}/`)
         .then(() => {
-            mostrarCarrito();  // recarga el modal
+            mostrarCarrito();
         });
 }
 
@@ -42,6 +42,6 @@ function cerrarModal() {
 function cambiarCantidad(itemId, accion) {
     fetch(`/carrito/cambiar/${itemId}/${accion}/`)
         .then(() => {
-            mostrarCarrito(); // refresca el modal
+            mostrarCarrito();
         });
 }

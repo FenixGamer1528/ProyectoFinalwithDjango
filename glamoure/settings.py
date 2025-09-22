@@ -80,15 +80,13 @@ WSGI_APPLICATION = 'glamoure.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'glamoure',
+        'NAME': 'glamoure_db',
         'USER': 'glamoure_user',
-        'PASSWORD': 'glamoure123',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
-        'PORT': '5432',
+        'PORT': 5432,
     }
 }
-
-
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
 
 AUTH_USER_MODEL = 'carrito.UsuarioPersonalizado'

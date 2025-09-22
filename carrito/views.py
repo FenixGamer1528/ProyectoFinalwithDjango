@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import models
+from bson.decimal128 import Decimal128
 
 
 # Create your views here.
@@ -51,16 +52,35 @@ def eliminar_item(request, item_id):
 def carrito_modal(request):
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
     items = carrito.items.all()
-    datos = [{
-        'id': item.id,
-        'producto': item.producto.nombre,
-        'precio': float(item.producto.precio),
-        'imagen': item.producto.imagen.url if item.producto.imagen else '',
-        'cantidad': item.cantidad,
-        'subtotal': float(item.subtotal())
-    } for item in items]
-    total = float(carrito.total())
-    return JsonResponse({'items': datos, 'total': total})
+
+    datos = []
+
+    for item in items:
+        # Convertir precio
+        precio = item.producto.precio
+        if isinstance(precio, Decimal128):
+            precio = precio.to_decimal()
+
+        # Convertir subtotal
+        subtotal = item.subtotal()
+        if isinstance(subtotal, Decimal128):
+            subtotal = subtotal.to_decimal()
+
+        datos.append({
+            'id': item.id,
+            'producto': item.producto.nombre,
+            'imagen': item.producto.imagen.url if item.producto.imagen else '',
+            'precio': float(precio),
+            'cantidad': item.cantidad,
+            'subtotal': float(subtotal)
+        })
+
+    total = carrito.total()
+    if isinstance(total, Decimal128):
+        total = total.to_decimal()
+
+    return JsonResponse({'items': datos, 'total': float(total)})
+
 
 def producto(request, product_id):
     producto = get_object_or_404(Producto, id=product_id)
@@ -75,14 +95,15 @@ def add_to_cart(request):
         return redirect('index')
     return redirect('index')
 
+@login_required
 def cambiar_cantidad(request, item_id, accion):
-    item = get_object_or_404(CarritoItem, id=item_id)
+    item = get_object_or_404(ItemCarrito, id=item_id)
     if accion == "mas":
         item.cantidad += 1
     elif accion == "menos" and item.cantidad > 1:
         item.cantidad -= 1
     item.save()
-    return JsonResponse({"ok": True})
+    return JsonResponse({"ok": True, "cantidad": item.cantidad})
 
 class CarritoItem(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

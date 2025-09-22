@@ -10,7 +10,7 @@ urlpatterns = [
     path('productos/', views.gestion_productos, name='gestion_productos'),
     path('pedidos/', views.gestion_pedidos, name='gestion_pedidos'),
     path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
-
+    
     path('reportes/', views.gestion_reportes, name='gestion_reportes'),
-    path('configuracion/', views.configuracion, name='configuracion'),
+   
 ]
