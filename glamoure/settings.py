@@ -79,15 +79,14 @@ WSGI_APPLICATION = 'glamoure.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'glamoure',  # nombre de tu base de datos (puedes cambiarlo)
-        'CLIENT': {
-            'host': 'mongodb+srv://suaza:1234@glamoure.cqwegal.mongodb.net/?retryWrites=true&w=majority&appName=Glamoure',
-        }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'glamoure_db',
+        'USER': 'glamoure_user',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',
+        'PORT': 5432,
     }
 }
-
-
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
 
 AUTH_USER_MODEL = 'carrito.UsuarioPersonalizado'
