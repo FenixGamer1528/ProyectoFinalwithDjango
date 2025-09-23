@@ -13,3 +13,19 @@
 <h3>Total: ${{ carrito.total }}</h3>
 <a href="{% url 'lista_productos' %}">Seguir comprando</a>
 {% endblock %}
+<!-- Botón para abrir el carrito -->
+<button onclick="mostrarCarrito()">🛒 Ver carrito</button>
+
+<!-- Modal del carrito -->
+<div id="carritoModal" class="modal">
+  <div class="modal-contenido">
+    <span class="cerrar" onclick="cerrarModal()">&times;</span>
+    <h2>Tu carrito</h2>
+    <div id="carritoContenido">
+      <!-- Aquí se insertan los items con JS -->
+    </div>
+  </div>
+</div>
+{% load static %}
+
+<script src="{% static 'js/modal.js' %}"></script>
