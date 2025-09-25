@@ -80,11 +80,14 @@ WSGI_APPLICATION = 'glamoure.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'glamoure_db',
-        'USER': 'glamoure_user',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': 5432,
+        'NAME': 'postgres',
+        'USER': 'postgres.hepzhkhrjvferjebazeg',
+        'PASSWORD': 'Glamoure123*',
+        'HOST': 'aws-1-us-east-2.pooler.supabase.com',
+        'PORT': 6543,
+         'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'

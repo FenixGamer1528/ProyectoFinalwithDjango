@@ -12,30 +12,35 @@
 <body>
     <header>
             <nav>
-                <ul class="menu">
-                    <li><a href="#">Hombres</a></li>
-                    <li><a href="#">Mujeres</a></li>                        
-                    <li><a href="#">Zapatos</a></li>
-                    <li><a href="#">Ofertas</a></li>
-                </ul>
-                <div class="logo-izquierda">
-                    <img src={% static "imagenes/Logonew.png" %} alt="Logo">
-                </div>
-                <div>
-                    <ul class="menu">
-                        <button type="button" class="logo-izquierda" onclick="mostrarCarrito()">
-                            <img src= {% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt="carrito">
-                        </button>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-                         <li><span>Hola, {{ user.username }}</span></li>
-                        {% else %}
-                        <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
-                        <li><a href="{% url 'registro' %}">Registrarse</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </nav>
+    <div class="nav-left">
+        <ul class="menu">
+            <li><a href="#">Hombres</a></li>
+            <li><a href="#">Mujeres</a></li>
+            <li><a href="#">Zapatos</a></li>
+            <li><a href="#">Ofertas</a></li>
+        </ul>
+    </div>
+
+    <div class="logo-center">
+        <img src={% static "imagenes/Logonew.png" %} alt="Logo">
+    </div>
+
+    <div class="nav-right">
+        <button type="button" onclick="mostrarCarrito()">
+            <img src={% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt="carrito">
+        </button>
+        <ul class="menu">
+            {% if user.is_authenticated %}
+                <li><span>Hola, {{ user.username }}</span></li>
+                <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
+                <li><a href="{% url 'registro' %}">Registrarse</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
     </header>
     <main>
         <section class="bienvenida">
