@@ -73,12 +73,13 @@ def carrito_modal(request):
         # Convertir precio
         precio = item.producto.precio
         if isinstance(precio, Decimal):
-            precio = precio.to_decimal()
-
+            # precio = precio.to_decimal()
+            pass
         # Convertir subtotal
         subtotal = item.subtotal()
         if isinstance(subtotal, Decimal):
-            subtotal = subtotal.to_decimal()
+            # subtotal = subtotal.to_decimal()
+            pass
 
         datos.append({
             'id': item.id,
@@ -91,8 +92,9 @@ def carrito_modal(request):
 
     total = carrito.total()
     if isinstance(total, Decimal):
-        total = total.to_decimal()
-
+        # total = total.to_decimal()
+        pass
+    
     return JsonResponse({'items': datos, 'total': float(total)})
 
 
