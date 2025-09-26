@@ -1,5 +1,5 @@
 function mostrarCarrito() {
-    fetch('/carrito/carrito/modal/')
+    fetch('/carrito/modal/')
         .then(response => response.json())
         .then(data => {
             let contenido = '';

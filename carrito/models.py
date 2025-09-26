@@ -42,5 +42,5 @@ class ItemCarrito(models.Model):
     def subtotal(self):
         precio = self.producto.precio
         if isinstance(precio, Decimal):
-            precio = precio.to_decimal()
+            precio = self.producto.precio 
         return precio * self.cantidad
