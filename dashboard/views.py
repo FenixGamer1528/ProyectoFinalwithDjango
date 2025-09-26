@@ -1,6 +1,11 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from carrito.models import UsuarioPersonalizado, Producto, Pedido  
+from django.db.models import Q
+
+from carrito.models import UsuarioPersonalizado, Producto, Pedido
+from .forms import ProductoForm
 
 User = get_user_model()
 
@@ -34,7 +39,54 @@ def eliminar_usuario(request, user_id):
 
 def gestion_productos(request):
     productos = Producto.objects.all()
-    return render(request, 'dashboard/gestion_productos.html', {'productos': productos})
+    search = request.GET.get('search', '')
+    categoria = request.GET.get('categoria', 'all')
+    
+    if search:
+        productos = productos.filter(
+            Q(nombre__icontains=search) | Q(descripcion__icontains=search)
+        )
+    if categoria != 'all':
+        productos = productos.filter(categoria=categoria)
+    
+    form = ProductoForm()
+    if request.method == 'POST':
+        if 'guardar' in request.POST:
+            form = ProductoForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Producto guardado exitosamente.')
+                return redirect('gestion_productos')
+        elif 'eliminar' in request.POST:
+            producto_id = request.POST.get('producto_id')
+            producto = get_object_or_404(Producto, id=producto_id)
+            producto.delete()
+            messages.success(request, 'Producto eliminado.')
+            return redirect('gestion_productos')
+    
+    context = {
+        'productos': productos,
+        'form': form,
+        'search_query': search,
+        'selected_categoria': categoria,
+    }
+    return render(request, 'dashboard/gestion_productos.html', context)
+
+
+@login_required
+def editar_producto(request, pk):
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, request.FILES, instance=producto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Producto actualizado.')
+            return redirect('gestion_productos')
+    else:
+        form = ProductoForm(instance=producto)
+    context = {'form': form, 'producto': producto}
+    return render(request, 'dashboard/editar_producto.html', context)
+
 
 def gestion_pedidos(request):
     pedidos = Pedido.objects.all()
@@ -44,8 +96,10 @@ def gestion_pedidos(request):
 def gestion_reportes(request):
     return render(request, 'dashboard/gestion_reportes.html')
 
+
 def configuracion(request):
     return render(request, 'dashboard/configuracion.html')
+
 
 def crear_usuario(request):
     if request.method == 'POST':
@@ -65,6 +119,6 @@ def crear_usuario(request):
             last_name=last_name,
             is_active=is_active
         )
-        
-
         return redirect('gestion_usuarios') 
+    
+    return render(request, 'dashboard/crear_usuario.html')
