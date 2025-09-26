@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.contrib import messages
 from .models import Producto, Carrito, ItemCarrito
+from decimal import Decimal
 
 
 
@@ -71,12 +72,12 @@ def carrito_modal(request):
     for item in items:
         # Convertir precio
         precio = item.producto.precio
-        if isinstance(precio, Decimal128):
+        if isinstance(precio, Decimal):
             precio = precio.to_decimal()
 
         # Convertir subtotal
         subtotal = item.subtotal()
-        if isinstance(subtotal, Decimal128):
+        if isinstance(subtotal, Decimal):
             subtotal = subtotal.to_decimal()
 
         datos.append({
@@ -89,7 +90,7 @@ def carrito_modal(request):
         })
 
     total = carrito.total()
-    if isinstance(total, Decimal128):
+    if isinstance(total, Decimal):
         total = total.to_decimal()
 
     return JsonResponse({'items': datos, 'total': float(total)})
