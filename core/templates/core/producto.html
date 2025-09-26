@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/styleproducto.css' %}">
-    <title>Document</title>
+    <title>Productos</title>
 </head>
 <body>
     {% block content %}
@@ -26,7 +26,7 @@
                     <p class="product-price">${{ producto.precio|default:"0.00" }}</p>
                     
                     <p class="product-description">
-                        {{ producto.descripcion|default:"A fierro le gusta el pene y es bien marica sjasjsjsjsjsjsjsjsjsjsjsjsjsjsjsjaksaksakaskasjkjasjkajskajkasjkaskjikasjkaskjikasjkjsajisjsajajsa" }}
+                        {{ producto.descripcion|default:"descripcion" }}
                     </p>
                     
                      <form action="{% url 'agregar_al_carrito' producto.id %}" method="post">
