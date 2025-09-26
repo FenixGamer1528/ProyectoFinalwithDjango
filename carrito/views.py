@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.contrib import messages
 from .models import Producto, Carrito, ItemCarrito
-from bson.decimal128 import Decimal128
+
 
 
 # Lista de productos

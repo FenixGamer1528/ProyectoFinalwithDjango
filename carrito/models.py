@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from bson.decimal128 import Decimal128
 
 # Create your models here.
 class Producto(models.Model):
