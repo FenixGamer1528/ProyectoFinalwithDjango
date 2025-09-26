@@ -31,7 +31,7 @@
         </button>
         <ul class="menu">
             {% if user.is_authenticated %}
-                <li><span>Hola, {{ user.username }}</span></li>
+                <li><span>!Bienvenido {{ user.username }}!</span></li>
                 <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
             {% else %}
                 <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
