@@ -203,9 +203,3 @@ def exportar_pdf(request):
     p.showPage()
     p.save()
     return response
-# Carrito de compras.
-
-
-
-#productos
-
