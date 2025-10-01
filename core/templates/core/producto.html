@@ -4,44 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/styleproducto.css' %}">
-    <title>Productos</title>
+    <title>{{ producto.nombre }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    {% block content %}
-    <div class="product-container">
-        <div class="product-card">
-            <div class="product-grid">
-                
-                <div class="product-image-container">
-                    {% if producto.imagen and producto.imagen.url %}
-                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="product-image">
-                    {% else %}
-                        <img src="{% static 'imagenes/placeholder.jpg' %}" alt="Imagen no disponible" class="product-image placeholder">
-                    {% endif %}
-                </div>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-6 py-8">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-3xl mx-auto">
+            <!-- Imagen -->
+            <div class="h-80 bg-gray-100">
+                {% if producto.imagen and producto.imagen.url %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
+                         class="w-full h-full object-cover">
+                {% else %}
+                    <img src="{% static 'imagenes/placeholder.jpg' %}" 
+                         alt="Imagen no disponible" 
+                         class="w-full h-full object-cover opacity-70">
+                {% endif %}
+            </div>
 
-                <div class="product-details">
-                    <h1 class="product-name">{{ producto.nombre|default:"[Sin nombre]" }}</h1>
-                    <p class="product-price">${{ producto.precio|default:"0.00" }}</p>
-                    
-                    <p class="product-description">
-                        {{ producto.descripcion|default:"descripcion" }}
-                    </p>
-                    
-                     <form action="{% url 'agregar_al_carrito' producto.id %}" method="post">
-        {% csrf_token %}
-        <label for="cantidad">Cantidad:</label>
-        <input type="number" name="cantidad" id="cantidad" min="1" value="1">
-        <button type="submit">Agregar al carrito</button>
-    </form>
+            <!-- Detalles -->
+            <div class="p-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-3">{{ producto.nombre|default:"[Sin nombre]" }}</h1>
+                <p class="text-xl text-indigo-600 font-semibold mb-4">${{ producto.precio|default:"0.00" }}</p>
+                <p class="text-gray-600 mb-6">{{ producto.descripcion|default:"Sin descripción" }}</p>
 
-                    <a href="{% url 'index' %}" class="back-link">Volver al inicio</a>
-                </div>
+                <!-- Formulario -->
+               <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex items-center space-x-3 mb-6">
+    {% csrf_token %}
+    <label for="cantidad" class="text-sm text-gray-700">Cantidad:</label>
+    <input type="number" name="cantidad" id="cantidad" min="1" value="1" 
+           class="w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-[#d4af37] focus:border-[#d4af37]">
+    
+    <!-- Botón Agregar -->
+    <button type="submit" 
+        class="w-full bg-black text-white font-medium text-sm px-4 py-3 rounded-lg transition duration-300 hover:bg-[#d4af37] hover:text-black">
+        Agregar al carrito
+    </button>
+</form>
+
+<!-- Botón Volver -->
+<a href="{% url 'index' %}" 
+   class="block w-full text-center bg-black text-white font-medium text-sm px-4 py-3 rounded-lg transition duration-300 hover:bg-[#d4af37] hover:text-black">
+   Volver al inicio
+</a>
 
             </div>
         </div>
     </div>
-    {% endblock %}
 </body>
 </html>

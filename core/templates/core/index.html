@@ -14,12 +14,13 @@
             <nav>
     <div class="nav-left">
         <ul class="menu">
-            <li><a href="#">Hombres</a></li>
-            <li><a href="#">Mujeres</a></li>
-            <li><a href="#">Zapatos</a></li>
-            <li><a href="#">Ofertas</a></li>
+            <li><a href="{% url 'hombres' %}">Hombres</a></li>
+            <li><a href="{% url 'mujeres' %}">Mujeres</a></li>
+            <li><a href="{% url 'zapatos' %}">Zapatos</a></li>
+            <li><a href="{% url 'ofertas' %}">Ofertas</a></li>
         </ul>
     </div>
+    
 
     <div class="logo-center">
         <img src={% static "imagenes/Logonew.png" %} alt="Logo">

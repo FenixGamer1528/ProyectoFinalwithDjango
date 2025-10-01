@@ -18,4 +18,10 @@ urlpatterns = [
     path('reportes/', ReporteListView.as_view(), name='lista_reportes'),
     path('reportes/exportar/excel/', exportar_excel, name='exportar_excel'),
     path('reportes/exportar/pdf/', exportar_pdf, name='exportar_pdf'),
+    path('hombres/', views.hombres, name='hombres'),
+    path('mujeres/', views.mujeres, name='mujeres'),
+    path('zapatos/', views.zapatos, name='zapatos'),
+    path('ofertas/', views.ofertas, name='ofertas'),
+    
+  
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
