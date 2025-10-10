@@ -1,0 +1,126 @@
+/* === ESTILOS PARA EL MODAL DE DETALLES DEL PRODUCTO === */
+
+/* --- PARTE 1: Estilos base copiados de carrito.css para mantener la coherencia visual --- */
+
+/* Fondo oscuro del modal */
+#productoModal.modal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Contenido de la ventana blanca */
+#productoModal .modal-contenido {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px; /* Un poco más ancho que el del carrito para dar espacio a la imagen */
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* Botón de cerrar (la 'X') */
+#productoModal .cerrar {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 28px;
+    color: #ccc;
+    cursor: pointer;
+}
+#productoModal .cerrar:hover {
+    color: #000;
+}
+
+
+/* --- PARTE 2: Estilos nuevos y específicos para el contenido del producto --- */
+
+#productoContenido {
+    position: relative;
+}
+
+/* Grid para organizar imagen y detalles */
+.producto-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    align-items: start;
+}
+
+/* Contenedor e imagen del producto */
+.producto-modal-imagen {
+    width: 100%;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.producto-modal-imagen img {
+    width: 100%;
+    max-height: 450px;
+    object-fit: contain; /* Muestra la imagen completa sin recortar */
+    border-radius: 8px;
+}
+
+/* Detalles del producto (nombre, precio, etc.) */
+.producto-modal-detalles h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+.producto-modal-detalles .precio {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a73e8;
+    margin-bottom: 15px;
+}
+.producto-modal-detalles .descripcion {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Formulario y botón de 'Agregar al carrito' */
+.producto-modal-detalles form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.btn-agregar-modal {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+.btn-agregar-modal:hover {
+    background-color: #155ab3;
+}
+
+/* Adaptación para móviles */
+@media (max-width: 768px) {
+    .producto-modal-grid {
+        grid-template-columns: 1fr;
+    }
+    .producto-modal-detalles h1 {
+        font-size: 1.5rem;
+    }
+}

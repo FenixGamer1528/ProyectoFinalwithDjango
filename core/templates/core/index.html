@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+    <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
     <title>Glamoure</title>
 </head>
 <body>
@@ -86,7 +87,7 @@
                         <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="">
                         <h3 class="">{{ producto.nombre }}</h3>
                         <p class="">${{ producto.precio }}</p>
-                        <a href="{% url 'producto' producto.id %}" class="">Ver detalles</a>
+                        <a href="{% url 'producto' producto.id %}" class="ver-detalles-btn">Ver detalles</a>
                     </div>
                 {% endfor %}
                 </div>
@@ -156,6 +157,11 @@
         <div id="carritoContenido"></div>
     </div>
 </div>
+    <div id="productoModal" class="modal">
+        <div class="modal-contenido">
+            <div id="productoContenido"></div>
+        </div>
+    </div>
 
     <script src="{% static 'js/modal.js' %}"></script>
 
