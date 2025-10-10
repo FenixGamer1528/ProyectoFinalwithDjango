@@ -31,12 +31,17 @@ class UsuarioPersonalizado(AbstractUser):
     def __str__(self):
         return self.username
 
+# en models.py
 class Pedido(models.Model):
-    UsuarioPersonalizado = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE)
+    # 👇 Cambio aquí
+    usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE) 
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
     fecha = models.DateTimeField(auto_now_add=True)
 
+    # 👇 Y aquí
+    def __str__(self):
+        return f"Pedido #{self.id} de {self.usuario}"
     def _str_(self):
         return f"Pedido #{self.id} de {self.usuario}"
 class Carrito(models.Model):

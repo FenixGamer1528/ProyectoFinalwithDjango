@@ -55,6 +55,16 @@
                 <img src={% static "imagenes/principalhombre.png" %} alt="Ropa Hombre">
             </div>
             <hr>
+            {% if user.is_authenticated %}
+    <div class="dashboard-boton" style="text-align: center; margin: 20px 0;">
+        <a href="{% url 'dashboard_cliente' %}" 
+           class="btn-dashboard"
+           style="background-color: #ff4081; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+           Ir a mi Dashboard
+        </a>
+    </div>
+{% endif %}
+
         </section>
         
         <section class="video">

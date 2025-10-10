@@ -3,11 +3,33 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.conf import settings
 from django.contrib import messages
-from .models import Producto, Carrito, ItemCarrito
+from .models import Producto, Carrito, ItemCarrito,Pedido
 from decimal import Decimal
 
 
+@login_required
+def cliente_dashboard(request):
+    # 1. Obtener los items del carrito del usuario
+    carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    items_carrito = carrito.items.all()
 
+    # 2. Obtener el historial de pedidos del usuario
+    #    Ordenamos por fecha más reciente usando '-fecha'
+    pedidos_usuario = Pedido.objects.filter(usuario=request.user).order_by('-fecha')
+
+    # 3. Obtener los productos destacados para mostrar
+    productos_destacados = Producto.objects.filter(destacado=True)
+
+    # 4. Crear el contexto con toda la información
+    context = {
+        'usuario': request.user,
+        'items': items_carrito,          # Para la sección "Mi Carrito"
+        'pedidos': pedidos_usuario,        # Para la sección "Mis Pedidos"
+        'productosDestacados': productos_destacados, # Para "Productos Destacados"
+    }
+    
+    # 5. Renderizar la plantilla con el contexto
+    return render(request, 'cliente_dashboard.html', context)
 # Lista de productos
 def lista_productos(request):
     productos = Producto.objects.all()
