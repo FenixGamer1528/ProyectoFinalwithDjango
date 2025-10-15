@@ -12,23 +12,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+SECRET_KEY = 'django-insecure-lker6vpv(__$b!l)aw_0=o_6*!lu3#v$4cocc7t+_!3dy696!='
+
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lker6vpv(__$b!l)aw_0=o_6*!lu3#v$4cocc7t+_!3dy696!='
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -42,6 +37,9 @@ INSTALLED_APPS = [
     'core',
     'carrito',
     'dashboard',
+    'tailwind',
+    'frontend',
+    'django_browser_reload',
 ]
 
 MIDDLEWARE = [
@@ -132,7 +130,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'core', 'static'), 
+    os.path.join(BASE_DIR, 'frontend', 'static'), 
 ]
 MEDIA_URL='media/'
 MEDIA_ROOT= os.path.join(BASE_DIR,'media')
@@ -145,3 +143,11 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/index/'
 LOGOUT_REDIRECT_URL = '/index/'
 
+TAILWIND_APP_NAME = 'frontend'
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
+SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
+
+
+# Cargar variables de entorno

@@ -2,152 +2,223 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
-    <title>Glamoure</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+  <link href="{% static 'css/output.css' %}" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+  <title>Glamoure</title>
 </head>
-<body>
-    <header>
-            <nav>
-    <div class="nav-left">
-        <ul class="menu">
-            <li><a href="{% url 'hombres' %}">Hombres</a></li>
-            <li><a href="{% url 'mujeres' %}">Mujeres</a></li>
-            <li><a href="{% url 'zapatos' %}">Zapatos</a></li>
-            <li><a href="{% url 'ofertas' %}">Ofertas</a></li>
-        </ul>
-    </div>
-    
+<body class="bg-black text-white font-sans antialiased">
 
-    <div class="logo-center">
-        <img src={% static "imagenes/Logonew.png" %} alt="Logo">
-    </div>
+  
+  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
+    <nav class="container mx-auto flex justify-between items-center px-6 py-4">
+      
+      <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
+        <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
+        <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
+        <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
+        <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
+      </ul>
 
-    <div class="nav-right">
-        <button type="button" onclick="mostrarCarrito()">
-            <img src={% static 'imagenes/Carrito_de_compras-removebg-preview.png' %} alt="carrito">
+     
+      <div class="flex justify-center">
+        <a href="{% url 'index' %}">
+          <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
+        </a>
+      </div>
+
+     
+      <div class="flex items-center gap-4">
+        <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
+          <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
         </button>
-        <ul class="menu">
-            {% if user.is_authenticated %}
-                <li><span>!Bienvenido {{ user.username }}!</span></li>
-                <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}">Iniciar Sesión</a></li>
-                <li><a href="{% url 'registro' %}">Registrarse</a></li>
-            {% endif %}
+        <ul class="hidden md:flex gap-4 text-sm">
+          {% if user.is_authenticated %}
+            <li><span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span></li>
+            <li><a href="{% url 'logout' %}" class="hover:text-[#C0A76B] transition">Cerrar sesión</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a></li>
+            <li><a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a></li>
+          {% endif %}
         </ul>
+      </div>
+    </nav>
+  </header>
+
+  
+  <section class="h-screen bg-cover bg-center flex flex-col justify-center items-center text-center"style="background-image: url('{% static 'imagenes/Gemini.png' %}');">
+    <div class="bg-black bg-opacity-60 p-10 rounded-2xl">
+      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-[#C0A76B] tracking-wide">¡Bienvenido a Glamoure!</h1>
+      <p class="text-gray-200 text-lg md:text-xl mb-6">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
+      <a href="{% url 'index' %}"
+         class="inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition">
+        Ver Productos
+      </a>
     </div>
-</nav>
+  </section>
 
-    </header>
-    <main>
-        <section class="bienvenida">
-            <div class="bienvenida-texto">
-                <h1>¡Bienvenido a Glamoure!</h1>
-                 <p>La tienda de ropa más exclusiva de la ciudad</p>
-             </div>
-            <div class="bienvenida-imagen">
-                <img src={% static "imagenes/señora.png" %} alt="Ropa Mujer">
-                <img src={% static "imagenes/zapatos.avif" %} alt="Zapatos">
-                <img src={% static "imagenes/principalhombre.png" %} alt="Ropa Hombre">
-            </div>
-            <hr>
-        </section>
-        
-        <section class="video">
-            <div class="video-interno">
-                <h2>Te ofrecemos gran variedad de prendas</h2>
-                <p>Nuestra marca busca ofrecer la mejor variedad de productos del mercado, incluyendo comodidad y frescura para ti.</p>
-                <video src={% static "Videos/69986-533438262_small.mp4" %} autoplay muted loop></video>
-            </div>
-        </section>
-        <hr>
-        <section class="lo-mas-vendido">
-            <div class="mas-vendidos">
-                <h2>🔥 Lo más vendido 🔥</h2>
-            </div>
-             
-                <div class="productos">
-                {% for producto in productos %}
-                    <div class="producto">
-                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="">
-                        <h3 class="">{{ producto.nombre }}</h3>
-                        <p class="">${{ producto.precio }}</p>
-                        <a href="{% url 'producto' producto.id %}" class="">Ver detalles</a>
-                    </div>
-                {% endfor %}
-                </div>
-            </div>
-        </section>
-        <section class="lo-mas-vendido">
-            <div class="mas-vendidos">
-                <h2>🎉Ofertas especiales🎉</h2>
-                <div class="productos">
-                    <div class="producto">
-                        <img src={% static "imagenes/Buso negro.webp" %} alt="Buzo negro">
-                        <p>Buzo negro</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa2">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Buso negro.webp" %} alt="Ropa3">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                    <div class="producto">
-                        <img src={% static "imagenes/Blusa mujer.webp" %} alt="Ropa4">
-                        <p>Camisa de vestir</p>
-                        <p>$50.00</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <section class="izquierda">
-            <ul>
-                <li><a href="#">Acerca de nosotros</a></li>
-                <li><a href="#">Contactanos</a></li>
-                <li><a href="#">Servicio al cliente</a></li>
-                <li><a href="#">Todos los derechos estan reservados</a></li>
-            </ul>
-        </section>
-        <section class="derecha">
-            <img src={% static "imagenes/Simbolo-transparente.png" %} alt="Logo de Glamoure">
-        </section>
-    </footer>
-    <!-- modal carrito -->
-    <div id="carritoModal" class="modal">
-    <div class="modal-contenido">
-        <span class="cerrar" onclick="cerrarModal()">&times;</span>
-        <h2>Carrito de compras</h2>
-        <div id="carritoContenido"></div>
+  
+  <section class="py-16 bg-gradient-to-b from-black via-[#111] to-black text-center">
+    <h2 class="text-3xl font-bold text-[#C0A76B] mb-10 uppercase">Categorías Destacadas</h2>
+    <div class="flex flex-col md:flex-row justify-center gap-8 px-6">
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'mujeres' %}">
+          <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer"class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+        <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Mujer</span>
+        </a>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'zapatos' %}">
+          <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos"class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Zapatos</span>
+        </a>
+      </div>
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'hombres' %}">
+          <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre"class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Hombre</span>
+        </a>
+      </div>
     </div>
-</div>
+  </section>
 
-    <script src="{% static 'js/modal.js' %}"></script>
+  
+  <section class="py-20 bg-[#111]">
+    <div class="text-center max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-[#C0A76B] mb-4">Comodidad, elegancia y estilo</h2>
+      <p class="text-gray-300 mb-8">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
+      <div class="rounded-2xl overflow-hidden shadow-lg border border-[#C0A76B]/30">
+        <video src="{% static 'Videos/69986-533438262_small.mp4' %}" autoplay muted loop class="w-full h-auto"></video>
+      </div>
+    </div>
+  </section>
 
-    </html>
+  
+  <section class="py-20 bg-black">
+    <div class="text-center mb-10">
+      <h2 class="text-4xl font-bold text-[#C0A76B] mb-3">🔥 Lo Más Vendido 🔥</h2>
+      <p class="text-gray-400">Descubre las prendas favoritas de nuestros clientes</p>
+    </div>
+
+    <div class="flex gap-6 overflow-x-auto px-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#C0A76B] scrollbar-track-[#222] pb-4">
+      {% for producto in productos %}
+      <div class="min-w-[300px] bg-[#1a1a1a] rounded-xl p-4 snap-center shadow-md hover:shadow-[#C0A76B]/50 transition">
+        {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
+        {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
+        {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" class="w-full h-64 object-cover rounded-lg mb-3">
+        {% endif %}
+
+        <h3 class="text-xl font-semibold text-[#C0A76B]">{{ producto.nombre }}</h3>
+        <p class="text-gray-300 mb-2">${{ producto.precio }}</p>
+        <a href="{% url 'producto' producto.id %}"
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  
+  <section class="py-20 bg-[#111] text-center">
+    <h2 class="text-3xl font-bold text-[#C0A76B] mb-10">🎉 Ofertas Especiales 🎉</h2>
+    <div class="flex gap-6 overflow-x-auto px-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#C0A76B] scrollbar-track-[#222] pb-4">
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Buso negro.webp' %}" alt="Buzo negro" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Buzo negro</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
+        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
+        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
+        <p>$50.00</p>
+        <a href=""
+           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+           Ver detalles
+        </a>
+      </div>
+      
+    </div>
+  </section>
+
+  
+  <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left px-6 gap-4">
+      <ul class="flex flex-wrap justify-center md:justify-start gap-6 text-gray-400 text-sm">
+        <li><a href="#" class="hover:text-[#C0A76B]">Acerca de nosotros</a></li>
+        <li><a href="#" class="hover:text-[#C0A76B]">Contáctanos</a></li>
+        <li><a href="#" class="hover:text-[#C0A76B]">Servicio al cliente</a></li>
+        <li><a href="#" class="hover:text-[#C0A76B]">Todos los derechos reservados</a></li>
+      </ul>
+      <div>
+        <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo de Glamoure" class="w-10 mx-auto md:mx-0">
+      </div>
+    </div>
+  </footer>
+
+  <!-- 🛒 MODAL CARRITO -->
+  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
+      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black">&times;</button>
+      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
+      <div id="carritoContenido"></div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/modal.js' %}"></script>
 </body>
+</html>

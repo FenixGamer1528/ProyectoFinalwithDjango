@@ -1,0 +1,13 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18"
+  },
+  "scripts": {
+  "build": "npx tailwindcss -i ./static_src/input.css -o ../static/css/output.css --watch"
+}
+}

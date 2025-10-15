@@ -8,18 +8,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+    {% block content %}
     <div class="container mx-auto px-6 py-8">
         <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-3xl mx-auto">
             <!-- Imagen -->
             <div class="h-80 bg-gray-100">
-                {% if producto.imagen and producto.imagen.url %}
-                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
-                         class="w-full h-full object-cover">
+                {% if producto.imagen_url %}
+                    <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover">
+                {% elif producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover">
                 {% else %}
-                    <img src="{% static 'imagenes/placeholder.jpg' %}" 
-                         alt="Imagen no disponible" 
-                         class="w-full h-full object-cover opacity-70">
+                    <img src="https://placehold.co/600x400?text=Sin+imagen" alt="Sin imagen" class="w-full h-full object-cover">
                 {% endif %}
+
             </div>
 
             <!-- Detalles -->
@@ -51,7 +52,6 @@
             </div>
         </div>
     </div>
+{% endblock %}
 </body>
 </html>
-{% endblock %}
-
