@@ -7,6 +7,7 @@
     <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+    <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
     <title>Glamoure - Hombres</title>
     
 </head>
@@ -69,7 +70,7 @@
                     <div class="flex justify-between items-center">
                         <span class="text-blue-600 font-bold">${{ producto.precio }}</span>
                         <a href="{% url 'producto' producto.id %}" 
-                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 ver-detalles-btn">
                            Ver
                         </a>
                     </div>
@@ -95,6 +96,19 @@
       </div>
     </div>
   </footer>
+
+    <div id="carritoModal" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
+            <h2>Carrito de compras</h2>
+            <div id="carritoContenido"></div>
+        </div>
+    </div>
+    <div id="productoModal" class="modal">
+        <div class="modal-contenido">
+            <div id="productoContenido"></div>
+        </div>
+    </div>
 
     <script src="{% static 'js/modal.js' %}"></script>
 </body>
