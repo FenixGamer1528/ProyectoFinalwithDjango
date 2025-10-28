@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/stylelogin.css' %}">
-    <!-- Google Fonts e Iconos -->
+   
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}" />
@@ -13,40 +13,68 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Logo -->
+        
         <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo" class="logo">
 
-        <!-- Título -->
         <h2>INICIO DE SESIÓN</h2>
 
-        <!-- Mensaje de error -->
         {% if error_message %}
         <p class="error-message">{{ error_message }}</p>
         {% endif %}
 
-        <!-- Formulario -->
         <form method="POST">
             {% csrf_token %}
 
-            <!-- Usuario -->
             <div class="form-group">
                 <div class="input-icon">
                     <i class="fa fa-user"></i>
-                    {{ form.usuario }}
+                    <input type="text" name="usuario" placeholder="Usuario" class="form-control">
                 </div>
             </div>
 
-            <!-- Contraseña -->
             <div class="form-group">
                 <div class="input-icon">
                     <i class="fa fa-lock"></i>
-                    {{ form.password }}
+                    <input type="password" name="password" placeholder="Contraseña" class="form-control">
                 </div>
             </div>
 
-            <!-- Botón -->
-            <button type="submit">LOGIN</button>
+            <button type="submit">INICIAR SESIÓN</button>
         </form>
+
+        <!-- 👇 Botón para ir al registro -->
+        <div class="extra-links">
+            <p>¿No tienes cuenta?</p>
+            <a href="{% url 'registro' %}" class="btn-register">Registrarse</a>
+        </div>
     </div>
+
+    <style>
+        .extra-links {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .extra-links p {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .btn-register {
+            display: inline-block;
+            padding: 10px 20px;
+            background:  #000;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s ease;
+        }
+
+        .btn-register:hover {
+            background: #d4af37;
+        }
+    </style>
 </body>
 </html>

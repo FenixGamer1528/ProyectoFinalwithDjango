@@ -1,6 +1,7 @@
 
 from django.db import models
 
+
 class Reporte(models.Model):
     ESTADOS = [
         ('pendiente', 'Pendiente'),
@@ -21,5 +22,4 @@ class Categoria(models.Model):
     def __str__(self):
         return self.nombre
 
-#Carrito
 
