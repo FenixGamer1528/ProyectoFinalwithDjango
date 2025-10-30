@@ -1,18 +1,119 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Editar Producto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .form-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 1px solid rgba(192, 167, 107, 0.5);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #C0A76B;
+            box-shadow: 0 0 0 2px rgba(192, 167, 107, 0.2);
+        }
+        
+        .form-input::placeholder {
+            color: #6B7280;
+        }
+        
+        .form-label {
+            color: #C0A76B;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.875rem;
+        }
+        
+        .checkbox-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #C0A76B;
+        }
+    </style>
 </head>
-<body>
-    <form id="productForm" method="post" enctype="multipart/form-data" class="space-y-4">
+<body class="bg-transparent text-white">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
         <input type="hidden" name="id" value="{{ producto.id }}">
-        {{ form.as_p }}
-        <div class="flex justify-end space-x-3 pt-4">
-            <button type="button" id="cancelBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-all">Cancelar</button>
-            <button type="submit" id="saveBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all">Actualizar</button>
+        
+        <!-- Campo Nombre -->
+        <div>
+            <label for="id_nombre" class="form-label">Nombre</label>
+            <input type="text" name="nombre" id="id_nombre" value="{{ form.nombre.value }}" class="form-input" placeholder="Ingresa el nombre del producto" required>
+        </div>
+
+        <!-- Campo Categoría -->
+        <div>
+            <label for="id_categoria" class="form-label">Categoría</label>
+            <select name="categoria" id="id_categoria" class="form-input" required>
+                <option value="">Selecciona una categoría</option>
+                {% for value, label in form.categoria.field.choices %}
+                    <option value="{{ value }}" {% if form.categoria.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Campo Precio -->
+        <div>
+            <label for="id_precio" class="form-label">Precio</label>
+            <input type="number" name="precio" id="id_precio" value="{{ form.precio.value }}" class="form-input" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+
+        <!-- Campo Stock -->
+        <div>
+            <label for="id_stock" class="form-label">Stock</label>
+            <input type="number" name="stock" id="id_stock" value="{{ form.stock.value }}" class="form-input" placeholder="0" min="0" required>
+        </div>
+
+        <!-- Campo Descripción -->
+        <div>
+            <label for="id_descripcion" class="form-label">Descripción</label>
+            <textarea name="descripcion" id="id_descripcion" class="form-input" rows="4" placeholder="Describe el producto...">{{ form.descripcion.value }}</textarea>
+        </div>
+
+        <!-- Campo Imagen -->
+        <div>
+            <label for="id_imagen" class="form-label">Imagen</label>
+            <input type="file" name="imagen" id="id_imagen" class="form-input" accept="image/*">
+            {% if producto.imagen %}
+            <div class="mt-2">
+                <p class="text-gray-400 text-sm">Imagen actual:</p>
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-32 h-32 object-cover rounded-lg mt-1">
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Campo Destacado -->
+        <div class="flex items-center gap-3">
+            <input type="checkbox" name="destacado" id="id_destacado" class="checkbox-input" {% if form.destacado.value %}checked{% endif %}>
+            <label for="id_destacado" class="form-label !mb-0 cursor-pointer">Producto Destacado</label>
         </div>
     </form>
+
+    <script>
+        // Aplicar estilos a los campos cuando se cargue en el modal
+        document.addEventListener('DOMContentLoaded', function() {
+            // Asegurar que todos los inputs tengan la clase form-input
+            const inputs = document.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (!input.classList.contains('form-input') && input.type !== 'checkbox') {
+                    input.classList.add('form-input');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,80 +1,120 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/stylelogin.css' %}">
-   
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <!-- Agregar Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}" />
-    <title>Iniciar sesión</title>
-</head>
-<body>
-    <div class="login-container">
-        
-        <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo" class="logo">
-
-        <h2>INICIO DE SESIÓN</h2>
-
-        {% if error_message %}
-        <p class="error-message">{{ error_message }}</p>
-        {% endif %}
-
-        <form method="POST">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <div class="input-icon">
-                    <i class="fa fa-user"></i>
-                    <input type="text" name="usuario" placeholder="Usuario" class="form-control">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="input-icon">
-                    <i class="fa fa-lock"></i>
-                    <input type="password" name="password" placeholder="Contraseña" class="form-control">
-                </div>
-            </div>
-
-            <button type="submit">INICIAR SESIÓN</button>
-        </form>
-
-        <!-- 👇 Botón para ir al registro -->
-        <div class="extra-links">
-            <p>¿No tienes cuenta?</p>
-            <a href="{% url 'registro' %}" class="btn-register">Registrarse</a>
-        </div>
-    </div>
-
+    <title>Iniciar sesión - Glamoure</title>
+    
     <style>
-        .extra-links {
-            margin-top: 15px;
-            text-align: center;
+        /* Estilos personalizados para mantener la funcionalidad específica */
+        .input-icon {
+            position: relative;
         }
-
-        .extra-links p {
-            margin-bottom: 5px;
-            font-size: 14px;
-            color: #555;
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #C0A76B;
+            z-index: 10;
         }
-
-        .btn-register {
-            display: inline-block;
-            padding: 10px 20px;
-            background:  #000;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.3s ease;
-        }
-
-        .btn-register:hover {
-            background: #d4af37;
+        .input-icon input {
+            padding-left: 40px;
         }
     </style>
+</head>
+<body class="bg-black min-h-screen flex items-center justify-center font-sans antialiased">
+
+    <!-- Fondo similar al de la página principal -->
+    <div class="absolute inset-0 bg-cover bg-center opacity-20" 
+         style="background-image: url('{% static 'imagenes/pexels-steve-29708304.jpg' %}');"></div>
+
+    <div class="relative z-10 w-full max-w-md">
+        <!-- Contenedor del login -->
+        <div class="bg-black bg-opacity-80 backdrop-blur-md border border-[#C0A76B] rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Logo centrado como en la página principal -->
+            <div class="flex justify-center mb-6">
+                <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-20 h-20">
+            </div>
+
+            <h2 class="text-2xl font-bold text-center text-[#C0A76B] mb-2 uppercase tracking-wider">
+                INICIO DE SESIÓN
+            </h2>
+
+            <p class="text-gray-400 text-center text-sm mb-6">
+                Accede a tu cuenta Glamoure
+            </p>
+
+            {% if error_message %}
+            <div class="bg-red-900 bg-opacity-50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-4 text-sm">
+                {{ error_message }}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Campo Usuario -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-user"></i>
+                        <input type="text" 
+                               name="usuario" 
+                               placeholder="Usuario" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    </div>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-lock"></i>
+                        <input type="password" 
+                               name="password" 
+                               placeholder="Contraseña" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    </div>
+                </div>
+
+                <!-- Botón de enviar -->
+                <button type="submit" 
+                        class="w-full bg-[#C0A76B] text-black font-semibold py-3 rounded-lg hover:bg-yellow-400 transition duration-300 uppercase tracking-wider">
+                    INICIAR SESIÓN
+                </button>
+            </form>
+
+            <!-- Enlace para registrarse -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm mb-2">¿No tienes cuenta?</p>
+                <a href="{% url 'registro' %}" 
+                   class="inline-block border border-[#C0A76B] text-[#C0A76B] font-semibold px-6 py-2 rounded-lg hover:bg-[#C0A76B] hover:text-black transition duration-300">
+                    Registrarse
+                </a>
+            </div>
+
+            <!-- Enlace para volver al inicio -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'index' %}" 
+                   class="text-gray-400 hover:text-[#C0A76B] text-sm transition">
+                    ← Volver al inicio
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer similar al de la página principal -->
+        <footer class="mt-8 text-center">
+            <p class="text-gray-500 text-sm">
+                &copy; 2025 Glamoure. Todos los derechos reservados.
+            </p>
+        </footer>
+    </div>
+
 </body>
 </html>
