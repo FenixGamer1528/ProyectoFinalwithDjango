@@ -106,7 +106,7 @@ def carrito_modal(request):
         datos.append({
             'id': item.id,
             'producto': item.producto.nombre,
-            'imagen': item.producto.imagen.url if item.producto.imagen else '',
+            'imagen': item.producto.imagen_url if item.producto.imagen_url else (item.producto.imagen.url if item.producto.imagen else ''),
             'precio': float(precio),
             'cantidad': item.cantidad,
             'subtotal': float(subtotal)

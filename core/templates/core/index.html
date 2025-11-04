@@ -15,38 +15,81 @@
   
   <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
     <nav class="container mx-auto flex justify-between items-center px-6 py-4">
-      
-      <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
-        <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
-        <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
-        <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
-        <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
-      </ul>
+  <!-- Menú izquierdo -->
+  <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
+    <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
+    <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
+    <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
+    <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
+  </ul>
 
-     
-      <div class="flex justify-center">
-        <a href="{% url 'index' %}">
-          <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
-        </a>
-      </div>
+  <!-- Logo central -->
+  <div class="flex justify-center">
+    <a href="{% url 'index' %}">
+      <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
+    </a>
+  </div>
 
-     
-      <div class="flex items-center gap-4">
-        <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
-          <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
-        </button>
-        <ul class="hidden md:flex gap-4 text-sm">
-          {% if user.is_authenticated %}
-            <li><span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span></li>
-            <li><a href="{% url 'logout' %}" class="hover:text-[#C0A76B] transition">Cerrar sesión</a></li>
-            <li><a href="{% url 'dashboard_cliente' %}" class="btn-dashboard"style="background-color: #ff4081; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold;">Ir a mi Dashboard</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a></li>
-            <li><a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </nav>
+  <!-- Menú derecho -->
+  <div class="flex items-center gap-4">
+    <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
+      <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
+    </button>
+    
+    <div class="hidden md:flex gap-4 text-sm">
+      {% if user.is_authenticated %}
+        <!-- Menú desplegable del usuario -->
+        <div class="relative">
+          <button id="userMenuButton" class="flex items-center gap-1 hover:text-[#C0A76B] transition cursor-pointer py-2">
+            <span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span>
+            <svg id="userMenuArrow" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Menú desplegable -->
+          <div id="userMenu" class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50 hidden">
+            <!-- Dashboard Cliente -->
+            <a href="{% url 'dashboard_cliente' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span>Mi Dashboard</span>
+              </div>
+            </a>
+            
+            <!-- Panel de Administración (Solo para staff) -->
+            {% if user.is_staff %}
+            <a href="{% url 'admin:index' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #7c3aed;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Panel Admin</span>
+              </div>
+            </a>
+            {% endif %}
+            
+            <!-- Cerrar sesión -->
+            <a href="{% url 'logout' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>Cerrar sesión</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a>
+        <a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
   </header>
 
   
@@ -213,13 +256,21 @@
   </footer>
 
   <!-- 🛒 MODAL CARRITO -->
-  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
-      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black">&times;</button>
-      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
-      <div id="carritoContenido"></div>
+  <div id="carritoModal" class="modal hidden">
+    <div class="modal-contenido">
+        <!-- Header Mejorado -->
+        <div class="carrito-header">
+            <button onclick="cerrarModal()" class="cerrar">&times;</button>
+            <h2>Carrito de Compras</h2>
+            <p class="carrito-subtitle">Glamoure Collection</p>
+        </div>
+
+        <!-- Contenido -->
+        <div class="carrito-body">
+            <div id="carritoContenido"></div>
+        </div>
     </div>
-  </div>
+</div>
 
   <div id="productoModal" class="modal">
         <div class="modal-contenido">
@@ -228,5 +279,54 @@
     </div>
 
   <script src="{% static 'js/modal.js' %}"></script>
+  <script>
+// Solo el código para el menú desplegable del usuario
+function initUserMenu() {
+    const userMenuButton = document.getElementById('userMenuButton');
+    const userMenu = document.getElementById('userMenu');
+    const userMenuArrow = document.getElementById('userMenuArrow');
+
+    if (userMenuButton && userMenu) {
+        // Abrir/cerrar menú
+        userMenuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (userMenu.classList.contains('hidden')) {
+                // Abrir menú
+                userMenu.classList.remove('hidden');
+                if (userMenuArrow) {
+                    userMenuArrow.classList.add('rotate-180');
+                }
+            } else {
+                // Cerrar menú
+                userMenu.classList.add('hidden');
+                if (userMenuArrow) {
+                    userMenuArrow.classList.remove('rotate-180');
+                }
+            }
+        });
+
+        // Cerrar menú al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (userMenu && !userMenu.contains(e.target) && userMenuButton && !userMenuButton.contains(e.target)) {
+                userMenu.classList.add('hidden');
+                if (userMenuArrow) {
+                    userMenuArrow.classList.remove('rotate-180');
+                }
+            }
+        });
+
+        // Prevenir que el click en el menú lo cierre
+        userMenu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    initUserMenu();
+});
+</script>
 </body>
 </html>

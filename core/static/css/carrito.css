@@ -1,5 +1,4 @@
-
-/* Modal fondo */
+/* Modal fondo - Estilo oscuro como tu página */
 #carritoModal.modal {
     display: none;
     position: fixed;
@@ -8,52 +7,120 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.8);
     justify-content: center;
     align-items: center;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    backdrop-filter: blur(10px);
 }
 
-/* Contenido del modal */
+/* Contenido del modal - Estilo oscuro elegante */
 .modal-contenido {
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    padding: 0;
+    border-radius: 16px;
     width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
+    max-width: 500px;
+    max-height: 85vh;
     overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid #C0A76B;
     position: relative;
+    color: #e2e8f0;
 }
 
-/* Botón cerrar */
+/* Header del carrito - Dorado elegante */
+.carrito-header {
+    background: linear-gradient(135deg, #C0A76B, #A8915C);
+    color: #1a1a1a;
+    padding: 25px;
+    border-radius: 16px 16px 0 0;
+    text-align: center;
+    position: relative;
+    border-bottom: 2px solid #C0A76B;
+}
+
+.carrito-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.carrito-subtitle {
+    margin: 5px 0 0 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+    color: #1a1a1a;
+}
+
+/* Botón cerrar - Estilo dorado */
 .cerrar {
     position: absolute;
     top: 20px;
-    right: 25px;
+    right: 20px;
     font-size: 28px;
-    color: #ccc;
+    color: #1a1a1a;
     cursor: pointer;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    font-weight: bold;
 }
+
 .cerrar:hover {
-    color: #000;
+    color: #1a1a1a;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
 }
 
+/* Contenido del carrito - Fondo oscuro */
+.carrito-body {
+    padding: 25px;
+    max-height: 400px;
+    overflow-y: auto;
+    background: #1a1a1a;
+}
 
+/* Items del carrito - Tarjetas oscuras con bordes dorados */
 .item-carrito {
     display: flex;
     gap: 15px;
-    padding: 15px 0;
+    padding: 20px;
     align-items: center;
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.item-carrito:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(192, 167, 107, 0.2);
+    border-color: #C0A76B;
 }
 
 .img-carrito {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
     object-fit: cover;
-    background-color: #f0f0f0;
+    background: linear-gradient(135deg, #333, #444);
+    border: 2px solid #444;
+    transition: all 0.3s ease;
+}
+
+.item-carrito:hover .img-carrito {
+    border-color: #C0A76B;
+    transform: scale(1.05);
 }
 
 .info-carrito {
@@ -61,40 +128,152 @@
 }
 
 .info-carrito p {
-    margin: 4px 0;
+    margin: 6px 0;
     font-size: 14px;
 }
 
+.info-carrito p:first-child {
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 15px;
+}
+
+.info-carrito p:nth-child(2) {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.info-carrito p:last-child {
+    color: #C0A76B;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+/* Acciones - Botones con estilo dorado */
 .acciones {
     display: flex;
-    gap: 5px;
-    margin-top: 8px;
+    gap: 8px;
+    margin-top: 10px;
 }
 
 .acciones button {
-    background-color: #e6f0fb;
-    border: 1px solid #cce4f6;
-    border-radius: 6px;
-    padding: 6px 10px;
+    background: linear-gradient(135deg, #333, #444);
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 8px 12px;
     font-size: 14px;
     cursor: pointer;
-    color: #1a73e8;
-    transition: background-color 0.3s ease;
+    color: #e2e8f0;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    min-width: 40px;
 }
 
 .acciones button:hover {
-    background-color: #d1e9ff;
+    background: linear-gradient(135deg, #444, #555);
+    border-color: #C0A76B;
+    color: #C0A76B;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(192, 167, 107, 0.3);
 }
 
+.acciones button:last-child {
+    background: linear-gradient(135deg, #444, #555);
+    border-color: #666;
+    color: #f87171;
+}
+
+.acciones button:last-child:hover {
+    background: linear-gradient(135deg, #555, #666);
+    border-color: #f87171;
+    color: #f87171;
+}
+
+/* Separador - Sutil */
 hr {
     border: 0;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #333;
+    margin: 20px 0;
+    border-radius: 2px;
 }
 
+/* Total - Destacado en dorado */
 .total-carrito {
-    text-align: right;
-    font-size: 18px;
-    font-weight: bold;
-    color: #1a73e8;
-    margin-top: 20px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #C0A76B;
+    margin-top: 25px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(192, 167, 107, 0.1), rgba(168, 145, 92, 0.1));
+    border-radius: 12px;
+    border: 1px solid #C0A76B;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar personalizado - Dorado */
+.carrito-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.carrito-body::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 10px;
+}
+
+.carrito-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #C0A76B, #A8915C);
+    border-radius: 10px;
+}
+
+.carrito-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #A8915C, #8a7848);
+}
+
+/* Estado vacío del carrito */
+.carrito-vacio {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.carrito-vacio p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+/* Mejora para el texto del total que genera JavaScript */
+#carritoContenido p[style*="text-align:right"] {
+    text-align: center !important;
+    font-size: 1.4rem !important;
+    font-weight: 800 !important;
+    color: #C0A76B !important;
+    margin-top: 25px !important;
+    padding: 20px !important;
+    background: linear-gradient(135deg, rgba(192, 167, 107, 0.1), rgba(168, 145, 92, 0.1)) !important;
+    border-radius: 12px !important;
+    border: 1px solid #C0A76B !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .modal-contenido {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .item-carrito {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    
+    .acciones {
+        justify-content: center;
+    }
+    
+    .carrito-header {
+        padding: 20px 15px;
+    }
 }
