@@ -4,90 +4,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Pedidos</title>
+    <title>Gestión de Pedidos - Glamoure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    
+    <style>
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C0A76B;
+            border-radius: 3px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body class="bg-[#fdf8e1] font-sans text-gray-800">
+<body class="bg-black text-white font-sans antialiased min-h-screen">
 
-<div class="flex flex-col min-h-screen">
-
-    <!-- Header -->
-    <header class="bg-[#25282A] text-white shadow p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <h2 class="text-xl font-bold"><i class="fas fa-clipboard-list"></i> Gestión de Pedidos</h2>
-            <a href="{% url 'logout' %}" class="flex items-center gap-2 bg-[#C0A76B] hover:bg-[#A8915C] px-4 py-2 rounded transition">
-                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-            </a>
-        </div>
-    </header>
-
-    <!-- Contenido -->
-    <main class="container mx-auto flex-1 p-6">
-        <div class="bg-white rounded shadow p-6">
-            <h3 class="text-lg font-semibold mb-4">Listado de Pedidos</h3>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full border border-gray-200">
-                    <thead class="bg-[#25282A] text-white">
-                        <tr>
-                            <th class="px-4 py-2 text-left">N° Pedido</th>
-                            <th class="px-4 py-2 text-left">Cliente</th>
-                            <th class="px-4 py-2 text-left">Fecha</th>
-                            <th class="px-4 py-2 text-left">Estado</th>
-                            <th class="px-4 py-2 text-right">Total</th>
-                            <th class="px-4 py-2 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pedido in pedidos %}
-                        <tr class="border-b hover:bg-[#fdf8e1] transition">
-                            <td class="px-4 py-2">{{ pedido.numero }}</td>
-                            <td class="px-4 py-2">{{ pedido.cliente }}</td>
-                            <td class="px-4 py-2">{{ pedido.fecha|date:"d/m/Y H:i" }}</td>
-                            <td class="px-4 py-2">
-                                {% if pedido.estado == 'pendiente' %}
-                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">Pendiente</span>
-                                {% elif pedido.estado == 'procesando' %}
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-sm">Procesando</span>
-                                {% elif pedido.estado == 'completado' %}
-                                    <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">Completado</span>
-                                {% else %}
-                                    <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-sm">Cancelado</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-2 text-right font-semibold">${{ pedido.total }}</td>
-                            <td class="px-4 py-2 text-center space-x-2">
-                                <a href="#" class="px-3 py-1 bg-[#C0A76B] text-white rounded hover:bg-[#A8915C] transition">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="#" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="px-4 py-4 text-center text-gray-500">
-                                No hay pedidos registrados.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Header -->
+<header class="bg-black border-b border-[#C0A76B] shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto flex justify-between items-center px-6 py-4">
+        <div class="flex items-center gap-4">
+            <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-10 h-10">
+            <div>
+                <h2 class="text-xl font-bold text-[#C0A76B]">
+                    <i class="fas fa-clipboard-list mr-2"></i>Gestión de Pedidos
+                </h2>
+                <p class="text-gray-400 text-sm">Administra los pedidos de Glamoure</p>
             </div>
         </div>
-    </main>
-</div>
+        <a href="{% url 'logout' %}" 
+           class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </a>
+    </div>
+</header>
+
+<!-- Contenido -->
+<main class="container mx-auto flex-1 p-6">
+    <!-- Estadísticas rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-[#C0A76B]">{{ total_pedidos }}</div>
+            <div class="text-gray-400 text-sm">Total Pedidos</div>
+        </div>
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-yellow-400">{{ pedidos_pendientes }}</div>
+            <div class="text-gray-400 text-sm">Pendientes</div>
+        </div>
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-blue-400">{{ pedidos_procesando }}</div>
+            <div class="text-gray-400 text-sm">Procesando</div>
+        </div>
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-4 text-center">
+            <div class="text-2xl font-bold text-green-400">{{ pedidos_completados }}</div>
+            <div class="text-gray-400 text-sm">Completados</div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-4 mb-6">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+            <div class="flex-1">
+                <input type="text" 
+                       placeholder="Buscar pedidos..." 
+                       class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+            </div>
+            <div class="flex gap-2">
+                <select class="bg-black border border-[#C0A76B] border-opacity-50 text-white rounded-lg px-3 py-3 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    <option class="bg-[#1a1a1a]">Todos los estados</option>
+                    <option class="bg-[#1a1a1a]">Pendiente</option>
+                    <option class="bg-[#1a1a1a]">Procesando</option>
+                    <option class="bg-[#1a1a1a]">Completado</option>
+                    <option class="bg-[#1a1a1a]">Cancelado</option>
+                </select>
+                <button class="bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-3 rounded-lg transition duration-300">
+                    <i class="fas fa-filter mr-2"></i>Filtrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de pedidos -->
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden">
+        <div class="p-4 border-b border-[#C0A76B] border-opacity-30">
+            <h3 class="text-lg font-semibold text-[#C0A76B]">Listado de Pedidos</h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-black">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">N° Pedido</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                    {% for pedido in pedidos %}
+                    <tr class="hover:bg-black hover:bg-opacity-30 transition duration-300 fade-in">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-white font-semibold">#{{ pedido.numero }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-white">{{ pedido.cliente }}</div>
+                            <div class="text-gray-400 text-sm">{{ pedido.email|default:"" }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                            {{ pedido.fecha|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if pedido.estado == 'pendiente' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-900 bg-opacity-20 text-yellow-400 border border-yellow-400 border-opacity-30">
+                                    <i class="fas fa-clock mr-1"></i>Pendiente
+                                </span>
+                            {% elif pedido.estado == 'procesando' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-900 bg-opacity-20 text-blue-400 border border-blue-400 border-opacity-30">
+                                    <i class="fas fa-cog mr-1 animate-spin"></i>Procesando
+                                </span>
+                            {% elif pedido.estado == 'completado' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-900 bg-opacity-20 text-green-400 border border-green-400 border-opacity-30">
+                                    <i class="fas fa-check mr-1"></i>Completado
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-900 bg-opacity-20 text-red-400 border border-red-400 border-opacity-30">
+                                    <i class="fas fa-times mr-1"></i>Cancelado
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <span class="text-[#C0A76B] font-bold text-lg">${{ pedido.total }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                            <a href="#" 
+                               class="inline-flex items-center justify-center w-8 h-8 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition duration-300"
+                               title="Ver detalles">
+                                <i class="fas fa-eye text-sm"></i>
+                            </a>
+                            <a href="#" 
+                               class="inline-flex items-center justify-center w-8 h-8 bg-blue-900 bg-opacity-20 text-blue-400 rounded-lg hover:bg-blue-400 hover:text-white transition duration-300"
+                               title="Editar pedido">
+                                <i class="fas fa-edit text-sm"></i>
+                            </a>
+                            <a href="#" 
+                               class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300"
+                               title="Eliminar pedido">
+                                <i class="fas fa-trash text-sm"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center text-gray-400">
+                                <i class="fas fa-clipboard-list text-4xl mb-3 opacity-50"></i>
+                                <p class="text-lg">No hay pedidos registrados</p>
+                                <p class="text-sm mt-1">Los pedidos aparecerán aquí cuando los clientes realicen compras</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="bg-black px-4 py-3 flex items-center justify-between border-t border-[#C0A76B] border-opacity-30 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] text-sm font-medium rounded-md text-[#C0A76B] bg-black hover:bg-[#C0A76B] hover:text-black transition"> Anterior </a>
+                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-[#C0A76B] text-sm font-medium rounded-md text-[#C0A76B] bg-black hover:bg-[#C0A76B] hover:text-black transition"> Siguiente </a>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-400">
+                        Mostrando
+                        <span class="font-medium text-white">1</span>
+                        a
+                        <span class="font-medium text-white">10</span>
+                        de
+                        <span class="font-medium text-white">{{ total_pedidos }}</span>
+                        resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition">
+                            <span class="sr-only">Anterior</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <a href="#" aria-current="page" class="z-10 bg-[#C0A76B] border-[#C0A76B] text-black relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
+                        <a href="#" class="bg-black border-[#C0A76B] text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black relative inline-flex items-center px-4 py-2 border text-sm font-medium transition"> 2 </a>
+                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition">
+                            <span class="sr-only">Siguiente</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
 <!-- Botón Volver al Dashboard -->
 <a href="{% url 'dashboard' %}" 
-   class="fixed bottom-4 right-4 bg-[#C0A76B] hover:bg-[#A8915C] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all shadow-lg z-50">
-    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+   class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+    <i class="fas fa-arrow-left"></i>
+    <span class="group-hover:underline">Volver al Dashboard</span>
 </a>
-
 
 </body>
 </html>

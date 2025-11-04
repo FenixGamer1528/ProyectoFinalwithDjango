@@ -2,6 +2,7 @@ from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import render,HttpResponse, redirect
 from .forms import LoginForm, RegistroForm 
 from carrito.models import Producto,Pedido, UsuarioPersonalizado
+from django.shortcuts import render, get_object_or_404
 
 
 
@@ -203,3 +204,23 @@ def exportar_pdf(request):
     p.showPage()
     p.save()
     return response
+
+def hombres(request):
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE)
+    return render(request, "core/hombres.html", {"productos": productos})
+
+
+def mujeres(request):
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER)
+    return render(request, "core/mujeres.html", {"productos": productos})
+
+
+def zapatos(request):
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS)
+    return render(request, "core/zapatos.html", {"productos": productos})
+
+
+def ofertas(request):
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS)
+    return render(request, "core/ofertas.html", {"productos": productos})
+

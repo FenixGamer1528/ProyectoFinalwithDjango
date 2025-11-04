@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
-from carrito.models import UsuarioPersonalizado, Producto, Pedido
+from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito
 from .forms import ProductoForm
 
 User = get_user_model()
@@ -122,3 +122,27 @@ def crear_usuario(request):
         return redirect('gestion_usuarios') 
     
     return render(request, 'dashboard/crear_usuario.html')
+@login_required
+def dashboardCliente(request):
+    # 1. Buscar el carrito del usuario y sus items
+    #    Usamos get_or_create para manejar usuarios que aún no tienen carrito
+    carrito, created = Carrito.objects.get_or_create(usuario=request.user)
+    items_del_carrito = carrito.items.all()
+
+    # 2. Buscar el historial de pedidos del usuario
+    #    Filtramos los pedidos que pertenecen al usuario logueado
+    pedidos_del_usuario = Pedido.objects.filter(usuario=request.user).order_by('-fecha')
+
+    # 3. Buscar los productos marcados como destacados
+    productos_destacados = Producto.objects.filter(destacado=True)
+
+    # 4. Preparar el contexto para enviar todo a la plantilla
+    context = {
+        'usuario': request.user,
+        'items': items_del_carrito,
+        'pedidos': pedidos_del_usuario,
+        'productosDestacados': productos_destacados
+    }
+
+    # 5. Renderizar la plantilla con todos los datos
+    return render(request, 'dashboard/cliente_dashboard.html', context)

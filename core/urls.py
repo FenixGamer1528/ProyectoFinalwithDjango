@@ -5,11 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('about/', views.about, name='about'),
-    path('contact/', views.contact, name='contact'),
-    path('portfolio/', views.portfolio, name='portfolio'),
-    path('index/', views.index, name='index'),
+    path('', views.index, name='index'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
@@ -18,4 +14,10 @@ urlpatterns = [
     path('reportes/', ReporteListView.as_view(), name='lista_reportes'),
     path('reportes/exportar/excel/', exportar_excel, name='exportar_excel'),
     path('reportes/exportar/pdf/', exportar_pdf, name='exportar_pdf'),
+    path('hombres/', views.hombres, name='hombres'),
+    path('mujeres/', views.mujeres, name='mujeres'),
+    path('zapatos/', views.zapatos, name='zapatos'),
+    path('ofertas/', views.ofertas, name='ofertas'),
+    
+  
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

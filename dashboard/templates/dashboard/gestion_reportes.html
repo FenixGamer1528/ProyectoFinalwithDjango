@@ -4,149 +4,213 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Gestión de Reportes</title>
+    <title>Gestión de Reportes - Glamoure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    
+    <style>
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C0A76B;
+            border-radius: 3px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body class="flex h-screen bg-gray-100">
+<body class="flex h-screen bg-black text-white font-sans antialiased">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-md p-6 flex flex-col">
-        <h2 class="text-2xl font-bold mb-8 text-primary">Reportes</h2>
+    <aside class="w-64 bg-[#1a1a1a] border-r border-[#C0A76B] p-6 flex flex-col">
+        <div class="flex items-center gap-3 mb-8">
+            <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-8 h-8">
+            <h2 class="text-xl font-bold text-[#C0A76B]">Reportes</h2>
+        </div>
         <nav class="flex flex-col space-y-4">
-            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 text-gray-700 hover:text-primary font-semibold">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-[#C0A76B] font-semibold transition duration-300">
                 <i class="fas fa-chart-bar"></i> Dashboard
             </a>
-            <!-- Más enlaces si quieres -->
         </nav>
     </aside>
+
     <!-- Contenido principal -->
     <main class="flex-1 p-8 overflow-auto">
-        <h1 class="text-3xl font-bold mb-6 text-secondary flex items-center gap-3">
-            <i class="fas fa-file-alt text-primary"></i> Gestión de Reportes
-        </h1>
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-10 h-10">
+                <div>
+                    <h1 class="text-3xl font-bold text-[#C0A76B] flex items-center gap-3">
+                        <i class="fas fa-file-alt"></i> Gestión de Reportes
+                    </h1>
+                    <p class="text-gray-400 text-sm">Analiza y gestiona los reportes de Glamoure</p>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" 
+               class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </a>
+        </div>
+
         <!-- Filtros y búsqueda -->
-        <form method="get" class="flex flex-wrap gap-4 mb-6 items-end">
-            <div>
-                <label for="q" class="block text-sm font-medium text-gray-700">Buscar</label>
-                <input type="text" name="q" id="q" value="{{ request.GET.q }}" placeholder="Título o Categoría"
-                    class="mt-1 block w-64 rounded border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-            </div>
-            <div>
-                <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
-                <select name="estado" id="estado"
-                    class="mt-1 block w-48 rounded border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                    <option value="">Todos</option>
-                    <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                    <option value="en_proceso" {% if request.GET.estado == 'en_proceso' %}selected{% endif %}>En proceso</option>
-                    <option value="completado" {% if request.GET.estado == 'completado' %}selected{% endif %}>Completado</option>
-                </select>
-            </div>
-            <div>
-                <label for="fecha_desde" class="block text-sm font-medium text-gray-700">Desde</label>
-                <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde }}"
-                    class="mt-1 block rounded border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-            </div>
-            <div>
-                <label for="fecha_hasta" class="block text-sm font-medium text-gray-700">Hasta</label>
-                <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta }}"
-                    class="mt-1 block rounded border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-            </div>
-            <div>
-                <button type="submit"
-                    class="px-4 py-2 bg-primary text-white rounded hover:bg-secondary transition">
-                    <i class="fas fa-filter me-1"></i> Filtrar
-                </button>
-            </div>
-            <div class="ml-auto flex gap-2">
-                <a href="{% url 'exportar_excel' %}" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition flex items-center gap-2">
-                    <i class="fas fa-file-excel"></i> Excel
-                </a>
-                <a href="{% url 'exportar_pdf' %}" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition flex items-center gap-2">
-                    <i class="fas fa-file-pdf"></i> PDF
-                </a>
+        <form method="get" class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6 mb-6">
+            <div class="flex flex-wrap gap-4 items-end">
+                <div>
+                    <label for="q" class="block text-sm font-medium text-[#C0A76B] mb-2">Buscar</label>
+                    <input type="text" name="q" id="q" value="{{ request.GET.q }}" placeholder="Título o Categoría"
+                        class="w-64 px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
+                </div>
+                <div>
+                    <label for="estado" class="block text-sm font-medium text-[#C0A76B] mb-2">Estado</label>
+                    <select name="estado" id="estado"
+                        class="w-48 px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                        <option value="" class="bg-[#1a1a1a]">Todos</option>
+                        <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %} class="bg-[#1a1a1a]">Pendiente</option>
+                        <option value="en_proceso" {% if request.GET.estado == 'en_proceso' %}selected{% endif %} class="bg-[#1a1a1a]">En proceso</option>
+                        <option value="completado" {% if request.GET.estado == 'completado' %}selected{% endif %} class="bg-[#1a1a1a]">Completado</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fecha_desde" class="block text-sm font-medium text-[#C0A76B] mb-2">Desde</label>
+                    <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde }}"
+                        class="px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
+                </div>
+                <div>
+                    <label for="fecha_hasta" class="block text-sm font-medium text-[#C0A76B] mb-2">Hasta</label>
+                    <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta }}"
+                        class="px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
+                </div>
+                <div>
+                    <button type="submit"
+                        class="px-6 py-3 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+                <div class="ml-auto flex gap-3">
+                    <a href="{% url 'exportar_excel' %}" class="px-4 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-file-excel"></i> Excel
+                    </a>
+                    <a href="{% url 'exportar_pdf' %}" class="px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg transition duration-300 flex items-center gap-2">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                </div>
             </div>
         </form>
+
         <!-- Tabla de reportes -->
-        <div class="overflow-x-auto bg-white rounded shadow">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de creación</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for reporte in reportes %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reporte.id }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reporte.titulo }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reporte.categoria }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {% if reporte.estado == 'pendiente' %}bg-gray-200 text-gray-800
-                                {% elif reporte.estado == 'en_proceso' %}bg-blue-200 text-blue-800
-                                {% elif reporte.estado == 'completado' %}bg-green-200 text-green-800
-                                {% endif %}">
-                                {{ reporte.get_estado_display }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium flex justify-center gap-3">
-                            <a href="#" title="Editar" class="text-blue-600 hover:text-blue-900">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" title="Eliminar" class="text-red-600 hover:text-red-900">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                            <a href="#" title="Descargar PDF" class="text-gray-600 hover:text-gray-900">
-                                <i class="fas fa-file-pdf"></i>
-                            </a>
-                            <a href="#" title="Descargar Excel" class="text-green-600 hover:text-green-900">
-                                <i class="fas fa-file-excel"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4 text-gray-500">No hay reportes para mostrar.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-700">
+                    <thead class="bg-black">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">ID</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Título</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Categoría</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Fecha de creación</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-4 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-[#1a1a1a] divide-y divide-gray-700">
+                        {% for reporte in reportes %}
+                        <tr class="hover:bg-black hover:bg-opacity-30 transition duration-300 fade-in">
+                            <td class="px-6 py-4 whitespace-nowrap text-white font-semibold">#{{ reporte.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-white">{{ reporte.titulo }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ reporte.categoria }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border
+                                    {% if reporte.estado == 'pendiente' %}bg-yellow-900 bg-opacity-20 text-yellow-400 border-yellow-400 border-opacity-30
+                                    {% elif reporte.estado == 'en_proceso' %}bg-blue-900 bg-opacity-20 text-blue-400 border-blue-400 border-opacity-30
+                                    {% elif reporte.estado == 'completado' %}bg-green-900 bg-opacity-20 text-green-400 border-green-400 border-opacity-30
+                                    {% endif %}">
+                                    {{ reporte.get_estado_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <div class="flex justify-center gap-3">
+                                    <a href="#" title="Editar" 
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-blue-900 bg-opacity-20 text-blue-400 rounded-lg hover:bg-blue-400 hover:text-white transition duration-300">
+                                        <i class="fas fa-edit text-sm"></i>
+                                    </a>
+                                    <a href="#" title="Eliminar" 
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300">
+                                        <i class="fas fa-trash-alt text-sm"></i>
+                                    </a>
+                                    <a href="#" title="Descargar PDF" 
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300">
+                                        <i class="fas fa-file-pdf text-sm"></i>
+                                    </a>
+                                    <a href="#" title="Descargar Excel" 
+                                       class="inline-flex items-center justify-center w-8 h-8 bg-green-900 bg-opacity-20 text-green-400 rounded-lg hover:bg-green-400 hover:text-white transition duration-300">
+                                        <i class="fas fa-file-excel text-sm"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center">
+                                <div class="flex flex-col items-center justify-center text-gray-400">
+                                    <i class="fas fa-file-alt text-4xl mb-3 opacity-50"></i>
+                                    <p class="text-lg">No hay reportes para mostrar</p>
+                                    <p class="text-sm mt-1">Ajusta los filtros o genera nuevos reportes</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
+
         <!-- Paginación -->
-        <div class="mt-4">
+        <div class="mt-6">
             {% if is_paginated %}
             <nav class="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                 {% if page_obj.has_previous %}
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.previous_page_number }}" 
+                   class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">
                     <span class="sr-only">Anterior</span>
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 {% else %}
-                <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-200 text-sm font-medium text-gray-400">
+                <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#C0A76B] bg-gray-800 text-gray-500">
                     <span class="sr-only">Anterior</span>
                     <i class="fas fa-chevron-left"></i>
                 </span>
                 {% endif %}
+                
                 {% for num in paginator.page_range %}
                     {% if page_obj.number == num %}
-                        <span aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-primary bg-primary text-white text-sm font-medium">{{ num }}</span>
+                        <span aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] bg-[#C0A76B] text-black font-semibold">{{ num }}</span>
                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">{{ num }}</a>
+                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ num }}" 
+                           class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">{{ num }}</a>
                     {% endif %}
                 {% endfor %}
+                
                 {% if page_obj.has_next %}
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.next_page_number }}" 
+                   class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">
                     <span class="sr-only">Siguiente</span>
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 {% else %}
-                <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-200 text-sm font-medium text-gray-400">
+                <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#C0A76B] bg-gray-800 text-gray-500">
                     <span class="sr-only">Siguiente</span>
                     <i class="fas fa-chevron-right"></i>
                 </span>
@@ -155,11 +219,12 @@
             {% endif %}
         </div>
     </main>
-    <!-- Botón Volver al Dashboard -->
-<a href="{% url 'dashboard' %}" 
-   class="fixed bottom-4 right-4 bg-[#C0A76B] hover:bg-[#A8915C] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all shadow-lg z-50">
-    <i class="fas fa-arrow-left"></i> Volver al Dashboard
-</a>
 
+    <!-- Botón Volver al Dashboard -->
+    <a href="{% url 'dashboard' %}" 
+       class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+        <i class="fas fa-arrow-left"></i>
+        <span class="group-hover:underline">Volver al Dashboard</span>
+    </a>
 </body>
 </html>
