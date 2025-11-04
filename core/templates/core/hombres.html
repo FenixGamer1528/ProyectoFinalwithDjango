@@ -13,7 +13,6 @@
 </head>
 <body class="flex flex-col min-h-screen bg-black text-white font-sans antialiased">
 
-    <!-- Copiamos el mismo header de index -->
     <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
     <nav class="container mx-auto flex justify-between items-center px-6 py-4">
       
@@ -49,9 +48,7 @@
     </nav>
   </header>
 
-    <!-- 👇 Aquí va el contenido específico de Hombres -->
-    <main class="container mx-auto px-6 py-10 flex-grow bg-gradient-to-br from-black to-gray-900">
-    <h1 class="text-4xl font-bold text-[#C0A76B] mb-8 text-center uppercase tracking-wide">Colección para Hombres</h1>
+    <main class="container mx-auto px-6 py-10 flex-grow pt-28"> <h1 class="text-4xl font-bold text-[#C0A76B] mb-8 text-center uppercase tracking-wide">Colección para Hombres</h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {% for producto in productos %}
@@ -70,8 +67,7 @@
                 <div class="flex justify-between items-center">
                     <span class="text-[#C0A76B] font-bold text-lg">${{ producto.precio }}</span>
                     <a href="{% url 'producto' producto.id %}" 
-                       class="bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] hover:scale-110 transform transition duration-300 font-semibold">
-                       Ver
+                       class="bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] hover:scale-110 transform transition duration-300 font-semibold ver-detalles-btn"> Ver
                     </a>
                 </div>
             </div>
@@ -82,7 +78,6 @@
     </div>
 </main>
 
-    <!-- Copiamos el mismo footer -->
     <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
     <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left px-6 gap-4">
       <ul class="flex flex-wrap justify-center md:justify-start gap-6 text-gray-400 text-sm">
@@ -100,8 +95,7 @@
     <div id="carritoModal" class="modal">
         <div class="modal-contenido">
             <span class="cerrar" onclick="cerrarModal()">&times;</span>
-            <h2>Carrito de compras</h2>
-            <div id="carritoContenido"></div>
+            <h2 id="carritoTitulo">Carrito de compras</h2> <div id="carritoContenido"></div>
         </div>
     </div>
     <div id="productoModal" class="modal">

@@ -2,145 +2,244 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Cliente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // Configuración de Tailwind con la nueva paleta de colores
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            // Definiendo tu color principal para usarlo fácilmente
-            'brand': {
-              DEFAULT: '#C0A76B',
-              hover: '#A8915C'
-            }
-          }
-        }
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <title>Mi Dashboard - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand': {
+                            DEFAULT: '#C0A76B',
+                            hover: '#A8915C'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-50 text-gray-800 font-sans">
 
-    <div class="fixed top-0 left-0 h-screen w-60 bg-white shadow-md p-5">
-    <h4 class="text-gray-900 text-xl font-bold text-center mb-10">Cliente Panel</h4>
-    <nav class="flex flex-col space-y-2">
-            <a href="#" class="flex items-center px-4 py-3 text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:scale-105 hover:shadow-lg">
-        <span class="mr-3">🏠</span> Inicio
-      </a>
-       <a href="#" class="flex items-center px-4 py-3 text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:scale-105 hover:shadow-lg">
-        <span class="mr-3">🛒</span> Mi Carrito
-      </a>
-      <a href="#" class="flex items-center px-4 py-3 text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:scale-105 hover:shadow-lg">
-        <span class="mr-3">📦</span> Mis Pedidos
-      </a>
-      <a href="#" class="flex items-center px-4 py-3 text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:scale-105 hover:shadow-lg">
-        <span class="mr-3">🌟</span> Destacados
-      </a>
-       <a href="#" class="flex items-center px-4 py-3 text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:scale-105 hover:shadow-lg">
-        <span class="mr-3">⚙️</span> Configuración
-      </a>
-    </nav>
-  </div>
+    <!-- Sidebar Elegante -->
+    <div class="fixed top-0 left-0 h-screen w-64 bg-white shadow-xl border-r border-gray-200 p-6">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+            <a href="{% url 'index' %}">
+                <img src="{% static 'imagenes/Logonew.png' %}" alt="Glamoure" class="w-16 h-16">
+            </a>
+        </div>
+        
+        <h4 class="text-gray-900 text-xl font-bold text-center mb-2">Mi Panel</h4>
+        <p class="text-gray-500 text-sm text-center mb-8">Bienvenido a tu espacio</p>
+        
+        <nav class="flex flex-col space-y-3">
+            <!-- Botón para volver al Index -->
+            <a href="{% url 'index' %}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg border border-gray-200 hover:border-brand transition-all duration-200 ease-in-out hover:bg-white hover:text-brand group mb-2">
+                <span class="mr-3 group-hover:scale-110 transition-transform">🏠</span>
+                <span class="font-medium">Volver a la Tienda</span>
+            </a>
 
-    <div class="ml-60 p-10">
-    <h2 class="text-3xl font-bold text-gray-900 mb-2">👤 Bienvenido, {{ usuario.first_name }} {{ usuario.last_name }}</h2>
-    <p class="text-gray-500 mb-8">Gestiona tu información, carrito y pedidos desde aquí.</p>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">📊</span>
+                <span class="font-medium">Resumen</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">🛒</span>
+                <span class="font-medium">Mi Carrito</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">📦</span>
+                <span class="font-medium">Mis Pedidos</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">🌟</span>
+                <span class="font-medium">Mi lista de deseos</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">⚙️</span>
+                <span class="font-medium">Configuración</span>
+            </a>
+        </nav>
+        
+        <!-- Footer del Sidebar -->
+        <div class="absolute bottom-6 left-6 right-6">
+            <a href="{% url 'logout' %}" class="flex items-center px-4 py-3 text-red-600 rounded-lg border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-200 group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">🚪</span>
+                <span class="font-medium">Cerrar Sesión</span>
+            </a>
+        </div>
+    </div>
 
-        <div class="flex flex-wrap -mx-4">
-            <div class="w-full lg:w-1/3 px-4 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div class="p-4 border-b border-gray-200">
-            <h5 class="text-lg font-semibold text-gray-800">Mis Datos</h5>
-          </div>
-          <div class="p-4 space-y-2">
-            <p><strong class="font-semibold">Usuario:</strong> {{ usuario.username }}</p>
-            <p><strong class="font-semibold">Email:</strong> {{ usuario.email }}</p>
-            <p><strong class="font-semibold">Teléfono:</strong> {{ usuario.telefono }}</p>
-          </div>
-        </div>
-      </div>
+    <!-- Contenido Principal -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">¡Hola, {{ usuario.first_name }}! 👋</h1>
+            <p class="text-gray-600">Gestiona tu información, carrito y pedidos desde tu dashboard personal</p>
+        </div>
 
-            <div class="w-full lg:w-2/3 px-4 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div class="p-4 border-b border-gray-200">
-            <h5 class="text-lg font-semibold text-gray-800">🛒 Mi Carrito</h5>
-          </div>
-          <div class="p-4">
-            {% if items %}
-              <table class="w-full text-left">
-                <thead>
-                  <tr class="border-b border-gray-200">
-                    <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Producto</th>
-                    <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
-                    <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Precio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for item in items %}
-                  <tr class="border-b border-gray-200 last:border-0">
-                    <td class="p-3">{{ item.producto.nombre }}</td>
-                    <td class="p-3">{{ item.cantidad }}</td>
-                    <td class="p-3">${{ item.producto.precio }}</td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            {% else %}
-              <p class="text-gray-500">No tienes productos en tu carrito.</p>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
+        <!-- Tarjetas de Resumen -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Tarjeta Datos Personales -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-blue-600">👤</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Mis Datos</h3>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <p><span class="font-medium text-gray-700">Usuario:</span> {{ usuario.username }}</p>
+                    <p><span class="font-medium text-gray-700">Email:</span> {{ usuario.email }}</p>
+                    <p><span class="font-medium text-gray-700">Teléfono:</span> {{ usuario.telefono }}</p>
+                </div>
+            </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-      <div class="p-4 border-b border-gray-200">
-        <h5 class="text-lg font-semibold text-gray-800">📦 Mis Pedidos</h5>
-      </div>
-      <div class="p-4">
-        {% if pedidos %}
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Producto</th>
-                <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
-                <th class="p-3 text-sm font-semibold text-gray-500 uppercase">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for pedido in pedidos %}
-              <tr class="border-b border-gray-200 last:border-0">
-                <td class="p-3">{{ pedido.producto.nombre }}</td>
-                <td class="p-3">{{ pedido.cantidad }}</td>
-                <td class="p-3">{{ pedido.fecha|date:"d/m/Y" }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        {% else %}
-          <p class="text-gray-500">No has realizado pedidos todavía.</p>
-        {% endif %}
-      </div>
-    </div>
+            <!-- Tarjeta Carrito -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-green-600">🛒</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Mi Carrito</h3>
+                </div>
+                {% if items %}
+                    <p class="text-sm text-gray-600 mb-3">{{ items|length }} producto(s) en tu carrito</p>
+                    <a href="#" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver carrito →</a>
+                {% else %}
+                    <p class="text-sm text-gray-500">Tu carrito está vacío</p>
+                    <a href="{% url 'hombres' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Descubrir productos →</a>
+                {% endif %}
+            </div>
 
-        <h4 class="text-xl font-semibold text-gray-900 mb-4">🌟 Productos Destacados</h4>
-    <div class="flex flex-wrap -mx-3">
-      {% for producto in productosDestacados %}
-        <div class="w-full sm:w-1/2 md:w-1/4 px-3 mb-6">
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-full">
-            <img src="{{ producto.imagen }}" class="w-full h-48 object-cover" alt="{{ producto.nombre }}">
-            <div class="p-4">
-              <h6 class="font-bold text-gray-800">{{ producto.nombre }}</h6>
-              <p class="text-gray-600">${{ producto.precio }}</p>
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
+            <!-- Tarjeta Pedidos -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-purple-600">📦</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Mis Pedidos</h3>
+                </div>
+                {% if pedidos %}
+                    <p class="text-sm text-gray-600 mb-3">{{ pedidos|length }} pedido(s) realizados</p>
+                    <a href="#" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver historial →</a>
+                {% else %}
+                    <p class="text-sm text-gray-500">No tienes pedidos aún</p>
+                    <a href="{% url 'ofertas' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver ofertas →</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sección de Productos Destacados -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">🌟 Lista de deseos</h2>
+                <a href="{% url 'hombres' %}" class="text-brand hover:text-brand-hover font-medium transition-colors">
+                    Ver todos →
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {% for producto in productosDestacados %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+                    <div class="relative overflow-hidden">
+                        <img src="{{ producto.imagen_url }}" class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105" alt="{{ producto.nombre }}">
+                        <div class="absolute top-3 right-3">
+                            <span class="bg-brand text-white px-2 py-1 rounded-full text-xs font-medium">Destacado</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ producto.nombre }}</h3>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-gray-900">${{ producto.precio }}</span>
+                            <button class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-4 text-center py-12">
+                    <p class="text-gray-500 text-lg">No hay productos destacados en este momento</p>
+                    <a href="{% url 'hombres' %}" class="inline-block mt-4 bg-brand hover:bg-brand-hover text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        Descubrir Colección
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tablas Detalladas (se muestran solo si hay datos) -->
+        {% if items %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">🛒 Detalles del Carrito</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Producto</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Precio</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                <td class="p-4 font-medium text-gray-900">{{ item.producto.nombre }}</td>
+                                <td class="p-4 text-gray-600">{{ item.cantidad }}</td>
+                                <td class="p-4 text-gray-600">${{ item.producto.precio }}</td>
+                                <td class="p-4 font-semibold text-gray-900">${{ item.subtotal }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if pedidos %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">📦 Historial de Pedidos</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Producto</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Fecha</th>
+                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pedido in pedidos %}
+                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                                <td class="p-4 font-medium text-gray-900">{{ pedido.producto.nombre }}</td>
+                                <td class="p-4 text-gray-600">{{ pedido.cantidad }}</td>
+                                <td class="p-4 text-gray-600">{{ pedido.fecha|date:"d/m/Y" }}</td>
+                                <td class="p-4">
+                                    <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                        Completado
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 
 </body>
 </html>
