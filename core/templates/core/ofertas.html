@@ -12,7 +12,6 @@
 </head>
 <body class="flex flex-col min-h-screen bg-black text-white font-sans antialiased">
 
-    <!-- Header -->
     <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
     <nav class="container mx-auto flex justify-between items-center px-6 py-4">
       
@@ -48,36 +47,37 @@
     </nav>
   </header>
 
-    <!-- Contenido -->
-    <main class="container mx-auto px-6 py-10 flex-grow">
-        <h1 class="text-4xl font-bold text-gray-900 mb-8">Ofertas Especiales</h1>
+    <main class="container mx-auto px-6 py-10 flex-grow pt-28">
+        <h1 class="text-4xl font-bold text-[#C0A76B] mb-8 text-center uppercase tracking-wide">Ofertas Especiales</h1>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {% for producto in productos %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:scale-105 transform transition border-2 border-red-500">
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden hover:scale-105 transform transition duration-300 hover:shadow-2xl hover:border-[#d4b96a]">
                 {% if producto.imagen_url %}
                   <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
                 {% elif producto.imagen %}
                   <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
                 {% else %}
-                  <img src="https://placehold.co/600x400?text=Sin+imagen" alt="Sin imagen" class="w-full h-64 object-cover">
+                  <img src="https://placehold.co/600x400/1a1a1a/C0A76B?text=Sin+imagen" alt="Sin imagen" class="w-full h-64 object-cover">
                 {% endif %}
 
                 <div class="p-4">
-                    <h3 class="text-lg font-semibold text-gray-800">{{ producto.nombre }}</h3>
-                    <p class="text-gray-600 text-sm mb-2">{{ producto.descripcion|truncatewords:12 }}</p>
+                    <h3 class="text-lg font-semibold text-white">{{ producto.nombre }}</h3>
+                    <p class="text-gray-300 text-sm mb-2">{{ producto.descripcion|truncatewords:12 }}</p>
                     <div class="flex justify-between items-center">
-                        <span class="text-red-600 font-bold">${{ producto.precio }}</span>
-                        <a href="{% url 'producto' producto.id %}" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 ver-detalles-btn">Ver</a>
+                        <span class="text-[#C0A76B] font-bold text-lg">${{ producto.precio }}</span>
+                        <a href="{% url 'producto' producto.id %}" 
+                           class="bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] hover:scale-110 transform transition duration-300 font-semibold ver-detalles-btn">
+                           Ver
+                        </a>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <p class="col-span-full text-center text-gray-500">No hay productos en oferta en este momento.</p>
+            <p class="col-span-full text-center text-gray-400 text-lg">No hay productos en oferta en este momento.</p>
             {% endfor %}
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
     <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left px-6 gap-4">
       <ul class="flex flex-wrap justify-center md:justify-start gap-6 text-gray-400 text-sm">
@@ -95,7 +95,7 @@
        <div id="carritoModal" class="modal">
         <div class="modal-contenido">
             <span class="cerrar" onclick="cerrarModal()">&times;</span>
-            <h2>Carrito de compras</h2>
+            <h2 id="carritoTitulo">Carrito de compras</h2>
             <div id="carritoContenido"></div>
         </div>
     </div>
