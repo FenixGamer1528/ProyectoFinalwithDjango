@@ -1,6 +1,6 @@
-/* === ESTILOS PARA EL MODAL DE DETALLES DEL PRODUCTO === */
+/* === ESTILOS PARA EL MODAL DE DETALLES DEL PRODUCTO (TEMA OSCURO/DORADO) === */
 
-/* --- PARTE 1: Estilos base copiados de carrito.css para mantener la coherencia visual --- */
+/* --- PARTE 1: Estilos base (coherentes con carrito.css) --- */
 
 /* Fondo oscuro del modal */
 #productoModal.modal {
@@ -11,22 +11,25 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6); /* Un poco más oscuro */
+    backdrop-filter: blur(5px); /* Efecto blur */
     justify-content: center;
     align-items: center;
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Contenido de la ventana blanca */
+/* Contenido de la ventana oscura */
 #productoModal .modal-contenido {
-    background-color: #fff;
+    background-color: #1a1a1a; /* Fondo de tarjeta oscuro */
+    color: #ffffff;
     padding: 30px;
     border-radius: 12px;
+    border: 1px solid #C0A76B; /* Borde dorado */
     width: 90%;
-    max-width: 800px; /* Un poco más ancho que el del carrito para dar espacio a la imagen */
+    max-width: 800px; 
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(192, 167, 107, 0.2); /* Sombra dorada suave */
     position: relative;
 }
 
@@ -36,11 +39,12 @@
     top: 20px;
     right: 25px;
     font-size: 28px;
-    color: #ccc;
+    color: #777; /* Gris */
     cursor: pointer;
+    transition: color 0.3s ease;
 }
 #productoModal .cerrar:hover {
-    color: #000;
+    color: #C0A76B; /* Dorado al pasar el mouse */
 }
 
 
@@ -61,11 +65,12 @@
 /* Contenedor e imagen del producto */
 .producto-modal-imagen {
     width: 100%;
-    background-color: #f9f9f9;
+    background-color: #000; /* Fondo negro puro para la imagen */
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid #333;
 }
 .producto-modal-imagen img {
     width: 100%;
@@ -78,20 +83,22 @@
 .producto-modal-detalles h1 {
     font-size: 2rem;
     font-weight: bold;
-    color: #333;
+    color: #C0A76B; /* Título en dorado */
     margin: 0 0 10px 0;
 }
 .producto-modal-detalles .precio {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #1a73e8;
+    color: #ffffff; /* Precio en blanco */
     margin-bottom: 15px;
 }
-.producto-modal-detalles .descripcion {
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #666;
-    margin-bottom: 20px;
+/* Estilo para la etiqueta "Cantidad" */
+.producto-modal-detalles form label {
+    color: #C0A76B; /* Color dorado para que resalte */
+    font-weight: 600; /* Un poco más de grosor */
+    font-size: 1.1rem; /* Ligeramente más grande */
+    display: block; /* Asegura que esté en su propia línea */
+    margin-bottom: 8px; /* Espacio antes del campo de entrada */
 }
 
 /* Formulario y botón de 'Agregar al carrito' */
@@ -100,9 +107,11 @@
     flex-direction: column;
     gap: 15px;
 }
+/* Estilo del botón "Agregar" genérico que pueda venir del form */
+.producto-modal-detalles form button[type="submit"],
 .btn-agregar-modal {
-    background-color: #1a73e8;
-    color: white;
+    background-color: #C0A76B; /* Fondo dorado */
+    color: #000; /* Texto negro */
     border: none;
     padding: 12px 20px;
     border-radius: 8px;
@@ -111,8 +120,9 @@
     font-weight: bold;
     transition: background-color 0.3s ease;
 }
+.producto-modal-detalles form button[type="submit"]:hover,
 .btn-agregar-modal:hover {
-    background-color: #155ab3;
+    background-color: #d4b96a; /* Dorado más claro al pasar el mouse */
 }
 
 /* Adaptación para móviles */
