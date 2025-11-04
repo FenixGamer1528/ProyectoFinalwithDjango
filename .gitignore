@@ -22,3 +22,5 @@ Thumbs.db
 
 # Archivos de logs
 *.log
+
+node_modules/
