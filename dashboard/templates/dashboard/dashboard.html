@@ -4,165 +4,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Administrador</title>
+    <title>Dashboard de Administrador - Glamoure</title>
 
     <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    
+    <style>
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C0A76B;
+            border-radius: 3px;
+        }
+    </style>
 </head>
-<body class="bg-[#fdf8e1] font-sans text-gray-800">
+<body class="bg-black text-white font-sans antialiased min-h-screen">
 
-
-<div class="flex flex-col min-h-screen">
-
-   <!-- Header -->
-<header class="bg-[#25282A] text-white shadow p-4">
-    <div class="container mx-auto flex justify-between items-center">
-        <h2 class="text-xl font-bold"><i class="fas fa-tachometer-alt"></i> Panel de Administración</h2>
-        <a href="{% url 'logout' %}" class="flex items-center gap-2 bg-[#C0A76B] hover:bg-[#A8915C] px-4 py-2 rounded transition">
+<!-- Header -->
+<header class="bg-black border-b border-[#C0A76B] shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto flex justify-between items-center px-6 py-4">
+        <div class="flex items-center gap-4">
+            <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-10 h-10">
+            <div>
+                <h2 class="text-xl font-bold text-[#C0A76B]">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Panel de Administración
+                </h2>
+                <p class="text-gray-400 text-sm">Glamoure - Control total de la plataforma</p>
+            </div>
+        </div>
+        <a href="{% url 'logout' %}" 
+           class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
         </a>
     </div>
 </header>
 
-    <!-- Main Content -->
-    <div class="flex flex-1 container mx-auto mt-6 gap-6">
+<!-- Main Content -->
+<div class="flex flex-1 container mx-auto py-6 px-4 gap-6">
 
-        <!-- Sidebar -->
-       <aside class="w-64 bg-[#fffdf5] rounded shadow p-4">
-    <h3 class="text-lg font-semibold mb-4">Menú Principal</h3>
-    <ul class="space-y-2">
-        <li>
-            <a href="{% url 'gestion_usuarios' %}" 
-               class="flex items-center gap-2 px-3 py-2 rounded hover:bg-[#C0A76B] hover:text-white transition">
-                <i class="fas fa-users"></i> Gestión de Usuarios
-            </a>
-        </li>
-        <li>
-            <a href="{% url 'gestion_productos' %}" 
-               class="flex items-center gap-2 px-3 py-2 rounded hover:bg-[#C0A76B] hover:text-white transition">
-                <i class="fas fa-box-open"></i> Gestión de Productos
-            </a>
-        </li>
-        <li>
-            <a href="{% url 'gestion_reportes' %}" 
-               class="flex items-center gap-2 px-3 py-2 rounded hover:bg-[#C0A76B] hover:text-white transition">
-                <i class="fas fa-chart-line"></i> Reportes
-            </a>
-        </li>
-    </ul>
+    <!-- Sidebar -->
+    <aside class="w-64 bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6 h-fit sticky top-24">
+        <h3 class="text-lg font-semibold text-[#C0A76B] mb-6 pb-2 border-b border-[#C0A76B] border-opacity-30">
+            <i class="fas fa-bars mr-2"></i>Menú Principal
+        </h3>
+        <ul class="space-y-3">
+            <li>
+                <a href="{% url 'gestion_usuarios' %}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg bg-black bg-opacity-50 hover:bg-[#C0A76B] hover:text-black text-gray-200 transition duration-300 group">
+                    <i class="fas fa-users text-[#C0A76B] group-hover:text-black"></i>
+                    Gestión de Usuarios
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'gestion_productos' %}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg bg-black bg-opacity-50 hover:bg-[#C0A76B] hover:text-black text-gray-200 transition duration-300 group">
+                    <i class="fas fa-box-open text-[#C0A76B] group-hover:text-black"></i>
+                    Gestión de Productos
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'gestion_pedidos' %}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg bg-black bg-opacity-50 hover:bg-[#C0A76B] hover:text-black text-gray-200 transition duration-300 group">
+                    <i class="fas fa-shopping-cart text-[#C0A76B] group-hover:text-black"></i>
+                    Gestión de Pedidos
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'gestion_reportes' %}" 
+                   class="flex items-center gap-3 px-4 py-3 rounded-lg bg-black bg-opacity-50 hover:bg-[#C0A76B] hover:text-black text-gray-200 transition duration-300 group">
+                    <i class="fas fa-chart-line text-[#C0A76B] group-hover:text-black"></i>
+                    Reportes y Analytics
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Quick Stats Sidebar -->
+        <div class="mt-8 pt-6 border-t border-[#C0A76B] border-opacity-30">
+            <h4 class="text-[#C0A76B] font-semibold mb-3">Resumen Rápido</h4>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Usuarios:</span>
+                    <span class="text-[#C0A76B] font-bold">{{ total_usuarios }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Productos:</span>
+                    <span class="text-[#C0A76B] font-bold">{{ total_productos }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Pedidos:</span>
+                    <span class="text-[#C0A76B] font-bold">{{ total_pedidos }}</span>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-    <li>
-    <a href="{% url 'gestion_pedidos' %}" 
-       class="flex items-center gap-2 px-3 py-2 rounded hover:bg-[#C0A76B] hover:text-white transition">
-        <i class="fas fa-shopping-cart"></i> Gestión de Pedidos
-    </a>
-</li>
-</aside>
+    <!-- Content Column -->
+    <main class="flex-1 space-y-6">
 
+        <!-- Welcome Section -->
+        <section class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-[#C0A76B] mb-3">Bienvenido al Panel de Control</h2>
+            <p class="text-gray-300">Gestiona todos los aspectos de Glamoure desde un solo lugar. Monitorea el rendimiento y toma decisiones informadas.</p>
+        </section>
 
-        <!-- Content Column -->
-        <main class="flex-1 bg-white rounded shadow p-6">
+        <!-- Stats Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <!-- Welcome Section -->
-            <section class="mb-6">
-                <h2 class="text-2xl font-bold mb-2">Bienvenido al Panel de Administración</h2>
-                <p>Desde aquí puedes gestionar todos los aspectos de tu plataforma. Revisa las estadísticas clave y accede rápidamente a las secciones principales.</p>
-            </section>
-
-            <!-- Stats Grid -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-
-                <!-- Usuarios -->
-                <div class="bg-[#fffdf5] rounded shadow p-4 border-t-4 border-blue-500">
-
-                    <h3 class="flex items-center gap-2 text-lg font-semibold mb-2">
+            <!-- Usuarios Card -->
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6 hover:border-opacity-100 transition duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="flex items-center gap-2 text-lg font-semibold text-[#C0A76B]">
                         <i class="fas fa-users"></i> Usuarios
                     </h3>
-                    <div class="text-2xl font-bold mb-1">{{ total_usuarios }}</div>
-                    <p class="text-gray-500 text-sm">Usuarios registrados en el sistema</p>
-                    <ul class="mt-2 list-disc list-inside text-gray-600 text-sm">
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-plus text-[#C0A76B]"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-white mb-2">{{ total_usuarios }}</div>
+                <p class="text-gray-400 text-sm mb-4">Usuarios registrados en el sistema</p>
+                <div class="border-t border-gray-700 pt-3">
+                    <h4 class="text-[#C0A76B] text-sm font-semibold mb-2">Últimos registros:</h4>
+                    <ul class="space-y-1 text-xs text-gray-300">
                         {% for user in ultimos_usuarios %}
-                            <li>{{ user.username }} - {{ user.date_joined|date:"d/m/Y H:i" }}</li>
+                            <li class="flex justify-between">
+                                <span>{{ user.username }}</span>
+                                <span class="text-gray-500">{{ user.date_joined|date:"d/m/Y" }}</span>
+                            </li>
                         {% empty %}
-                            <li>No hay usuarios registrados.</li>
+                            <li class="text-gray-500">No hay usuarios registrados</li>
                         {% endfor %}
                     </ul>
                 </div>
+            </div>
 
-                <!-- Productos -->
-                <div class="bg-[#fffdf5] rounded shadow p-4 border-t-4 border-green-500">
-
-                    <h3 class="flex items-center gap-2 text-lg font-semibold mb-2">
+            <!-- Productos Card -->
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6 hover:border-opacity-100 transition duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="flex items-center gap-2 text-lg font-semibold text-[#C0A76B]">
                         <i class="fas fa-box-open"></i> Productos
                     </h3>
-                    <div class="text-2xl font-bold mb-1">{{ total_productos }}</div>
-                    <p class="text-gray-500 text-sm">Productos disponibles en el catálogo</p>
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-tags text-[#C0A76B]"></i>
+                    </div>
                 </div>
+                <div class="text-3xl font-bold text-white mb-2">{{ total_productos }}</div>
+                <p class="text-gray-400 text-sm">Productos en el catálogo</p>
+                <div class="mt-4">
+                    <a href="{% url 'gestion_productos' %}" 
+                       class="inline-flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg text-sm transition duration-300">
+                        <i class="fas fa-edit"></i> Gestionar Productos
+                    </a>
+                </div>
+            </div>
 
-                <!-- Pedidos -->
-                <div class="bg-[#fffdf5] rounded shadow p-4 border-t-4 border-yellow-500">
-
-                    <h3 class="flex items-center gap-2 text-lg font-semibold mb-2">
+            <!-- Pedidos Card -->
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6 hover:border-opacity-100 transition duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="flex items-center gap-2 text-lg font-semibold text-[#C0A76B]">
                         <i class="fas fa-clipboard-list"></i> Pedidos
                     </h3>
-                    <div class="text-2xl font-bold mb-1">{{ total_pedidos }}</div>
-                    <p class="text-gray-500 text-sm">Pedidos realizados en total</p>
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-[#C0A76B]"></i>
+                    </div>
+                </div>
+                <div class="text-3xl font-bold text-white mb-2">{{ total_pedidos }}</div>
+                <p class="text-gray-400 text-sm">Pedidos realizados</p>
+                <div class="mt-4">
+                    <a href="{% url 'gestion_pedidos' %}" 
+                       class="inline-flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg text-sm transition duration-300">
+                        <i class="fas fa-eye"></i> Ver Pedidos
+                    </a>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold text-[#C0A76B] mb-6 flex items-center gap-2">
+                <i class="fas fa-history"></i> Actividad Reciente
+            </h3>
+            <div class="space-y-4">
+
+                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-white">Nuevo usuario registrado</div>
+                        <div class="text-gray-400 text-sm">Usuario "nuevo_cliente" se registró en el sistema</div>
+                    </div>
+                    <div class="text-gray-500 text-sm">Hace 2 horas</div>
                 </div>
 
-            </section>
-
-            <!-- Recent Activity -->
-            <section>
-                <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <i class="fas fa-history"></i> Actividad Reciente
-                </h3>
-                <div class="space-y-4 border-t border-gray-200 pt-4">
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div>
-                            <div class="font-medium">Nuevo usuario registrado</div>
-                            <div class="text-gray-500 text-sm">Hace 2 horas</div>
-                        </div>
+                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
+                        <i class="fas fa-shopping-cart"></i>
                     </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div>
-                            <div class="font-medium">Pedido #1245 completado</div>
-                            <div class="text-gray-500 text-sm">Hace 5 horas</div>
-                        </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-white">Pedido #1245 completado</div>
+                        <div class="text-gray-400 text-sm">Pedido marcado como entregado exitosamente</div>
                     </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-box"></i>
-                        </div>
-                        <div>
-                            <div class="font-medium">Producto actualizado</div>
-                            <div class="text-gray-500 text-sm">Ayer, 15:30</div>
-                        </div>
-                    </div>
-
+                    <div class="text-gray-500 text-sm">Hace 5 horas</div>
                 </div>
-            </section>
 
-        </main>
+                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
+                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-white">Producto actualizado</div>
+                        <div class="text-gray-400 text-sm">"Vestido Elegante Negro" - Precio actualizado</div>
+                    </div>
+                    <div class="text-gray-500 text-sm">Ayer, 15:30</div>
+                </div>
 
-    </div>
+            </div>
+        </section>
+
+    </main>
 
 </div>
 
 <!-- Botón Volver al Inicio -->
 <a href="{% url 'index' %}" 
-   class="fixed bottom-4 right-4 bg-[#C0A76B] hover:bg-[#A8915C] text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition z-50">
-    <i class="fas fa-home"></i> Volver al Inicio
+   class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+    <i class="fas fa-home"></i>
+    <span class="group-hover:underline">Volver al Inicio</span>
 </a>
 
 </body>

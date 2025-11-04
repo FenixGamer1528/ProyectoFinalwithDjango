@@ -1,11 +1,14 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios</title>
+    <title>Gestión de Usuarios - Glamoure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    
     <style>
         .fade-in {
             animation: fadeIn 0.3s ease-in-out;
@@ -25,217 +28,269 @@
             to { transform: translateX(0); }
         }
         
+        /* Toggle switch personalizado para Glamoure */
         .checkbox:checked + .slider {
-            background-color: #4f46e5;
+            background-color: #C0A76B;
         }
         
         .checkbox:checked + .slider:before {
             transform: translateX(24px);
+            background-color: #000;
+        }
+        
+        .slider {
+            background-color: #4B5563;
+        }
+        
+        .slider:before {
+            background-color: #D1D5DB;
+        }
+        
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #C0A76B;
+            border-radius: 3px;
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
+<body class="bg-black text-white font-sans antialiased min-h-screen">
+
+<!-- Header -->
+<header class="bg-black border-b border-[#C0A76B] shadow-lg sticky top-0 z-40">
+    <div class="container mx-auto flex justify-between items-center px-6 py-4">
+        <div class="flex items-center gap-4">
+            <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-10 h-10">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
-                
-                <p class="text-gray-600">Administra los usuarios registrados en el sistema</p>
-            </div>
-            <button onclick="openModal('create')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                <i class="fas fa-plus"></i> Nuevo Usuario
-            </button>
-        </div>
-        
-        <!-- Filtros y búsqueda -->
-        <div class="bg-white rounded-lg shadow p-4 mb-6">
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="relative flex-grow">
-                    <input type="text" placeholder="Buscar usuarios..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" id="searchInput">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
-                <div class="flex gap-2">
-                    <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option>Filtrar por rol</option>
-                        <option>Administrador</option>
-                        <option>Editor</option>
-                        <option>Usuario</option>
-                    </select>
-                    <select class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option>Ordenar por</option>
-                        <option>Nombre (A-Z)</option>
-                        <option>Nombre (Z-A)</option>
-                        <option>Fecha más reciente</option>
-                        <option>Fecha más antigua</option>
-                    </select>
-                </div>
+                <h1 class="text-2xl font-bold text-[#C0A76B]">Gestión de Usuarios</h1>
+                <p class="text-gray-400 text-sm">Administra los usuarios registrados en Glamoure</p>
             </div>
         </div>
-        
-        <!-- Tabla de usuarios -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registrado</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                  <tbody class="bg-white divide-y divide-gray-200" id="usersTableBody">
-    {% for usuario in usuarios %}
-    <tr class="hover:bg-gray-50 transition-colors">
-        <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
-                    <img src="https://ui-avatars.com/api/?name={{ usuario.first_name }}+{{ usuario.last_name }}&background=random&color=fff" alt="Avatar" class="h-full w-full object-cover">
-                </div>
-                <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">{{ usuario.first_name }} {{ usuario.last_name }}</div>
-                    <div class="text-sm text-gray-500">@{{ usuario.username }}</div>
-                </div>
+        <a href="{% url 'logout' %}" 
+           class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </a>
+    </div>
+</header>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-[#C0A76B]">Gestión de Usuarios</h1>
+            <p class="text-gray-400">Administra los usuarios registrados en el sistema</p>
+        </div>
+        <button onclick="openModal('create')" 
+                class="bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 transition duration-300">
+            <i class="fas fa-plus"></i> Nuevo Usuario
+        </button>
+    </div>
+    
+    <!-- Filtros y búsqueda -->
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6 mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="relative flex-grow">
+                <input type="text" 
+                       placeholder="Buscar usuarios..." 
+                       class="w-full pl-10 pr-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition"
+                       id="searchInput">
+                <i class="fas fa-search absolute left-3 top-3 text-[#C0A76B]"></i>
             </div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ usuario.email }}</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            {% if usuario.is_superuser %}
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">Administrador</span>
-            {% elif usuario.is_staff %}
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Editor</span>
-            {% else %}
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Usuario</span>
-            {% endif %}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" class="checkbox sr-only" {% if usuario.is_active %}checked{% endif %}>
-                <div class="slider w-11 h-6 bg-gray-200 rounded-full transition-colors {% if usuario.is_active %}bg-indigo-600{% endif %}"></div>
-            </label>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ usuario.date_joined|date:"d/m/Y" }}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    <button onclick="openModal('edit')" class="text-indigo-600 hover:text-indigo-900 mr-3">
-        <i class="fas fa-edit"></i>
-    </button>
-  
-    </button>
-</td>
-
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="6" class="text-center py-4 text-gray-500">No hay usuarios registrados.</td>
-    </tr>
-    {% endfor %}
-</tbody>
-
-
-
-            <!-- Paginación -->
-            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div class="flex-1 flex justify-between sm:hidden">
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Anterior </a>
-                    <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"> Siguiente </a>
-                </div>
-                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm text-gray-700">
-                            Mostrando
-                            <span class="font-medium">1</span>
-                            a
-                            <span class="font-medium">3</span>
-                            de
-                            <span class="font-medium">12</span>
-                            resultados
-                        </p>
-                    </div>
-                    <div>
-                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span class="sr-only">Anterior</span>
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                            <a href="#" aria-current="page" class="z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
-                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 2 </a>
-                            <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 3 </a>
-                            <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                                <span class="sr-only">Siguiente</span>
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </nav>
-                    </div>
-                </div>
+            <div class="flex gap-2">
+                <select class="bg-black border border-[#C0A76B] border-opacity-50 text-white rounded-lg px-3 py-3 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    <option class="bg-[#1a1a1a]">Filtrar por rol</option>
+                    <option class="bg-[#1a1a1a]">Administrador</option>
+                    <option class="bg-[#1a1a1a]">Editor</option>
+                    <option class="bg-[#1a1a1a]">Usuario</option>
+                </select>
+                <select class="bg-black border border-[#C0A76B] border-opacity-50 text-white rounded-lg px-3 py-3 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    <option class="bg-[#1a1a1a]">Ordenar por</option>
+                    <option class="bg-[#1a1a1a]">Nombre (A-Z)</option>
+                    <option class="bg-[#1a1a1a]">Nombre (Z-A)</option>
+                    <option class="bg-[#1a1a1a]">Fecha más reciente</option>
+                    <option class="bg-[#1a1a1a]">Fecha más antigua</option>
+                </select>
             </div>
         </div>
     </div>
     
-    
-    <!-- Modal Crear/Editar Usuario -->
+    <!-- Tabla de usuarios -->
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-black">
+                    <tr>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Usuario</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Email</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Rol</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Estado</th>
+                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Registrado</th>
+                        <th scope="col" class="px-6 py-4 text-right text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-[#1a1a1a] divide-y divide-gray-700" id="usersTableBody">
+                    {% for usuario in usuarios %}
+                    <tr class="hover:bg-black hover:bg-opacity-30 transition duration-300">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden border border-[#C0A76B]">
+                                    <img src="https://ui-avatars.com/api/?name={{ usuario.first_name }}+{{ usuario.last_name }}&background=C0A76B&color=000" 
+                                         alt="Avatar" 
+                                         class="h-full w-full object-cover">
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-semibold text-white">{{ usuario.first_name }} {{ usuario.last_name }}</div>
+                                    <div class="text-sm text-gray-400">@{{ usuario.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ usuario.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if usuario.is_superuser %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] border border-[#C0A76B] border-opacity-30">Administrador</span>
+                            {% elif usuario.is_staff %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-900 bg-opacity-20 text-green-400 border border-green-400 border-opacity-30">Editor</span>
+                            {% else %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-900 bg-opacity-20 text-blue-400 border border-blue-400 border-opacity-30">Usuario</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="checkbox sr-only" {% if usuario.is_active %}checked{% endif %}>
+                                <div class="slider w-11 h-6 rounded-full transition-colors"></div>
+                            </label>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ usuario.date_joined|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button onclick="openModal('edit')" 
+                                    class="text-[#C0A76B] hover:text-yellow-400 mr-4 transition duration-300">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="openDeleteModal({{ usuario.id }})" 
+                                    class="text-red-400 hover:text-red-300 transition duration-300">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-8 text-gray-400">
+                            <i class="fas fa-users text-4xl mb-2 opacity-50"></i>
+                            <p>No hay usuarios registrados</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="bg-black px-4 py-3 flex items-center justify-between border-t border-[#C0A76B] border-opacity-30 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <a href="#" class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] text-sm font-medium rounded-md text-[#C0A76B] bg-black hover:bg-[#C0A76B] hover:text-black transition"> Anterior </a>
+                <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-[#C0A76B] text-sm font-medium rounded-md text-[#C0A76B] bg-black hover:bg-[#C0A76B] hover:text-black transition"> Siguiente </a>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-400">
+                        Mostrando
+                        <span class="font-medium text-white">1</span>
+                        a
+                        <span class="font-medium text-white">3</span>
+                        de
+                        <span class="font-medium text-white">12</span>
+                        resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition">
+                            <span class="sr-only">Anterior</span>
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <a href="#" aria-current="page" class="z-10 bg-[#C0A76B] border-[#C0A76B] text-black relative inline-flex items-center px-4 py-2 border text-sm font-medium"> 1 </a>
+                        <a href="#" class="bg-black border-[#C0A76B] text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black relative inline-flex items-center px-4 py-2 border text-sm font-medium transition"> 2 </a>
+                        <a href="#" class="bg-black border-[#C0A76B] text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black relative inline-flex items-center px-4 py-2 border text-sm font-medium transition"> 3 </a>
+                        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition">
+                            <span class="sr-only">Siguiente</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Crear/Editar Usuario -->
 <div id="userModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
         
-        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="inline-block align-bottom bg-[#1a1a1a] border border-[#C0A76B] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full slide-in">
             <form id="userForm" method="POST" action="{% url 'crear_usuario' %}">
                 {% csrf_token %}
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="bg-[#1a1a1a] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modalTitle">Nuevo Usuario</h3>
+                            <h3 class="text-lg leading-6 font-semibold text-[#C0A76B] mb-4" id="modalTitle">Nuevo Usuario</h3>
                             <div class="mt-2">
                                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                                     <div class="sm:col-span-6">
-                                        <label for="avatar" class="block text-sm font-medium text-gray-700">Avatar</label>
+                                        <label for="avatar" class="block text-sm font-medium text-[#C0A76B]">Avatar</label>
                                         <div class="mt-1 flex items-center">
-                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
-                                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b0c11e84-7075-4dda-981b-b65f7fbcae46.png" alt="Avatar" id="avatarPreview" class="h-full w-full object-cover">
+                                            <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-black border border-[#C0A76B]">
+                                                <img src="https://ui-avatars.com/api/?name=Usuario+Nuevo&background=C0A76B&color=000" 
+                                                     alt="Avatar" 
+                                                     id="avatarPreview" 
+                                                     class="h-full w-full object-cover">
                                             </span>
-                                            <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">Cambiar</button>
+                                            <button type="button" class="ml-5 bg-black border border-[#C0A76B] text-[#C0A76B] py-2 px-3 rounded-md shadow-sm text-sm leading-4 font-medium hover:bg-[#C0A76B] hover:text-black transition">Cambiar</button>
                                         </div>
                                     </div>
 
                                     <div class="sm:col-span-3">
-                                        <label for="first_name" class="block text-sm font-medium text-gray-700">Nombre</label>
-                                        <input type="text" name="first_name" id="first_name" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Juan">
+                                        <label for="first_name" class="block text-sm font-medium text-[#C0A76B]">Nombre</label>
+                                        <input type="text" name="first_name" id="first_name" class="mt-1 block w-full bg-black border border-[#C0A76B] border-opacity-50 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" placeholder="Juan">
                                     </div>
 
                                     <div class="sm:col-span-3">
-                                        <label for="last_name" class="block text-sm font-medium text-gray-700">Apellido</label>
-                                        <input type="text" name="last_name" id="last_name" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Pérez">
+                                        <label for="last_name" class="block text-sm font-medium text-[#C0A76B]">Apellido</label>
+                                        <input type="text" name="last_name" id="last_name" class="mt-1 block w-full bg-black border border-[#C0A76B] border-opacity-50 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" placeholder="Pérez">
                                     </div>
 
                                     <div class="sm:col-span-4">
-                                        <label for="username" class="block text-sm font-medium text-gray-700">Usuario</label>
-                                        <input type="text" name="username" id="username" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" placeholder="@juanperez">
+                                        <label for="username" class="block text-sm font-medium text-[#C0A76B]">Usuario</label>
+                                        <input type="text" name="username" id="username" class="mt-1 block w-full bg-black border border-[#C0A76B] border-opacity-50 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" placeholder="@juanperez">
                                     </div>
 
                                     <div class="sm:col-span-6">
-                                        <label for="email" class="block text-sm font-medium text-gray-700">Correo</label>
-                                        <input type="email" name="email" id="email" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md" placeholder="correo@empresa.com">
+                                        <label for="email" class="block text-sm font-medium text-[#C0A76B]">Correo</label>
+                                        <input type="email" name="email" id="email" class="mt-1 block w-full bg-black border border-[#C0A76B] border-opacity-50 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" placeholder="correo@empresa.com">
                                     </div>
 
                                     <div class="sm:col-span-3">
-                                        <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
-                                        <select id="role" name="role" class="shadow-sm block w-full sm:text-sm border-gray-300 rounded-md">
-                                            <option value="admin">Administrador</option>
-                                            <option value="editor">Editor</option>
-                                            <option value="user">Usuario</option>
+                                        <label for="role" class="block text-sm font-medium text-[#C0A76B]">Rol</label>
+                                        <select id="role" name="role" class="mt-1 block w-full bg-black border border-[#C0A76B] border-opacity-50 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                                            <option value="admin" class="bg-[#1a1a1a]">Administrador</option>
+                                            <option value="editor" class="bg-[#1a1a1a]">Editor</option>
+                                            <option value="user" class="bg-[#1a1a1a]">Usuario</option>
                                         </select>
                                     </div>
 
                                     <div class="sm:col-span-3">
-                                        <label for="status" class="block text-sm font-medium text-gray-700">Estado</label>
+                                        <label class="block text-sm font-medium text-[#C0A76B]">Estado</label>
                                         <div class="mt-1 flex items-center">
                                             <label class="relative inline-flex items-center cursor-pointer">
                                                 <input type="checkbox" class="sr-only" id="status" name="status" checked>
-                                                <div class="slider w-11 h-6 bg-gray-200 rounded-full transition-colors"></div>
-                                                <span class="ml-2 text-sm text-gray-700">Activo</span>
+                                                <div class="slider w-11 h-6 rounded-full transition-colors"></div>
+                                                <span class="ml-2 text-sm text-gray-300">Activo</span>
                                             </label>
                                         </div>
                                     </div>
@@ -245,170 +300,145 @@
                     </div>
                 </div>
                 
-
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
-                    <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancelar</button>
+                <div class="bg-black px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-[#C0A76B] border-opacity-30">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-[#C0A76B] text-black font-semibold hover:bg-yellow-400 transition duration-300 sm:ml-3 sm:w-auto sm:text-sm">Guardar</button>
+                    <button type="button" onclick="closeModal()" class="mt-3 w-full inline-flex justify-center rounded-lg border border-[#C0A76B] shadow-sm px-4 py-2 bg-black text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition duration-300 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-    <!-- Modal de confirmación para eliminar -->
+<!-- Modal de confirmación para eliminar -->
 <div id="deleteModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">​</span>
 
-    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-      <form method="POST" id="deleteUserForm">
-        {% csrf_token %}
-        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-          <div class="sm:flex sm:items-start">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-              <i class="fas fa-exclamation text-red-600"></i>
-            </div>
-            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-              <h3 class="text-lg leading-6 font-medium text-gray-900">Confirmar eliminación</h3>
-              <div class="mt-2">
-                <p class="text-sm text-gray-500">¿Estás seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
-              </div>
-            </div>
-          </div>
+        <div class="inline-block align-bottom bg-[#1a1a1a] border border-[#C0A76B] rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full slide-in">
+            <form method="POST" id="deleteUserForm">
+                {% csrf_token %}
+                <div class="bg-[#1a1a1a] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-900 bg-opacity-20 border border-red-400 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-exclamation text-red-400"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-semibold text-[#C0A76B]">Confirmar eliminación</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-300">¿Estás seguro que deseas eliminar este usuario? Esta acción no se puede deshacer.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="bg-black px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-[#C0A76B] border-opacity-30">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-white font-semibold hover:bg-red-700 transition duration-300 sm:ml-3 sm:w-auto sm:text-sm">
+                        Eliminar
+                    </button>
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-lg border border-[#C0A76B] shadow-sm px-4 py-2 bg-black text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition duration-300 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="closeDeleteModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-          <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-            Eliminar
-          </button>
-          <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="closeDeleteModal()">
-            Cancelar
-          </button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 
-
-
-
-    <!-- Notificación Toast -->
-    <div id="toast" class="fixed bottom-4 right-4 hidden">
-        <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center fade-in">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span id="toastMessage">Operación completada con éxito</span>
-        </div>
+<!-- Notificación Toast -->
+<div id="toast" class="fixed bottom-4 right-4 hidden z-50">
+    <div class="bg-[#C0A76B] text-black px-6 py-3 rounded-lg shadow-lg flex items-center fade-in border border-[#C0A76B]">
+        <i class="fas fa-check-circle mr-3"></i>
+        <span id="toastMessage" class="font-semibold">Operación completada con éxito</span>
     </div>
+</div>
 
-    <script>
-        // Manejo de modales
-        function openModal(action) {
-            const modal = document.getElementById('userModal');
-            const title = document.getElementById('modalTitle');
-            
-            if (action === 'create') {
-                title.textContent = 'Nuevo Usuario';
-                // Resetear formulario
-                document.getElementById('userForm').reset();
-            } else if (action === 'edit') {
-                title.textContent = 'Editar Usuario';
-                // Aquí cargaríamos los datos del usuario
-                document.getElementById('firstName').value = 'Juan';
-                document.getElementById('lastName').value = 'Pérez';
-                document.getElementById('username').value = '@juanperez';
-                document.getElementById('email').value = 'juan.perez@empresa.com';
-                document.getElementById('role').value = 'admin';
-                document.getElementById('status').checked = true;
-            }
-            
-            modal.classList.remove('hidden');
-        }
-        
-        function closeModal() {
-            document.getElementById('userModal').classList.add('hidden');
-        }
-        
-        function confirmDelete() {
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
-        
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-        }
-        
-        function deleteUser() {
-            closeDeleteModal();
-            showToast('Usuario eliminado correctamente');
-            // Aquí iría la lógica para eliminar el usuario
-        }
-        
-        function saveUser() {
-            closeModal();
-            showToast('Usuario guardado correctamente');
-            // Aquí iría la lógica para guardar/actualizar el usuario
-        }
-        
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-        
-        // Búsqueda en tiempo real
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#usersTableBody tr');
-            
-            rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-                const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                
-                if (name.includes(searchTerm) || email.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-        
-        // Toggle switches
-        document.querySelectorAll('.checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const slider = this.nextElementSibling;
-                if (this.checked) {
-                    slider.classList.add('bg-indigo-600');
-                    slider.classList.remove('bg-gray-200');
-                } else {
-                    slider.classList.add('bg-gray-200');
-                    slider.classList.remove('bg-indigo-600');
-                }
-            });
-        });
-
-         function openDeleteModal(userId) {
-  const form = document.getElementById('deleteUserForm');
-  form.action = `/usuarios/eliminar/${userId}/`;
-  document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-    </script>
-    
 <!-- Botón Volver al Dashboard -->
 <a href="{% url 'dashboard' %}" 
-   class="fixed bottom-4 right-4 bg-[#C0A76B] hover:bg-[#A8915C] text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-all shadow-lg z-50">
-    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+   class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+    <i class="fas fa-arrow-left"></i>
+    <span class="group-hover:underline">Volver al Dashboard</span>
 </a>
 
+<script>
+    // El JavaScript se mantiene igual, solo cambian los estilos
+    function openModal(action) {
+        const modal = document.getElementById('userModal');
+        const title = document.getElementById('modalTitle');
+        
+        if (action === 'create') {
+            title.textContent = 'Nuevo Usuario';
+            document.getElementById('userForm').reset();
+        } else if (action === 'edit') {
+            title.textContent = 'Editar Usuario';
+            document.getElementById('first_name').value = 'Juan';
+            document.getElementById('last_name').value = 'Pérez';
+            document.getElementById('username').value = '@juanperez';
+            document.getElementById('email').value = 'juan.perez@empresa.com';
+            document.getElementById('role').value = 'admin';
+            document.getElementById('status').checked = true;
+        }
+        
+        modal.classList.remove('hidden');
+    }
+    
+    function closeModal() {
+        document.getElementById('userModal').classList.add('hidden');
+    }
+    
+    function openDeleteModal(userId) {
+        const form = document.getElementById('deleteUserForm');
+        form.action = `/usuarios/eliminar/${userId}/`;
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+    
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+    
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+        
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+    }
+    
+    // Búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#usersTableBody tr');
+        
+        rows.forEach(row => {
+            const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Toggle switches
+    document.querySelectorAll('.checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const slider = this.nextElementSibling;
+            if (this.checked) {
+                slider.classList.add('bg-[#C0A76B]');
+                slider.classList.remove('bg-gray-600');
+            } else {
+                slider.classList.add('bg-gray-600');
+                slider.classList.remove('bg-[#C0A76B]');
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
