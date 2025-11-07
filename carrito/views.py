@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib import messages
 from .models import Producto, Carrito, ItemCarrito,Pedido
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 
 @login_required
@@ -50,8 +52,15 @@ def agregar_al_carrito(request, producto_id):
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
 
     cantidad = int(request.POST.get('cantidad', 1))
+    # Permitimos que el usuario envíe una talla opcional al agregar al carrito
+    talla = request.POST.get('talla')
+    if talla:
+        talla = talla.strip()
+    else:
+        talla = None
 
-    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
+    # Buscamos el item teniendo en cuenta la talla seleccionada (puede ser None)
+    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto, talla=talla)
     if not creado:
         item.cantidad += cantidad
     else:
@@ -66,6 +75,7 @@ def agregar_al_carrito(request, producto_id):
                 "id": item.id,
                 "producto": producto.nombre,
                 "cantidad": item.cantidad,
+                "talla": item.talla,
                 "subtotal": float(item.subtotal())
             }
         })
@@ -109,6 +119,7 @@ def carrito_modal(request):
             'imagen': item.producto.imagen_url if item.producto.imagen_url else (item.producto.imagen.url if item.producto.imagen else ''),
             'precio': float(precio),
             'cantidad': item.cantidad,
+            'talla': item.talla,
             'subtotal': float(subtotal)
         })
 
@@ -125,6 +136,43 @@ def producto(request, product_id):
     producto = get_object_or_404(Producto, id=product_id)
     context = {'producto': producto}
     return render(request, 'producto.html', context)
+
+
+@login_required
+@require_POST
+def toggle_favorito(request, producto_id):
+    """Alterna el favorito (lista de deseos) del usuario para un producto.
+
+    Responde JSON: {ok: True, added: True/False, total_favorites: int}
+    """
+    producto = get_object_or_404(Producto, id=producto_id)
+    user = request.user
+    # Asegurarse de que el usuario tenga el atributo favoritos (modelo personalizado)
+    added = False
+    if producto in user.favoritos.all():
+        user.favoritos.remove(producto)
+        added = False
+    else:
+        user.favoritos.add(producto)
+        added = True
+
+    total = user.favoritos.count()
+    return JsonResponse({
+        'ok': True,
+        'added': added,
+        'total_favorites': total,
+        'producto_id': producto.id,
+    })
+
+
+@login_required
+def mis_deseos(request):
+    """Muestra la lista de deseos del usuario autenticado."""
+    user = request.user
+    # obtener productos favoritos (prefetch si necesario)
+    productos = user.favoritos.all()
+    context = {'productos': productos}
+    return render(request, 'core/mis_deseos.html', context)
 
 
 # Cambiar cantidad de un producto en el carrito
