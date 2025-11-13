@@ -15,6 +15,8 @@ class Producto(models.Model):
     descripcion = models.TextField(blank=True)
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     imagen_url = models.URLField(blank=True, null=True)
+    # Talla opcional del producto (ej: S, M, L, 38, 39, etc.)
+    talla = models.CharField(max_length=20, blank=True, null=True)
     destacado = models.BooleanField(default=False)
     stock = models.IntegerField(default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
@@ -57,6 +59,8 @@ class Producto(models.Model):
 
 class UsuarioPersonalizado(AbstractUser):
     telefono = models.CharField(max_length=15, blank=True)
+    # Lista de deseos: productos que el usuario marcó como favorito
+    favoritos = models.ManyToManyField('Producto', blank=True, related_name='favorited_by')
 
     def __str__(self):
         return self.username
@@ -83,6 +87,8 @@ class Carrito(models.Model):
 class ItemCarrito(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    # Guardamos la talla seleccionada por el usuario cuando agrega al carrito
+    talla = models.CharField(max_length=20, blank=True, null=True)
     cantidad = models.PositiveIntegerField(default=1)
 
     def subtotal(self):
