@@ -57,12 +57,10 @@ def login_view(request):
             user = authenticate(request, username=usuario, password=password)
 
             if user is not None:
-                login(request, user)  # <- LOGIN SIEMPRE QUE SEA VÁLIDO
+                login(request, user)  # Iniciar sesión
                 
-                if user.is_staff:
-                    return redirect('dashboard')  # vista del admin
-                else:
-                    return redirect('index')   # vista del usuario normal
+                # TODOS los usuarios van al index
+                return redirect('index')
             else:
                 error_message = "Datos inválidos"
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
