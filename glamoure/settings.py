@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'tailwind',
     'frontend',
     'django_browser_reload',
+    'payments',
 ]
 
 MIDDLEWARE = [
@@ -150,4 +151,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
 
 
-# Cargar variables de entorno
+# Django Payments Settings
+WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "pub_test_yourkey")
+WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "prv_test_yourkey")
+WOMPI_BASE_URL = "https://sandbox.wompi.co/v1"
+WOMPI_REDIRECT_URL = "http://127.0.0.1:8000/payments/confirm/" 
