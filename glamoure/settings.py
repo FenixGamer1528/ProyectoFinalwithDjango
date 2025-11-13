@@ -84,9 +84,10 @@ DATABASES = {
         'PASSWORD': 'Glamoure123*',
         'HOST': 'aws-1-us-east-2.pooler.supabase.com',
         'PORT': 6543,
-         'OPTIONS': {
+        'OPTIONS': {
             'sslmode': 'require',
         },
+        'CONN_MAX_AGE': 600,  # Reutilizar conexiones por 10 minutos
     }
 }
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
@@ -150,6 +151,30 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
 
+# Configuración de caché (mejora rendimiento significativamente)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 5 minutos
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
+
+# Configuración de sesiones (usa caché en lugar de DB)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'default'
+
+# Configuración de templates para producción
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ]),
+    ]
 
 # Django Payments Settings
 WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "pub_test_yourkey")

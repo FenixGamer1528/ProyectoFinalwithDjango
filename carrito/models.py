@@ -11,20 +11,28 @@ class Producto(models.Model):
         ZAPATOS = 'zapatos', 'Zapatos'
         OFERTAS = 'ofertas', 'Ofertas'
         
-    nombre = models.CharField(max_length=150)
+    nombre = models.CharField(max_length=150)  # Índice creado manualmente
     descripcion = models.TextField(blank=True)
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     imagen_url = models.URLField(blank=True, null=True)
     # Talla opcional del producto (ej: S, M, L, 38, 39, etc.)
     talla = models.CharField(max_length=20, blank=True, null=True)
-    destacado = models.BooleanField(default=False)
+    destacado = models.BooleanField(default=False)  # Índice creado manualmente
     stock = models.IntegerField(default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.CharField(
         max_length=20,
         choices=CategoriaEnum.choices,
         default=CategoriaEnum.MUJER
+        # Índice creado manualmente para evitar conflictos con ENUM
     )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['categoria', 'destacado']),  # Índice compuesto
+            models.Index(fields=['-precio']),  # Para ordenar por precio
+        ]
+        ordering = ['-id']  # Orden por defecto
 
     def save(self, *args, **kwargs):
         """Si se sube una nueva imagen, la sube a Supabase y guarda su URL."""
@@ -91,19 +99,20 @@ class UsuarioPersonalizado(AbstractUser):
     def __str__(self):
         return self.username
 
-# en models.py
 class Pedido(models.Model):
-    # 👇 Cambio aquí
-    usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE) 
+    usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
-    fecha = models.DateTimeField(auto_now_add=True)
+    fecha = models.DateTimeField(auto_now_add=True)  # Índice creado manualmente
 
-    # 👇 Y aquí
+    class Meta:
+        indexes = [
+            models.Index(fields=['usuario', '-fecha']),  # Para consultas del historial
+        ]
+        ordering = ['-fecha']
+
     def __str__(self):
         return f"Pedido #{self.id} de {self.usuario}"
-    def _str_(self):
-        return f"Pedido #{self.id} de {self.usuario}"
 class Carrito(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -116,6 +125,11 @@ class ItemCarrito(models.Model):
     # Guardamos la talla seleccionada por el usuario cuando agrega al carrito
     talla = models.CharField(max_length=20, blank=True, null=True)
     cantidad = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['carrito', 'producto']),  # Para búsquedas rápidas
+        ]
 
     def subtotal(self):
         precio = self.producto.precio
