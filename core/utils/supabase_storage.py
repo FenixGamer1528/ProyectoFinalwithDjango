@@ -41,3 +41,20 @@ def subir_a_supabase(imagen):
     except Exception as e:
         print(f"⚠️ Error al subir imagen a Supabase: {e}")
         return None
+    
+def eliminar_de_supabase(nombre_archivo):
+    """Elimina un archivo del bucket de Supabase."""
+    if not supabase:
+        raise Exception("❌ Supabase no está configurado correctamente.")
+    
+    try:
+        nombre_archivo = nombre_archivo.strip()
+        if nombre_archivo.startswith("/"):
+            nombre_archivo = nombre_archivo[1:]
+        
+        print(f"🧹 Intentando eliminar de bucket 'media': {nombre_archivo}")
+        respuesta = supabase.storage.from_("media").remove([nombre_archivo])
+        print("🧾 Respuesta Supabase:", respuesta)
+    except Exception as e:
+        print(f"⚠️ Error al eliminar archivo de Supabase: {e}")
+

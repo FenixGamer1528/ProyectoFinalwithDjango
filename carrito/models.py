@@ -54,6 +54,32 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+    def delete(self, *args, **kwargs):
+        """Elimina la imagen del bucket de Supabase al eliminar el producto."""
+        if self.imagen_url:
+            try:
+                from core.utils.supabase_storage import eliminar_de_supabase
+                from urllib.parse import unquote, urlparse
+
+                # Quitar parámetros o signos "?" de la URL
+                ruta = urlparse(self.imagen_url).path  
+                nombre_archivo = ruta.split("/storage/v1/object/public/media/")[-1].strip()
+                nombre_archivo = unquote(nombre_archivo)
+
+                # Eliminar barras iniciales si las hubiera
+                if nombre_archivo.startswith("/"):
+                    nombre_archivo = nombre_archivo[1:]
+
+                print(f"🧩 Eliminando de Supabase: {nombre_archivo}")
+                eliminar_de_supabase(nombre_archivo)
+
+            except Exception as e:
+                print(f"⚠️ No se pudo eliminar la imagen de Supabase: {e}")
+
+        super().delete(*args, **kwargs)
+
+
+
 
 class UsuarioPersonalizado(AbstractUser):
     telefono = models.CharField(max_length=15, blank=True)
