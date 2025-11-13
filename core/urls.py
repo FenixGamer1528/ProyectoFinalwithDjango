@@ -18,6 +18,8 @@ urlpatterns = [
     path('mujeres/', views.mujeres, name='mujeres'),
     path('zapatos/', views.zapatos, name='zapatos'),
     path('ofertas/', views.ofertas, name='ofertas'),
+    path('toggle-favorito/<int:producto_id>/', views.toggle_favorito, name='toggle_favorito'),
+    path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
     
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,53 @@
+# COMANDOS RÁPIDOS - Glamoure Django Optimizado
+# Copia y pega estos comandos en PowerShell
+
+# ============================================
+# EJECUTAR EL SERVIDOR
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py runserver
+
+# ============================================
+# CREAR SUPERUSUARIO (ADMIN)
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py createsuperuser
+
+# ============================================
+# VERIFICAR MIGRACIONES
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py showmigrations
+
+# ============================================
+# LIMPIAR CACHE
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py shell
+# Luego ejecuta:
+# >>> from django.core.cache import cache
+# >>> cache.clear()
+# >>> exit()
+
+# ============================================
+# INSTALAR NUEVAS DEPENDENCIAS
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe -m pip install django-debug-toolbar
+
+# ============================================
+# RECOLECTAR ARCHIVOS ESTÁTICOS
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py collectstatic --noinput
+
+# ============================================
+# VERIFICAR CONFIGURACIÓN
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py check
+
+# ============================================
+# VER CONSULTAS SQL (DEBUG)
+# ============================================
+C:/Users/SENA/Desktop/hello/ProyectoFinalwithDjango/hello/Scripts/python.exe manage.py shell
+# Luego ejecuta:
+# >>> from django.db import connection
+# >>> from django.db import reset_queries
+# >>> reset_queries()
+# >>> # Ejecuta tu código aquí
+# >>> print(len(connection.queries))
+# >>> exit()

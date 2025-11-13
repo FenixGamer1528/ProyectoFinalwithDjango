@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mi Dashboard - Glamoure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -53,7 +54,13 @@
                 <span class="mr-3 group-hover:scale-110 transition-transform">📦</span>
                 <span class="font-medium">Mis Pedidos</span>
             </a>
-            <!-- Wishlist link removed from dashboard sidebar (kept in header for quick access) -->
+            <a href="{% url 'mis_deseos' %}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">❤️</span>
+                <span class="font-medium">Mis Deseos</span>
+                {% if usuario.favoritos.count > 0 %}
+                <span class="ml-auto bg-brand text-white text-xs rounded-full px-2 py-1">{{ usuario.favoritos.count }}</span>
+                {% endif %}
+            </a>
             <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
                 <span class="mr-3 group-hover:scale-110 transition-transform">⚙️</span>
                 <span class="font-medium">Configuración</span>
@@ -78,7 +85,7 @@
         </div>
 
         <!-- Tarjetas de Resumen -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Tarjeta Datos Personales -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center mb-4">
@@ -111,6 +118,23 @@
                 {% endif %}
             </div>
 
+            <!-- Tarjeta Favoritos (Mis Deseos) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-red-600">❤️</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Mis Deseos</h3>
+                </div>
+                {% if usuario.favoritos.count > 0 %}
+                    <p class="text-sm text-gray-600 mb-3">{{ usuario.favoritos.count }} producto(s) favoritos</p>
+                    <a href="{% url 'mis_deseos' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver lista →</a>
+                {% else %}
+                    <p class="text-sm text-gray-500">No tienes favoritos aún</p>
+                    <a href="{% url 'index' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Explorar productos →</a>
+                {% endif %}
+            </div>
+
             <!-- Tarjeta Pedidos -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center mb-4">
@@ -132,8 +156,8 @@
         <!-- Sección de Productos Destacados -->
         <div class="mb-8">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">🌟 Lista de deseos</h2>
-                <a href="{% url 'hombres' %}" class="text-brand hover:text-brand-hover font-medium transition-colors">
+                <h2 class="text-2xl font-bold text-gray-900">🌟 Productos Destacados</h2>
+                <a href="{% url 'index' %}" class="text-brand hover:text-brand-hover font-medium transition-colors">
                     Ver todos →
                 </a>
             </div>
@@ -146,14 +170,28 @@
                         <div class="absolute top-3 right-3">
                             <span class="bg-brand text-white px-2 py-1 rounded-full text-xs font-medium">Destacado</span>
                         </div>
+                        <!-- Botón de favoritos -->
+                        <div class="absolute top-3 left-3">
+                            <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                                    class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110" 
+                                    title="{% if user in producto.favorited_by.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
+                                    data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
+                                <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart text-lg" 
+                                   style="{% if user in producto.favorited_by.all %}color: #C0A76B;{% else %}color: #6B7280;{% endif %}"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="p-4">
                         <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ producto.nombre }}</h3>
                         <div class="flex items-center justify-between">
                             <span class="text-lg font-bold text-gray-900">${{ producto.precio }}</span>
-                            <button class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                Agregar
-                            </button>
+                            <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    Agregar
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -237,6 +275,80 @@
         </div>
         {% endif %}
     </div>
+
+    <script>
+    // Función para agregar/quitar de favoritos
+    function toggleFavorito(productoId, button) {
+        fetch(`/toggle-favorito/${productoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = button.querySelector('i');
+                if (data.is_favorito) {
+                    // Agregado a favoritos - dorado
+                    icon.className = 'fa-solid fa-heart text-lg';
+                    icon.style.color = '#C0A76B';
+                    button.title = 'Eliminar de favoritos';
+                    // Animación de corazón
+                    button.classList.add('animate-bounce');
+                    setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                } else {
+                    // Eliminado de favoritos
+                    icon.className = 'fa-regular fa-heart text-gray-600 text-lg';
+                    icon.style.color = '';
+                    button.title = 'Agregar a favoritos';
+                }
+                
+                // Actualizar contador en sidebar si existe
+                updateWishlistCount(data.total_favorites);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Hubo un error. Por favor, intenta de nuevo.');
+        });
+    }
+
+    // Actualizar contador de favoritos en el sidebar
+    function updateWishlistCount(count) {
+        const wishlistLinks = document.querySelectorAll('a[href*="mis_deseos"]');
+        wishlistLinks.forEach(link => {
+            let badge = link.querySelector('.bg-brand.rounded-full');
+            if (count > 0) {
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'ml-auto bg-brand text-white text-xs rounded-full px-2 py-1';
+                    link.appendChild(badge);
+                }
+                badge.textContent = count;
+            } else if (badge) {
+                badge.remove();
+            }
+        });
+    }
+
+    // Obtener CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
 
 </body>
 </html>
