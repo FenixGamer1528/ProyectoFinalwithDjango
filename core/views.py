@@ -3,6 +3,7 @@ from django.shortcuts import render,HttpResponse, redirect
 from .forms import LoginForm, RegistroForm 
 from carrito.models import Producto,Pedido, UsuarioPersonalizado
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
 
 
 
@@ -15,10 +16,12 @@ def about(request):
     return render(request, "about.html",{})
 
 def index(request):
-    productos= Producto.objects.all()
+    productos = Producto.objects.filter(destacado=True)  # Solo productos destacados
+    productos_ofertas = Producto.objects.filter(en_oferta=True)  # Solo productos en oferta
     print(productos)
     return render(request, 'index.html', {
-        'productos': productos
+        'productos': productos,
+        'productos_ofertas': productos_ofertas
   
 })
   
@@ -118,6 +121,28 @@ def portfolio(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+def buscar_productos(request):
+    query = request.GET.get('q', '').strip()
+    productos = []
+
+    if query:
+        # Búsqueda más precisa por nombre
+        productos = Producto.objects.filter(nombre__iexact=query)
+        
+        # Si no encuentra resultados exactos, busca coincidencias parciales
+        if not productos:
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(categoria__icontains=query)
+            )
+
+    context = {
+        'productos': productos,
+        'query': query,
+    }
+    
+    return render(request, 'core/resultados_busqueda.html', context)
 
 
 

@@ -16,6 +16,7 @@ class Producto(models.Model):
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
     imagen_url = models.URLField(blank=True, null=True)
     destacado = models.BooleanField(default=False)
+    en_oferta = models.BooleanField(default=False)
     stock = models.IntegerField(default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.CharField(

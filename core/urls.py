@@ -18,6 +18,7 @@ urlpatterns = [
     path('mujeres/', views.mujeres, name='mujeres'),
     path('zapatos/', views.zapatos, name='zapatos'),
     path('ofertas/', views.ofertas, name='ofertas'),
+    path('buscar/', views.buscar_productos, name='buscar_productos'),
     
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -96,10 +96,19 @@
             {% endif %}
         </div>
 
-        <!-- Campo Destacado -->
-        <div class="flex items-center gap-3">
-            <input type="checkbox" name="destacado" id="id_destacado" class="checkbox-input" {% if form.destacado.value %}checked{% endif %}>
-            <label for="id_destacado" class="form-label !mb-0 cursor-pointer">Producto Destacado</label>
+        <!-- Campos Destacado y En Oferta -->
+        <div class="flex gap-6">
+            <!-- Campo Destacado -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="destacado" id="id_destacado" class="checkbox-input" {% if form.destacado.value %}checked{% endif %}>
+                <label for="id_destacado" class="form-label !mb-0 cursor-pointer">⭐ Destacado</label>
+            </div>
+
+            <!-- Campo En Oferta -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="en_oferta" id="id_en_oferta" class="checkbox-input" style="accent-color: #ff4757;" {% if form.en_oferta.value %}checked{% endif %}>
+                <label for="id_en_oferta" class="form-label !mb-0 cursor-pointer">🔥 En oferta</label>
+            </div>
         </div>
     </form>
 

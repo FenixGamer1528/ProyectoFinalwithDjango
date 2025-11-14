@@ -82,9 +82,14 @@
                                         {% if producto.stock > 0 %}{{ producto.stock }} en stock{% else %}Agotado{% endif %}
                                     </span>
                                 </div>
-                                {% if producto.destacado %}
-                                    <span class="inline-block mt-2 bg-yellow-900 bg-opacity-20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-400 border-opacity-30">Destacado</span>
-                                {% endif %}
+                                <div class="flex gap-2 mt-2">
+                                    {% if producto.destacado %}
+                                        <span class="inline-block bg-yellow-900 bg-opacity-20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-400 border-opacity-30">⭐ Destacado</span>
+                                    {% endif %}
+                                    {% if producto.en_oferta %}
+                                        <span class="inline-block bg-red-900 bg-opacity-20 text-red-400 text-xs px-2 py-1 rounded-full border border-red-400 border-opacity-30">🔥 En Oferta</span>
+                                    {% endif %}
+                                </div>
                                 <div class="flex justify-end space-x-3 mt-4">
                                     <button onclick="editProduct({{ producto.id }})" class="text-[#C0A76B] hover:text-yellow-400 transition duration-300">
                                         <i class="fas fa-edit"></i>
@@ -119,7 +124,55 @@
 
             <form id="productForm" method="post" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
-                {{ form.as_p }}
+                
+                <!-- Campo Nombre -->
+                <div>
+                    <label for="id_nombre" class="block text-sm font-medium text-[#C0A76B] mb-1">Nombre:</label>
+                    {{ form.nombre }}
+                </div>
+
+                <!-- Campo Categoría -->
+                <div>
+                    <label for="id_categoria" class="block text-sm font-medium text-[#C0A76B] mb-1">Categoría:</label>
+                    {{ form.categoria }}
+                </div>
+
+                <!-- Campo Precio -->
+                <div>
+                    <label for="id_precio" class="block text-sm font-medium text-[#C0A76B] mb-1">Precio:</label>
+                    {{ form.precio }}
+                </div>
+
+                <!-- Campo Stock -->
+                <div>
+                    <label for="id_stock" class="block text-sm font-medium text-[#C0A76B] mb-1">Stock:</label>
+                    {{ form.stock }}
+                </div>
+
+                <!-- Campo Descripción -->
+                <div>
+                    <label for="id_descripcion" class="block text-sm font-medium text-[#C0A76B] mb-1">Descripción:</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <!-- Campo Imagen -->
+                <div>
+                    <label for="id_imagen" class="block text-sm font-medium text-[#C0A76B] mb-1">Imagen:</label>
+                    {{ form.imagen }}
+                </div>
+
+                <!-- Campos Destacado y En Oferta en la misma línea -->
+                <div class="flex gap-6">
+                    <div class="flex items-center gap-2">
+                        {{ form.destacado }}
+                        <label for="id_destacado" class="text-sm font-medium text-[#C0A76B] cursor-pointer">Destacado:</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {{ form.en_oferta }}
+                        <label for="id_en_oferta" class="text-sm font-medium text-red-400 cursor-pointer">En oferta:</label>
+                    </div>
+                </div>
+
                 <div class="flex justify-end space-x-3 pt-4 border-t border-[#C0A76B] border-opacity-30">
                     <button type="button" id="cancelBtn" class="px-4 py-2 border border-[#C0A76B] rounded-md text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition-all">Cancelar</button>
                     <button type="submit" name="guardar" id="saveBtn" class="px-4 py-2 bg-[#C0A76B] text-black font-semibold rounded-md hover:bg-yellow-400 transition-all">Guardar</button>

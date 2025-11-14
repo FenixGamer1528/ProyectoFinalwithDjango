@@ -4,16 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
     <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
     <title>Glamoure - Ofertas</title>
 </head>
-<body class="flex flex-col min-h-screen bg-black text-white font-sans antialiased">
+<body class="bg-black text-white font-sans antialiased">
 
-    <!-- Header -->
-    <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
+  <!-- Header -->
+  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
     <nav class="container mx-auto flex justify-between items-center px-6 py-4">
       
       <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
@@ -23,14 +24,12 @@
         <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
       </ul>
 
-     
       <div class="flex justify-center">
         <a href="{% url 'index' %}">
           <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
         </a>
       </div>
 
-     
       <div class="flex items-center gap-4">
         <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
           <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
@@ -48,37 +47,115 @@
     </nav>
   </header>
 
-    <!-- Contenido -->
-    <main class="container mx-auto px-6 py-10 flex-grow">
-        <h1 class="text-4xl font-bold text-gray-900 mb-8">Ofertas Especiales</h1>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {% for producto in productos %}
-            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:scale-105 transform transition border-2 border-red-500">
-                {% if producto.imagen_url %}
-                  <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
-                {% elif producto.imagen %}
-                  <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
-                {% else %}
-                  <img src="https://placehold.co/600x400?text=Sin+imagen" alt="Sin imagen" class="w-full h-64 object-cover">
-                {% endif %}
+  <!-- Espaciado para el header fijo -->
+  <div style="margin-top: 100px;"></div>
 
-                <div class="p-4">
-                    <h3 class="text-lg font-semibold text-gray-800">{{ producto.nombre }}</h3>
-                    <p class="text-gray-600 text-sm mb-2">{{ producto.descripcion|truncatewords:12 }}</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-red-600 font-bold">${{ producto.precio }}</span>
-                        <a href="{% url 'producto' producto.id %}" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 ver-detalles-btn">Ver</a>
-                    </div>
-                </div>
+  <!-- Sección de Ofertas -->
+  <section class="py-20 bg-[#111]">
+    <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
+    
+    <div class="carousel-container">
+      <!-- Botones de navegación -->
+      <button class="carousel-nav prev" aria-label="Anterior">‹</button>
+      <button class="carousel-nav next" aria-label="Siguiente">›</button>
+      
+      <!-- Carrusel -->
+      <div class="carousel-wrapper">
+        <div class="carousel-track">
+          
+          <!-- Producto 1 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Buso negro.webp' %}" alt="Buzo negro">
+            <div class="product-info">
+              <p class="product-name">Buzo Negro Premium</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
             </div>
-            {% empty %}
-            <p class="col-span-full text-center text-gray-500">No hay productos en oferta en este momento.</p>
-            {% endfor %}
+          </div>
+          
+          <!-- Producto 2 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Blusa mujer">
+            <div class="product-info">
+              <p class="product-name">Blusa de Vestir Elegante</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
+          <!-- Producto 3 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa de vestir">
+            <div class="product-info">
+              <p class="product-name">Camisa de Vestir</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
+          <!-- Producto 4 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa casual">
+            <div class="product-info">
+              <p class="product-name">Camisa Casual</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
+          <!-- Producto 5 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Conjunto elegante">
+            <div class="product-info">
+              <p class="product-name">Conjunto Elegante</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
+          <!-- Producto 6 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Blusa moderna">
+            <div class="product-info">
+              <p class="product-name">Blusa Moderna</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
+          <!-- Producto 7 -->
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa sport">
+            <div class="product-info">
+              <p class="product-name">Camisa Sport</p>
+              <p class="product-price">$50.00</p>
+              <a href="#" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          
         </div>
-    </main>
+      </div>
+      
+      <!-- Indicadores -->
+      <div class="carousel-indicators">
+        <span class="indicator active"></span>
+        <span class="indicator"></span>
+        <span class="indicator"></span>
+        <span class="indicator"></span>
+        <span class="indicator"></span>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
+  <!-- Footer -->
+  <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
     <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left px-6 gap-4">
       <ul class="flex flex-wrap justify-center md:justify-start gap-6 text-gray-400 text-sm">
         <li><a href="#" class="hover:text-[#C0A76B]">Acerca de nosotros</a></li>
@@ -92,20 +169,22 @@
     </div>
   </footer>
 
-       <div id="carritoModal" class="modal">
-        <div class="modal-contenido">
-            <span class="cerrar" onclick="cerrarModal()">&times;</span>
-            <h2>Carrito de compras</h2>
-            <div id="carritoContenido"></div>
-        </div>
+  <!-- Modal Carrito -->
+  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
+      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black text-2xl font-bold">&times;</button>
+      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
+      <div id="carritoContenido"></div>
     </div>
-    <div id="productoModal" class="modal">
-        <div class="modal-contenido">
-            <div id="productoContenido"></div>
-        </div>
+  </div>
+
+  <div id="productoModal" class="modal">
+    <div class="modal-contenido">
+      <div id="productoContenido"></div>
     </div>
+  </div>
 
-
-    <script src="{% static 'js/modal.js' %}"></script>
+  <script src="{% static 'js/modal.js' %}"></script>
+  <script src="{% static 'js/carousel-ofertas.js' %}"></script>
 </body>
 </html>

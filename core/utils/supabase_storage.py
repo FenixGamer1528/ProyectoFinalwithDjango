@@ -1,29 +1,36 @@
 import os
-from supabase import create_client
-from dotenv import load_dotenv
 from pathlib import Path
 
-# Cargar variables del archivo .env
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# Variable para indicar si queremos usar Supabase
+USE_SUPABASE = False
 
-# Leer las variables de entorno
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+if USE_SUPABASE:
+    from supabase import create_client
+    from dotenv import load_dotenv
+    
+    # Cargar variables del archivo .env
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Crear cliente de Supabase
-supabase = None
-if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # Leer las variables de entorno
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+    # Crear cliente de Supabase
+    supabase = None
+    if SUPABASE_URL and SUPABASE_KEY:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    else:
+        print("⚠️ No se pudo cargar SUPABASE_URL o SUPABASE_KEY desde .env")
 else:
-    print("⚠️ No se pudo cargar SUPABASE_URL o SUPABASE_KEY desde .env")
+    supabase = None
 
 def subir_a_supabase(imagen):
     """
-    Sube una imagen al bucket 'media' y devuelve la URL pública.
+    Función temporal que devuelve una URL de ejemplo.
     """
-    if not supabase:
-        raise Exception("❌ Supabase no está configurado correctamente.")
+    # Devolver una URL temporal para pruebas
+    return "/static/imagenes/zapatos.avif"
 
     try:
         nombre_archivo = f"productos/{imagen.name}"
