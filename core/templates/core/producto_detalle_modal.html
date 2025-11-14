@@ -1,0 +1,279 @@
+{% load static %}
+<!-- CONTENIDO SOLO PARA MODAL (sin layout completo) -->
+<button class="cerrar text-white hover:text-[#C0A76B] text-4xl font-bold cursor-pointer absolute top-4 right-6 z-20 transition-all hover:scale-110" 
+        onclick="cerrarProductoModal()" 
+        title="Cerrar">
+    &times;
+</button>
+
+<div class="w-full max-h-[90vh] overflow-y-auto p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Columna Izquierda - Imagen -->
+        <div class="relative">
+            <div class="sticky top-0">
+                <img id="modal-producto-imagen" 
+                     src="{{ producto.imagen_url|default:'/static/imagenes/placeholder.png' }}" 
+                     alt="{{ producto.nombre }}" 
+                     class="w-full rounded-xl border-4 border-[#C0A76B] shadow-2xl hover:scale-105 transition-transform duration-300">
+                
+                <!-- Badge IA -->
+                <div id="modal-ia-badge" class="hidden absolute top-4 left-4 bg-purple-900 bg-opacity-95 text-purple-200 px-4 py-2 rounded-lg border-2 border-purple-400 shadow-lg">
+                    <i class="fas fa-robot mr-2"></i>
+                    <span class="font-semibold">Generado con IA</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna Derecha - Información completa del producto -->
+        <div class="text-white space-y-4">
+            <!-- Nombre y Categoría -->
+            <div class="border-b border-[#C0A76B] pb-4">
+                <h1 class="text-4xl font-bold text-[#C0A76B] mb-2">
+                    {{ producto.nombre }}
+                </h1>
+                <p class="text-gray-400 text-sm flex items-center gap-2">
+                    <i class="fas fa-tag"></i>
+                    <span>{{ producto.get_categoria_display }}</span>
+                </p>
+            </div>
+            
+            <!-- Precio -->
+            <div class="bg-gradient-to-r from-[#C0A76B]/10 to-yellow-900/10 border-2 border-[#C0A76B] rounded-xl p-4">
+                <p class="text-sm text-gray-400 uppercase tracking-wide mb-1">Precio</p>
+                <p class="text-3xl font-bold text-white">
+                    ${{ producto.precio|floatformat:2 }}
+                </p>
+            </div>
+            
+            <!-- Descripción -->
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-xl p-4">
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-2 flex items-center gap-2">
+                    <i class="fas fa-align-left"></i>Descripción
+                </h3>
+                <p class="text-gray-300 text-sm leading-relaxed">
+                    {{ producto.descripcion|default:"Sin descripción disponible" }}
+                </p>
+            </div>
+            
+            <!-- Información General -->
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-xl p-4">
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i>Información General
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase">Categoría</p>
+                        <p class="text-white font-semibold">{{ producto.get_categoria_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase">Stock Base</p>
+                        <p class="text-white font-semibold">{{ producto.stock|default:0 }} unidades</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase">Destacado</p>
+                        <p class="text-white font-semibold">{% if producto.destacado %}Sí{% else %}No{% endif %}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase">ID</p>
+                        <p class="text-white font-semibold">#{{ producto.id }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if variantes %}
+            <!-- Tallas -->
+            <div>
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-2">
+                    <i class="fas fa-ruler mr-2"></i>Tallas Disponibles
+                </h3>
+                <div class="flex flex-wrap gap-2" id="modal-tallas-container">
+                    {% for talla in tallas_disponibles %}
+                        <button class="modal-talla-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all text-sm font-semibold" 
+                                data-talla="{{ talla }}">
+                            {{ talla }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Colores -->
+            <div>
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-2">
+                    <i class="fas fa-palette mr-2"></i>Colores Disponibles
+                </h3>
+                <div class="flex flex-wrap gap-2" id="modal-colores-container">
+                    {% for color in colores_disponibles %}
+                        <button class="modal-color-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all text-sm font-semibold" 
+                                data-color="{{ color }}">
+                            {{ color }}
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Info de Stock -->
+            <div id="modal-stock-info" class="hidden bg-gradient-to-r from-green-900/20 to-blue-900/20 border-2 border-[#C0A76B] rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase tracking-wide">Stock Disponible</p>
+                        <p id="modal-stock-cantidad" class="text-2xl font-bold text-green-400"></p>
+                    </div>
+                    <i class="fas fa-box text-3xl text-[#C0A76B] opacity-50"></i>
+                </div>
+            </div>
+            
+            <div id="modal-variante-seleccionada" class="hidden bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3">
+                <p class="text-sm text-gray-400">Variante seleccionada:</p>
+                <p id="modal-variante-texto" class="text-white font-semibold"></p>
+            </div>
+            
+            {% else %}
+            <!-- Sin variantes -->
+            <div class="bg-yellow-900/20 border-2 border-yellow-600 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-info-circle text-yellow-400 text-xl mt-1"></i>
+                    <div>
+                        <p class="text-yellow-400 font-semibold text-sm">
+                            <i class="fas fa-box-open mr-1"></i>Producto sin variantes
+                        </p>
+                        <p class="text-gray-300 text-xs mt-1">Este producto no tiene tallas ni colores configurados</p>
+                        <div class="mt-3 bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3">
+                            <p class="text-xs text-gray-400 uppercase tracking-wide">Stock Base</p>
+                            <p class="text-xl font-bold text-white">{{ producto.stock|default:0 }} unidades</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Mensaje de Selección -->
+            <div id="modal-mensaje-seleccion" class="text-center py-3 px-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                <p class="text-sm text-gray-400">
+                    {% if variantes %}
+                        👆 Selecciona talla y color para ver stock disponible
+                    {% else %}
+                        ✓ Producto sin variantes
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if variantes %}
+<script>
+// Datos de variantes
+const modalVariantesData = [
+    {% for v in variantes %}
+    {
+        id: {{ v.id }},
+        talla: '{{ v.talla }}',
+        color: '{{ v.color }}',
+        stock: {{ v.stock }},
+        imagen_url: '{% if v.imagen_url %}{{ v.imagen_url }}{% else %}{{ producto.imagen_url|default:"/static/imagenes/placeholder.png" }}{% endif %}',
+        imagen_ia: {% if v.imagen_generada_ia %}true{% else %}false{% endif %}
+    },
+    {% endfor %}
+];
+
+let modalTallaSeleccionada = null;
+let modalColorSeleccionado = null;
+
+const modalTallaBtns = document.querySelectorAll('.modal-talla-btn');
+const modalColorBtns = document.querySelectorAll('.modal-color-btn');
+const modalImagen = document.getElementById('modal-producto-imagen');
+const modalIaBadge = document.getElementById('modal-ia-badge');
+const modalStockInfo = document.getElementById('modal-stock-info');
+const modalStockCantidad = document.getElementById('modal-stock-cantidad');
+const modalMensaje = document.getElementById('modal-mensaje-seleccion');
+const modalVarianteSeleccionada = document.getElementById('modal-variante-seleccionada');
+const modalVarianteTexto = document.getElementById('modal-variante-texto');
+
+function actualizarVarianteModal() {
+    const variante = modalVariantesData.find(v => 
+        v.talla === modalTallaSeleccionada && v.color === modalColorSeleccionado
+    );
+    
+    if (variante && modalTallaSeleccionada && modalColorSeleccionado) {
+        // Actualizar imagen
+        if (variante.imagen_url) {
+            modalImagen.src = variante.imagen_url;
+        }
+        
+        // Mostrar/ocultar badge IA
+        if (variante.imagen_ia) {
+            modalIaBadge.classList.remove('hidden');
+        } else {
+            modalIaBadge.classList.add('hidden');
+        }
+        
+        // Mostrar stock
+        modalStockInfo.classList.remove('hidden');
+        modalStockCantidad.textContent = `${variante.stock} unidades`;
+        
+        // Color del stock
+        if (variante.stock > 10) {
+            modalStockCantidad.className = 'text-2xl font-bold text-green-400';
+        } else if (variante.stock > 0) {
+            modalStockCantidad.className = 'text-2xl font-bold text-yellow-400';
+        } else {
+            modalStockCantidad.className = 'text-2xl font-bold text-red-400';
+        }
+        
+        // Mostrar variante seleccionada
+        modalVarianteSeleccionada.classList.remove('hidden');
+        modalVarianteTexto.textContent = `Talla ${modalTallaSeleccionada} - Color ${modalColorSeleccionado}`;
+        
+        // Actualizar mensaje
+        if (variante.stock > 0) {
+            modalMensaje.innerHTML = `
+                <p class="text-sm text-green-400 font-semibold">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    ✓ Disponible - Talla: ${modalTallaSeleccionada} | Color: ${modalColorSeleccionado}
+                </p>
+            `;
+            modalMensaje.className = 'text-center py-3 px-4 bg-green-900/20 rounded-lg border-2 border-green-600';
+        } else {
+            modalMensaje.innerHTML = `
+                <p class="text-sm text-red-400 font-semibold">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    ✗ Sin stock en esta combinación
+                </p>
+            `;
+            modalMensaje.className = 'text-center py-3 px-4 bg-red-900/20 rounded-lg border-2 border-red-600';
+        }
+    } else {
+        modalStockInfo.classList.add('hidden');
+        modalVarianteSeleccionada.classList.add('hidden');
+    }
+}
+
+// Event listeners para tallas
+modalTallaBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        modalTallaBtns.forEach(b => {
+            b.classList.remove('bg-[#C0A76B]', 'text-black', 'scale-110');
+            b.classList.add('text-white');
+        });
+        btn.classList.add('bg-[#C0A76B]', 'text-black', 'scale-110');
+        btn.classList.remove('text-white');
+        modalTallaSeleccionada = btn.dataset.talla;
+        actualizarVarianteModal();
+    });
+});
+
+// Event listeners para colores
+modalColorBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        modalColorBtns.forEach(b => {
+            b.classList.remove('bg-[#C0A76B]', 'text-black', 'scale-110');
+            b.classList.add('text-white');
+        });
+        btn.classList.add('bg-[#C0A76B]', 'text-black', 'scale-110');
+        btn.classList.remove('text-white');
+        modalColorSeleccionado = btn.dataset.color;
+        actualizarVarianteModal();
+    });
+});
+</script>
+{% endif %}

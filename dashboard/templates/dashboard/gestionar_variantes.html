@@ -1,0 +1,321 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Variantes - {{ producto.nombre }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .variant-card {
+            transition: all 0.3s ease;
+        }
+        .variant-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-[#C0A76B]">Variantes de Producto</h1>
+                    <p class="text-gray-400 mt-2">{{ producto.nombre }}</p>
+                </div>
+                <a href="{% url 'gestion_productos' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i> Volver
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-[#C0A76B] bg-opacity-20 border border-[#C0A76B] text-[#C0A76B] p-3 rounded-lg mt-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Columna izquierda: Formulario + Info del producto -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Información del producto base -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                        <i class="fas fa-info-circle mr-2"></i> Producto Base
+                    </h2>
+                    
+                    {% if producto.imagen_url %}
+                        <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-48 object-cover rounded-lg mb-4 border border-[#C0A76B]">
+                    {% endif %}
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Nombre:</span>
+                            <span class="text-white font-semibold">{{ producto.nombre }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Precio:</span>
+                            <span class="text-[#C0A76B] font-bold">${{ producto.precio }}</span>
+                        </div>
+                        {% if producto.talla %}
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Talla base:</span>
+                            <span class="text-white font-semibold bg-[#C0A76B] bg-opacity-20 px-3 py-1 rounded-full border border-[#C0A76B]">{{ producto.talla }}</span>
+                        </div>
+                        {% endif %}
+                        {% if producto.colores %}
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Color base:</span>
+                            <span class="text-white font-semibold bg-[#C0A76B] bg-opacity-20 px-3 py-1 rounded-full border border-[#C0A76B]">{{ producto.colores }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Categoría:</span>
+                            <span class="text-white font-semibold">{{ producto.get_categoria_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulario para agregar variante -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                    <i class="fas fa-plus-circle mr-2"></i> Agregar Variante
+                </h2>
+                
+                <form method="post" enctype="multipart/form-data" id="variantForm" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Tipo de Producto *</label>
+                        {{ form.tipo_producto }}
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Talla *</label>
+                        <select name="talla" id="id_talla" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="">Selecciona una talla</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Color *</label>
+                        <select name="color" id="id_color" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="">Selecciona un color</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Stock Inicial *</label>
+                        {{ form.stock }}
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Imagen (opcional)</label>
+                        {{ form.imagen }}
+                        <p class="text-xs text-gray-500 mt-1">Si no subes imagen, se puede generar con IA después</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold py-3 px-4 rounded-md transition-all">
+                        <i class="fas fa-save mr-2"></i> Crear Variante
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lista de variantes -->
+            <div class="lg:col-span-2">
+                <!-- DEBUG INFO -->
+                <div class="bg-red-900 border border-red-500 p-4 rounded-lg mb-4 text-white">
+                    <h3 class="font-bold mb-2">🔍 DEBUG INFO:</h3>
+                    <p>tallas_disponibles: {{ tallas_disponibles }}</p>
+                    <p>colores_disponibles: {{ colores_disponibles }}</p>
+                    <p>Producto talla: "{{ producto.talla }}"</p>
+                    <p>Producto color: "{{ producto.colores }}"</p>
+                    <p>Número de variantes: {{ variantes.count }}</p>
+                </div>
+                
+                <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
+                {% if tallas_disponibles or colores_disponibles %}
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg mb-6">
+                    <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                        <i class="fas fa-layer-group mr-2"></i> Tallas y Colores Disponibles
+                    </h2>
+                    
+                    <!-- Tallas disponibles -->
+                    {% if tallas_disponibles %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                            <i class="fas fa-ruler mr-2"></i>Tallas:
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for talla in tallas_disponibles %}
+                                <button class="px-4 py-2 bg-black border-2 border-[#C0A76B] rounded-lg text-white hover:bg-[#C0A76B] hover:text-black transition-all font-semibold cursor-default">
+                                    {{ talla }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Colores disponibles -->
+                    {% if colores_disponibles %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                            <i class="fas fa-palette mr-2"></i>Colores:
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for color in colores_disponibles %}
+                                <button class="px-4 py-2 bg-black border-2 border-[#C0A76B] rounded-lg text-white hover:bg-[#C0A76B] hover:text-black transition-all font-semibold cursor-default">
+                                    {{ color }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Miniaturas de variantes disponibles -->
+                {% if variantes %}
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg mb-6">
+                    <div>
+                        <h3 class="text-sm font-medium text-[#C0A76B] mb-3">
+                            <i class="fas fa-images mr-2"></i>Disponible en {{ variantes.count }} variante{{ variantes.count|pluralize }}
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for variante in variantes %}
+                                <div class="group relative bg-black border border-[#C0A76B] border-opacity-30 hover:border-opacity-100 rounded-lg p-2 transition-all cursor-pointer w-24">
+                                    {% if variante.imagen_url %}
+                                        <img src="{{ variante.imagen_url }}" alt="{{ variante.talla }} - {{ variante.color }}" class="w-full h-24 object-cover rounded-md mb-2">
+                                    {% elif variante.producto.imagen_url %}
+                                        <img src="{{ variante.producto.imagen_url }}" alt="{{ variante.talla }} - {{ variante.color }}" class="w-full h-24 object-cover rounded-md mb-2 opacity-40">
+                                    {% else %}
+                                        <div class="w-full h-24 bg-gray-800 rounded-md mb-2 flex items-center justify-center">
+                                            <i class="fas fa-image text-gray-600 text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                    <p class="text-xs text-center text-white font-semibold">{{ variante.talla }}</p>
+                                    <p class="text-xs text-center text-gray-400">{{ variante.color }}</p>
+                                    
+                                    <!-- Tooltip al hacer hover -->
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3 z-10 w-48 shadow-xl">
+                                        <p class="text-xs text-white font-semibold mb-1">{{ variante.talla }} - {{ variante.color }}</p>
+                                        <p class="text-xs text-gray-400 mb-1">Stock: <span class="{% if variante.stock > 10 %}text-green-400{% elif variante.stock > 0 %}text-yellow-400{% else %}text-red-400{% endif %}">{{ variante.stock }} unidades</span></p>
+                                        {% if variante.imagen_generada_ia %}
+                                            <p class="text-xs text-purple-400"><i class="fas fa-robot mr-1"></i>Generada con IA</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Lista detallada de variantes -->
+                {% if variantes %}
+                <div class="mt-6">
+                <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                    <i class="fas fa-list mr-2"></i> Variantes Existentes ({{ variantes.count }})
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for variante in variantes %}
+                        <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4 hover:border-opacity-100 transition-all">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-white">{{ variante.talla }} - {{ variante.color }}</h3>
+                                    <p class="text-sm text-gray-400">{{ variante.get_tipo_producto_display }}</p>
+                                </div>
+                                <span class="{% if variante.stock > 10 %}bg-green-900 text-green-400{% elif variante.stock > 0 %}bg-yellow-900 text-yellow-400{% else %}bg-red-900 text-red-400{% endif %} text-xs px-3 py-1 rounded-full border border-current">
+                                    Stock: {{ variante.stock }}
+                                </span>
+                            </div>
+                            
+                            {% if variante.imagen_url %}
+                                <img src="{{ variante.imagen_url }}" alt="{{ variante }}" class="w-full h-32 object-cover rounded-lg mb-3">
+                            {% elif variante.producto.imagen_url %}
+                                <img src="{{ variante.producto.imagen_url }}" alt="{{ variante }}" class="w-full h-32 object-cover rounded-lg mb-3 opacity-50">
+                                <p class="text-xs text-gray-500 text-center -mt-2 mb-2">Imagen del producto base</p>
+                            {% endif %}
+
+                            {% if variante.imagen_generada_ia %}
+                                <span class="inline-block text-xs bg-purple-900 text-purple-400 px-2 py-1 rounded-full border border-purple-400 mb-2">
+                                    <i class="fas fa-robot mr-1"></i> Generada con IA
+                                </span>
+                            {% endif %}
+
+                            <div class="flex gap-2 mt-3">
+                                <a href="{% url 'historial_inventario' variante.id %}" class="flex-1 text-center bg-blue-900 hover:bg-blue-800 text-blue-400 px-3 py-2 rounded-md text-sm transition-all">
+                                    <i class="fas fa-history mr-1"></i> Historial
+                                </a>
+                                <a href="{% url 'ajustar_inventario' variante.id %}" class="flex-1 text-center bg-green-900 hover:bg-green-800 text-green-400 px-3 py-2 rounded-md text-sm transition-all">
+                                    <i class="fas fa-boxes mr-1"></i> Ajustar
+                                </a>
+                                <form method="post" action="{% url 'eliminar_variante' variante.id %}" class="inline" onsubmit="return confirm('¿Eliminar esta variante?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-red-900 hover:bg-red-800 text-red-400 px-3 py-2 rounded-md text-sm transition-all">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-400 col-span-2 text-center py-8">
+                            No hay variantes creadas. Agrega la primera variante usando el formulario.
+                        </p>
+                    {% endfor %}
+                </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SIZE_GROUPS = {
+            ropa: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+            pantalones: ['28', '30', '32', '34', '36', '38', '40'],
+            zapatos: ['36', '37', '38', '39', '40', '41', '42', '43', '44']
+        };
+
+        const COLOR_GROUPS = {
+            ropa: ['Blanco', 'Negro', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Gris', 'Marrón', 'Rosa', 'Morado'],
+            pantalones: ['Negro', 'Azul', 'Gris', 'Marrón', 'Caqui'],
+            zapatos: ['Negro', 'Blanco', 'Marrón', 'Beige', 'Azul', 'Rojo']
+        };
+
+        const tipoSelect = document.getElementById('id_tipo_producto');
+        const tallaSelect = document.getElementById('id_talla');
+        const colorSelect = document.getElementById('id_color');
+
+        function updateOptions() {
+            const tipo = tipoSelect.value;
+            
+            // Actualizar tallas
+            tallaSelect.innerHTML = '<option value="">Selecciona una talla</option>';
+            (SIZE_GROUPS[tipo] || []).forEach(size => {
+                const opt = document.createElement('option');
+                opt.value = size;
+                opt.textContent = size;
+                tallaSelect.appendChild(opt);
+            });
+
+            // Actualizar colores
+            colorSelect.innerHTML = '<option value="">Selecciona un color</option>';
+            (COLOR_GROUPS[tipo] || []).forEach(color => {
+                const opt = document.createElement('option');
+                opt.value = color;
+                opt.textContent = color;
+                colorSelect.appendChild(opt);
+            });
+        }
+
+        tipoSelect.addEventListener('change', updateOptions);
+        updateOptions(); // Inicializar
+    </script>
+</body>
+</html>
