@@ -3,6 +3,8 @@ from django.shortcuts import render,HttpResponse, redirect
 from .forms import LoginForm, RegistroForm 
 from carrito.models import Producto,Pedido, UsuarioPersonalizado
 from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -15,12 +17,16 @@ def about(request):
     return render(request, "about.html",{})
 
 def index(request):
-    productos= Producto.objects.all()
-    print(productos)
+    # Optimizado: solo cargar campos necesarios
+    productos = Producto.objects.only('id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria')
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, 'index.html', {
         'productos': productos
-  
-})
+    })
   
 
 def login_view(request):
@@ -57,12 +63,10 @@ def login_view(request):
             user = authenticate(request, username=usuario, password=password)
 
             if user is not None:
-                login(request, user)  # <- LOGIN SIEMPRE QUE SEA VÁLIDO
+                login(request, user)  # Iniciar sesión
                 
-                if user.is_staff:
-                    return redirect('dashboard')  # vista del admin
-                else:
-                    return redirect('index')   # vista del usuario normal
+                # TODOS los usuarios van al index
+                return redirect('index')
             else:
                 error_message = "Datos inválidos"
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
@@ -206,21 +210,98 @@ def exportar_pdf(request):
     return response
 
 def hombres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE)
+    # Optimizado: solo cargar campos necesarios y usar caché
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/hombres.html", {"productos": productos})
 
 
 def mujeres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/mujeres.html", {"productos": productos})
 
 
 def zapatos(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/zapatos.html", {"productos": productos})
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/ofertas.html", {"productos": productos})
+
+
+@login_required
+def toggle_favorito(request, producto_id):
+    # Aceptar tanto POST como GET para depuración
+    if request.method not in ['POST', 'GET']:
+        return JsonResponse({
+            'success': False,
+            'error': 'Método no permitido'
+        }, status=405)
+    
+    try:
+        print(f"Usuario: {request.user}, Producto ID: {producto_id}")  # Debug
+        
+        producto = get_object_or_404(Producto, id=producto_id)
+        usuario = request.user
+        
+        # Verificar si el producto ya está en favoritos
+        if producto in usuario.favoritos.all():
+            usuario.favoritos.remove(producto)
+            is_favorito = False
+            mensaje = 'Producto eliminado de favoritos'
+            print(f"Producto {producto_id} eliminado de favoritos")  # Debug
+        else:
+            usuario.favoritos.add(producto)
+            is_favorito = True
+            mensaje = 'Producto agregado a favoritos'
+            print(f"Producto {producto_id} agregado a favoritos")  # Debug
+        
+        # Contar favoritos actualizados
+        total_favoritos = usuario.favoritos.count()
+        print(f"Total favoritos: {total_favoritos}")  # Debug
+        
+        return JsonResponse({
+            'success': True,
+            'is_favorito': is_favorito,
+            'mensaje': mensaje,
+            'total_favoritos': total_favoritos
+        })
+    except Exception as e:
+        print(f"Error en toggle_favorito: {str(e)}")  # Debug
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
+@login_required
+def mis_deseos(request):
+    productos = request.user.favoritos.all()
+    return render(request, 'core/mis_deseos.html', {'productos': productos})
 

@@ -1,7 +1,7 @@
 # Entorno virtual
 env/
 venv/
-hello/
+
 # Archivos compilados de Python
 __pycache__/
 *.py[cod]

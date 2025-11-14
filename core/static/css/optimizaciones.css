@@ -1,0 +1,51 @@
+/* 
+ * OPTIMIZACIONES CSS PARA MEJORAR RENDIMIENTO
+ * Agrega estas reglas a tus archivos CSS
+ */
+
+/* 1. Usar will-change para animaciones suaves */
+.animacion-producto {
+    will-change: transform;
+}
+
+.animacion-carrito {
+    will-change: opacity, transform;
+}
+
+/* 2. Optimizar imágenes con object-fit */
+.imagen-producto {
+    object-fit: cover;
+    object-position: center;
+}
+
+/* 3. Lazy loading para imágenes fuera de viewport */
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+    opacity: 1;
+}
+
+/* 4. Reducir reflows con contain */
+.producto-card {
+    contain: layout style paint;
+}
+
+/* 5. Optimizar fuentes */
+@font-face {
+    font-display: swap; /* Evita FOIT (Flash of Invisible Text) */
+}
+
+/* 6. Hardware acceleration para elementos interactivos */
+.boton-agregar-carrito,
+.modal-carrito {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* 7. Reducir composite layers */
+.overlay-modal {
+    transform: translate3d(0, 0, 0);
+}
