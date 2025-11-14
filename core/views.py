@@ -5,6 +5,7 @@ from carrito.models import Producto,Pedido, UsuarioPersonalizado
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 
 
@@ -17,15 +18,24 @@ def about(request):
     return render(request, "about.html",{})
 
 def index(request):
-    # Optimizado: solo cargar campos necesarios
-    productos = Producto.objects.only('id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria')
+    # Cargar productos destacados (para "Lo Más Vendido")
+    productos = Producto.objects.filter(destacado=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria'
+    )
+    
+    # Cargar productos en oferta (para "Ofertas Especiales")
+    productos_ofertas = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta'
+    )
     
     # Prefetch favoritos si el usuario está autenticado
     if request.user.is_authenticated:
         productos = productos.prefetch_related('favorited_by')
+        productos_ofertas = productos_ofertas.prefetch_related('favorited_by')
     
     return render(request, 'index.html', {
-        'productos': productos
+        'productos': productos,
+        'productos_ofertas': productos_ofertas
     })
   
 
@@ -122,6 +132,28 @@ def portfolio(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+def buscar_productos(request):
+    query = request.GET.get('q', '').strip()
+    productos = []
+
+    if query:
+        # Búsqueda más precisa por nombre
+        productos = Producto.objects.filter(nombre__iexact=query)
+        
+        # Si no encuentra resultados exactos, busca coincidencias parciales
+        if not productos:
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(categoria__icontains=query)
+            )
+
+    context = {
+        'productos': productos,
+        'query': query,
+    }
+    
+    return render(request, 'core/resultados_busqueda.html', context)
 
 
 
@@ -245,10 +277,12 @@ def zapatos(request):
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    # Mostrar productos marcados como "en_oferta"
+    productos = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta', 'descripcion'
     )
     
+    # Prefetch favoritos si el usuario está autenticado
     if request.user.is_authenticated:
         productos = productos.prefetch_related('favorited_by')
     

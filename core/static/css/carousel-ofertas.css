@@ -1,0 +1,276 @@
+/* Carrusel de Ofertas - Glamoure */
+
+.carousel-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 10px 0;
+    overflow: hidden;
+}
+
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    gap: 20px;
+    padding: 10px 20px;
+}
+
+.carousel-slide {
+    position: relative;
+    flex: 0 0 280px;
+    min-width: 280px;
+    max-width: 280px;
+    background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s ease;
+    border: 2px solid transparent;
+}
+
+.carousel-slide:hover {
+    transform: translateY(-10px);
+    border-color: #C0A76B;
+    box-shadow: 0 20px 60px rgba(192, 167, 107, 0.3);
+}
+
+.carousel-slide img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    transition: transform 0.4s ease;
+}
+
+.carousel-slide:hover img {
+    transform: scale(1.05);
+}
+
+.product-info {
+    text-align: center;
+}
+
+.product-name {
+    color: #C0A76B;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    text-transform: capitalize;
+}
+
+.product-price {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.product-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #C0A76B, #d4b876);
+    color: #000;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(192, 167, 107, 0.3);
+    font-size: 0.9rem;
+}
+
+.product-btn:hover {
+    background: linear-gradient(135deg, #d4b876, #e6c98a);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(192, 167, 107, 0.5);
+}
+
+/* Botones de navegación */
+.carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(192, 167, 107, 0.9);
+    color: #000;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.carousel-nav:hover {
+    background: #d4b876;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 8px 30px rgba(192, 167, 107, 0.6);
+}
+
+.carousel-nav:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.carousel-nav.prev {
+    left: 20px;
+}
+
+.carousel-nav.next {
+    right: 20px;
+}
+
+/* Indicadores */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.indicator:hover {
+    background: #666;
+}
+
+.indicator.active {
+    background: #C0A76B;
+    border-color: #C0A76B;
+    width: 35px;
+    border-radius: 10px;
+}
+
+/* Badge de oferta */
+.offer-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, #ff4757, #ff6348);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    z-index: 5;
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+    animation: pulse 2s infinite;
+}
+
+/* Badge para productos más vendidos */
+#mas-vendido-carousel .offer-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Título de la sección */
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #C0A76B;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #C0A76B, transparent);
+    border-radius: 2px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .carousel-slide {
+        flex: 0 0 260px;
+        min-width: 260px;
+        max-width: 260px;
+    }
+    
+    .carousel-container {
+        padding: 10px 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel-slide {
+        flex: 0 0 240px;
+        min-width: 240px;
+        max-width: 240px;
+    }
+    
+    .carousel-slide img {
+        height: 220px;
+    }
+    
+    .carousel-container {
+        padding: 10px 0;
+    }
+    
+    .carousel-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .carousel-container {
+        padding: 15px 30px;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+    
+    .carousel-slide {
+        padding: 15px;
+    }
+    
+    .carousel-slide img {
+        height: 220px;
+    }
+}
