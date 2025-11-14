@@ -83,6 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
             productoContenido.innerHTML = html;
             console.log('✅ Modal cargado correctamente');
             
+            // EJECUTAR SCRIPTS DEL MODAL DESPUÉS DE CARGAR EL CONTENIDO
+            const scriptMatches = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+            if (scriptMatches) {
+                scriptMatches.forEach((scriptTag, index) => {
+                    const scriptContent = scriptTag.replace(/<script[^>]*>|<\/script>/gi, '');
+                    try {
+                        console.log(`🔧 Ejecutando script ${index + 1} del modal...`);
+                        eval(scriptContent);
+                        console.log(`✅ Script ${index + 1} ejecutado correctamente`);
+                    } catch (error) {
+                        console.error(`❌ Error en script ${index + 1}:`, error);
+                    }
+                });
+            }
+            
         } catch (error) {
             console.error('❌ Error:', error);
             productoContenido.innerHTML = `

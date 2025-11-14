@@ -61,22 +61,51 @@
                             <span class="text-gray-400">Precio:</span>
                             <span class="text-[#C0A76B] font-bold">${{ producto.precio }}</span>
                         </div>
-                        {% if producto.talla %}
                         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
-                            <span class="text-gray-400">Talla base:</span>
-                            <span class="text-white font-semibold bg-[#C0A76B] bg-opacity-20 px-3 py-1 rounded-full border border-[#C0A76B]">{{ producto.talla }}</span>
-                        </div>
-                        {% endif %}
-                        {% if producto.colores %}
-                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
-                            <span class="text-gray-400">Color base:</span>
-                            <span class="text-white font-semibold bg-[#C0A76B] bg-opacity-20 px-3 py-1 rounded-full border border-[#C0A76B]">{{ producto.colores }}</span>
-                        </div>
-                        {% endif %}
-                        <div class="flex justify-between items-center">
                             <span class="text-gray-400">Categoría:</span>
                             <span class="text-white font-semibold">{{ producto.get_categoria_display }}</span>
                         </div>
+                    </div>
+                    
+                    <!-- Panel de Stock -->
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <h3 class="text-sm font-semibold text-[#C0A76B] mb-3">
+                            <i class="fas fa-warehouse mr-2"></i>Distribución de Stock
+                        </h3>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Stock Total:</span>
+                                <span class="text-white font-bold text-lg">{{ stock_total }} unidades</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Stock Asignado:</span>
+                                <span class="text-yellow-400 font-semibold">{{ stock_asignado }} unidades</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-700">
+                                <span class="text-gray-400 text-sm font-semibold">Stock Disponible:</span>
+                                <span class="{% if stock_disponible > 0 %}text-green-400{% else %}text-red-400{% endif %} font-bold text-lg">
+                                    {{ stock_disponible }} unidades
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso -->
+                        <div class="mt-3">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-[#C0A76B] h-2 rounded-full" style="width: {% widthratio stock_asignado stock_total 100 %}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 text-center">
+                                {% widthratio stock_asignado stock_total 100 %}% distribuido
+                            </p>
+                        </div>
+                        
+                        {% if stock_disponible == 0 %}
+                        <div class="mt-3 bg-yellow-900 bg-opacity-20 border border-yellow-400 text-yellow-300 p-2 rounded text-xs">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Todo el stock está distribuido
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -91,14 +120,20 @@
                     
                     <div>
                         <label class="text-sm text-[#C0A76B] block mb-2">Tipo de Producto *</label>
-                        {{ form.tipo_producto }}
-                    </div>
-
-                    <div>
-                        <label class="text-sm text-[#C0A76B] block mb-2">Talla *</label>
-                        <select name="talla" id="id_talla" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
-                            <option value="">Selecciona una talla</option>
+                        <select name="tipo_producto" id="id_tipo_producto" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="ropa">Prenda Superior (camisetas, blusas, chaquetas)</option>
+                            <option value="pantalones">Prenda Inferior (pantalones, jeans)</option>
+                            <option value="zapatos">Calzado</option>
                         </select>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {% if producto.categoria == 'hombre' %}
+                                🚹 Hombre: Superior (XS-XXL) | Inferior (28-38)
+                            {% elif producto.categoria == 'mujer' %}
+                                🚺 Mujer: Superior (XS-XL) | Inferior (6-16)
+                            {% elif producto.categoria == 'zapatos' %}
+                                👞 Zapatos: Sistema europeo (33-45)
+                            {% endif %}
+                        </p>
                     </div>
 
                     <div>
@@ -109,8 +144,25 @@
                     </div>
 
                     <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Talla *</label>
+                        <select name="talla" id="id_talla" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="">Selecciona una talla</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="text-sm text-[#C0A76B] block mb-2">Stock Inicial *</label>
-                        {{ form.stock }}
+                        <input type="number" 
+                               name="stock" 
+                               min="1" 
+                               max="{{ stock_disponible }}"
+                               value="0"
+                               required 
+                               class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#C0A76B]"
+                               placeholder="Ingresa cantidad">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Máximo disponible: <span class="{% if stock_disponible > 0 %}text-green-400{% else %}text-red-400{% endif %} font-semibold">{{ stock_disponible }} unidades</span>
+                        </p>
                     </div>
 
                     <div>
@@ -119,24 +171,15 @@
                         <p class="text-xs text-gray-500 mt-1">Si no subes imagen, se puede generar con IA después</p>
                     </div>
 
-                    <button type="submit" class="w-full bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold py-3 px-4 rounded-md transition-all">
-                        <i class="fas fa-save mr-2"></i> Crear Variante
+                    <button type="submit" class="w-full bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold py-3 px-4 rounded-md transition-all {% if stock_disponible == 0 %}opacity-50 cursor-not-allowed{% endif %}" {% if stock_disponible == 0 %}disabled{% endif %}>
+                        <i class="fas fa-save mr-2"></i> 
+                        {% if stock_disponible > 0 %}Crear Variante{% else %}Sin stock disponible{% endif %}
                     </button>
                 </form>
             </div>
 
             <!-- Lista de variantes -->
             <div class="lg:col-span-2">
-                <!-- DEBUG INFO -->
-                <div class="bg-red-900 border border-red-500 p-4 rounded-lg mb-4 text-white">
-                    <h3 class="font-bold mb-2">🔍 DEBUG INFO:</h3>
-                    <p>tallas_disponibles: {{ tallas_disponibles }}</p>
-                    <p>colores_disponibles: {{ colores_disponibles }}</p>
-                    <p>Producto talla: "{{ producto.talla }}"</p>
-                    <p>Producto color: "{{ producto.colores }}"</p>
-                    <p>Número de variantes: {{ variantes.count }}</p>
-                </div>
-                
                 <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
                 {% if tallas_disponibles or colores_disponibles %}
                 <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg mb-6">
@@ -276,41 +319,141 @@
     </div>
 
     <script>
+        // Categoría del producto desde Django
+        const categoriaProducto = '{{ producto.categoria }}'; // 'mujer', 'hombre', 'zapatos'
+        
+        // Tallas según categoría y tipo de producto
         const SIZE_GROUPS = {
-            ropa: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-            pantalones: ['28', '30', '32', '34', '36', '38', '40'],
-            zapatos: ['36', '37', '38', '39', '40', '41', '42', '43', '44']
+            // HOMBRE
+            'hombre_ropa': ['XS', 'S', 'M', 'L', 'XL', 'XXL'],  // Prendas superiores
+            'hombre_pantalones': ['28', '30', '32', '34', '36', '38'],  // Pantalones
+            
+            // MUJER
+            'mujer_ropa': ['XS', 'S', 'M', 'L', 'XL'],  // Prendas superiores
+            'mujer_pantalones': ['6', '8', '10', '12', '14', '16'],  // Jeans/Pantalones
+            
+            // ZAPATOS (sistema europeo, unisex)
+            'zapatos_zapatos': ['33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
+            
+            // Fallback genérico
+            'ropa': ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+            'pantalones': ['28', '30', '32', '34', '36', '38'],
+            'zapatos': ['33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
         };
 
         const COLOR_GROUPS = {
-            ropa: ['Blanco', 'Negro', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Gris', 'Marrón', 'Rosa', 'Morado'],
-            pantalones: ['Negro', 'Azul', 'Gris', 'Marrón', 'Caqui'],
-            zapatos: ['Negro', 'Blanco', 'Marrón', 'Beige', 'Azul', 'Rojo']
+            'ropa': ['Blanco', 'Negro', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Gris', 'Marrón', 'Rosa', 'Morado', 'Beige', 'Naranja'],
+            'pantalones': ['Negro', 'Azul', 'Gris', 'Marrón', 'Caqui', 'Blanco', 'Verde Oliva'],
+            'zapatos': ['Negro', 'Blanco', 'Marrón', 'Beige', 'Azul', 'Rojo', 'Gris', 'Verde']
         };
 
         const tipoSelect = document.getElementById('id_tipo_producto');
         const tallaSelect = document.getElementById('id_talla');
         const colorSelect = document.getElementById('id_color');
+        const stockInput = document.querySelector('input[name="stock"]');
+        const variantForm = document.getElementById('variantForm');
+        
+        const stockDisponible = {{ stock_disponible }};
 
         function updateOptions() {
             const tipo = tipoSelect.value;
             
-            // Actualizar tallas
-            tallaSelect.innerHTML = '<option value="">Selecciona una talla</option>';
-            (SIZE_GROUPS[tipo] || []).forEach(size => {
-                const opt = document.createElement('option');
-                opt.value = size;
-                opt.textContent = size;
-                tallaSelect.appendChild(opt);
-            });
-
-            // Actualizar colores
+            // Determinar clave de tallas según categoría del producto + tipo seleccionado
+            let sizesKey = tipo; // fallback
+            
+            if (categoriaProducto === 'hombre') {
+                sizesKey = `hombre_${tipo}`;
+            } else if (categoriaProducto === 'mujer') {
+                sizesKey = `mujer_${tipo}`;
+            } else if (categoriaProducto === 'zapatos') {
+                sizesKey = `zapatos_zapatos`;
+            }
+            
+            // Actualizar colores (PRIMERO)
             colorSelect.innerHTML = '<option value="">Selecciona un color</option>';
             (COLOR_GROUPS[tipo] || []).forEach(color => {
                 const opt = document.createElement('option');
                 opt.value = color;
                 opt.textContent = color;
                 colorSelect.appendChild(opt);
+            });
+
+            // Actualizar tallas (SEGUNDO) según categoría + tipo
+            tallaSelect.innerHTML = '<option value="">Selecciona una talla</option>';
+            const sizes = SIZE_GROUPS[sizesKey] || SIZE_GROUPS[tipo] || [];
+            sizes.forEach(size => {
+                const opt = document.createElement('option');
+                opt.value = size;
+                opt.textContent = size;
+                tallaSelect.appendChild(opt);
+            });
+        }
+
+        // Validación en tiempo real del stock
+        if (stockInput) {
+            stockInput.addEventListener('input', function() {
+                const valor = parseInt(this.value) || 0;
+                
+                if (valor > stockDisponible) {
+                    const exceso = valor - stockDisponible;
+                    this.style.borderColor = '#EF4444';
+                    this.style.backgroundColor = '#FEE2E2';
+                    
+                    // Mostrar alerta
+                    let alertDiv = document.getElementById('stock-alert');
+                    if (!alertDiv) {
+                        alertDiv = document.createElement('div');
+                        alertDiv.id = 'stock-alert';
+                        alertDiv.className = 'mt-2 bg-red-900 bg-opacity-20 border border-red-400 text-red-300 p-2 rounded text-xs';
+                        this.parentElement.appendChild(alertDiv);
+                    }
+                    alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> ¡Error! Te excedes por <strong>${exceso}</strong> unidad${exceso > 1 ? 'es' : ''}. Máximo: ${stockDisponible}`;
+                } else if (valor <= 0) {
+                    this.style.borderColor = '#EF4444';
+                    this.style.backgroundColor = '#FEE2E2';
+                    
+                    let alertDiv = document.getElementById('stock-alert');
+                    if (!alertDiv) {
+                        alertDiv = document.createElement('div');
+                        alertDiv.id = 'stock-alert';
+                        alertDiv.className = 'mt-2 bg-red-900 bg-opacity-20 border border-red-400 text-red-300 p-2 rounded text-xs';
+                        this.parentElement.appendChild(alertDiv);
+                    }
+                    alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i> El stock debe ser mayor a 0';
+                } else {
+                    this.style.borderColor = '#10B981';
+                    this.style.backgroundColor = '#D1FAE5';
+                    
+                    const alertDiv = document.getElementById('stock-alert');
+                    if (alertDiv) {
+                        alertDiv.remove();
+                    }
+                }
+            });
+        }
+
+        // Validación antes de enviar
+        if (variantForm) {
+            variantForm.addEventListener('submit', function(e) {
+                const stockValue = parseInt(stockInput.value) || 0;
+                
+                if (stockValue > stockDisponible) {
+                    e.preventDefault();
+                    const exceso = stockValue - stockDisponible;
+                    alert(`❌ ERROR: No puedes asignar ${stockValue} unidades.\\n\\n` +
+                          `Stock disponible: ${stockDisponible} unidades\\n` +
+                          `Te excedes por: ${exceso} unidad${exceso > 1 ? 'es' : ''}\\n\\n` +
+                          `Por favor, ajusta el stock.`);
+                    stockInput.focus();
+                    return false;
+                }
+                
+                if (stockValue <= 0) {
+                    e.preventDefault();
+                    alert('❌ ERROR: El stock debe ser mayor a 0.');
+                    stockInput.focus();
+                    return false;
+                }
             });
         }
 
