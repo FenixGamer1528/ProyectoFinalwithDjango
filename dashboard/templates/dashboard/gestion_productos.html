@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,6 +60,9 @@
                         {% endfor %}
                     </select>
                     <button id="applyFilter" class="w-full mt-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-md transition-all">Aplicar Filtros</button>
+                    <button id="inventarioCompletoBtn" class="w-full mt-3 bg-blue-900 hover:bg-blue-800 text-white font-semibold py-3 px-4 rounded-md transition-all flex items-center justify-center">
+                        <i class="fas fa-warehouse mr-2"></i> Ver Inventario Completo
+                    </button>
                 </div>
             </div>
 
@@ -91,17 +95,24 @@
                                 {% if producto.destacado %}
                                     <span class="inline-block mt-2 bg-yellow-900 bg-opacity-20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-400 border-opacity-30">Destacado</span>
                                 {% endif %}
-                                <div class="flex justify-end space-x-3 mt-4">
-                                    <button onclick="editProduct({{ producto.id }})" class="text-[#C0A76B] hover:text-yellow-400 transition duration-300">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?')">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                        <button type="submit" name="eliminar" class="text-red-400 hover:text-red-300 transition duration-300">
-                                            <i class="fas fa-trash"></i>
+                                
+                                <!-- Botones de acción -->
+                                <div class="flex justify-between items-center mt-4">
+                                    <a href="{% url 'gestionar_variantes' producto.id %}" class="text-center bg-[#C0A76B] bg-opacity-20 hover:bg-opacity-30 text-[#C0A76B] px-3 py-2 rounded-md text-sm transition-all border border-[#C0A76B] border-opacity-50 flex-1 mr-2">
+                                        <i class="fas fa-boxes mr-1"></i> Variantes
+                                    </a>
+                                    <div class="flex space-x-3">
+                                        <button onclick="editProduct({{ producto.id }})" class="text-[#C0A76B] hover:text-yellow-400 transition duration-300 px-2">
+                                            <i class="fas fa-edit"></i>
                                         </button>
-                                    </form>
+                                        <form method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?')">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                            <button type="submit" name="eliminar" class="text-red-400 hover:text-red-300 transition duration-300 px-2">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -125,12 +136,85 @@
 
             <form id="productForm" method="post" enctype="multipart/form-data" class="space-y-4">
                 {% csrf_token %}
-                {{ form.as_p }}
+                <!-- Renderizamos campos individualmente para poder controlar tallas dinámicas -->
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Nombre *</label>
+                    {{ form.nombre }}
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Categoría *</label>
+                    {{ form.categoria }}
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Tipo de producto</label>
+                    <select id="id_tipo_producto" name="tipo_producto" class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                        <option value="ropa">Ropa (camisetas, buzos, camisas)</option>
+                        <option value="pantalones">Pantalones (jeans, sudaderas)</option>
+                        <option value="zapatos">Zapatos (calzado)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Precio *</label>
+                    {{ form.precio }}
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Stock *</label>
+                    {{ form.stock }}
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Tallas (selecciona una o varias)</label>
+                    <select id="id_tallas" name="tallas" multiple class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                        <!-- Opciones se cargan desde JS según tipo -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Colores (selecciona una o varias)</label>
+                    <select id="id_colores" name="colores" multiple class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                        <!-- Opciones se cargan desde JS según tipo -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Descripción</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B]">Imagen</label>
+                    {{ form.imagen }}
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {{ form.destacado }}
+                    <label class="text-sm text-[#C0A76B]">Destacado</label>
+                </div>
                 <div class="flex justify-end space-x-3 pt-4 border-t border-[#C0A76B] border-opacity-30">
                     <button type="button" id="cancelBtn" class="px-4 py-2 border border-[#C0A76B] rounded-md text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition-all">Cancelar</button>
                     <button type="submit" name="guardar" id="saveBtn" class="px-4 py-2 bg-[#C0A76B] text-black font-semibold rounded-md hover:bg-yellow-400 transition-all">Guardar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de Inventario -->
+    <div id="inventarioModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="inventarioModalTitle" class="text-xl font-semibold text-[#C0A76B]">Inventario del Producto</h2>
+                <button id="closeInventarioModal" class="text-gray-400 hover:text-[#C0A76B] transition duration-300">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <div id="inventarioContent" class="space-y-4">
+                <!-- Contenido cargado dinámicamente -->
+            </div>
         </div>
     </div>
 
@@ -159,6 +243,10 @@
             productForm.reset();
             modalTitle.textContent = 'Agregar Nuevo Producto';
             saveBtn.textContent = 'Agregar';
+            // Asegurar que el select de tallas se inicialice con el tipo por defecto
+            const tipo = document.getElementById('id_tipo_producto');
+            const tallaSel = document.getElementById('id_tallas');
+            if (tipo && tallaSel) populateSizes(tipo.value || 'ropa', tallaSel, []);
             productModal.classList.remove('hidden');
         }
 
@@ -174,6 +262,8 @@
                     productForm.action = `/dashboard/editar/${id}/`;
                     modalTitle.textContent = 'Editar Producto';
                     saveBtn.textContent = 'Actualizar';
+                    // Bindear controles de tallas en el formulario inyectado
+                    bindSizeControls(productForm);
                     productModal.classList.remove('hidden');
                 })
                 .catch(error => console.error('Error cargando formulario:', error));
@@ -216,6 +306,64 @@
                 productModal.classList.add('hidden');
             }
         });
+
+        // ------------------- Lógicas de Tallas Dinámicas -------------------
+        const SIZE_GROUPS = {
+            ropa: ['XS','S','M','L','XL','XXL'],
+            pantalones: ['28','30','32','34','36','38','40'],
+            zapatos: ['36','37','38','39','40','41','42','43','44']
+        };
+
+        const COLOR_GROUPS = {
+            ropa: ['Blanco','Negro','Rojo','Azul','Verde','Amarillo','Gris','Marrón','Rosa','Morado'],
+            pantalones: ['Negro','Azul','Gris','Marrón','Caqui'],
+            zapatos: ['Negro','Blanco','Marrón','Beige','Azul','Rojo']
+        };
+
+        function populateSizes(tipo, selectEl, selectedValues=[]) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            const sizes = SIZE_GROUPS[tipo] || [];
+            sizes.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                if (selectedValues.includes(s)) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        function bindSizeControls(root = document) {
+            const tipoSel = root.getElementById('id_tipo_producto');
+            const tallaSel = root.getElementById('id_tallas');
+            const colorSel = root.getElementById('id_colores');
+            if (tipoSel && tallaSel) {
+                // inicializar
+                populateSizes(tipoSel.value || 'ropa', tallaSel, []);
+                tipoSel.addEventListener('change', () => {
+                    populateSizes(tipoSel.value, tallaSel, []);
+                    if (colorSel) populateColors(tipoSel.value, colorSel, []);
+                });
+                if (colorSel) populateColors(tipoSel.value, colorSel, []);
+            }
+        }
+
+        function populateColors(tipo, selectEl, selectedValues=[]) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            const colors = COLOR_GROUPS[tipo] || [];
+            colors.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                if (selectedValues.includes(c)) opt.selected = true;
+                selectEl.appendChild(opt);
+            });
+        }
+
+        // Bind inicial para el modal y formulario
+        bindSizeControls(document);
     </script>
+    <script src="{% static 'js/inventario-modal.js' %}"></script>
 </body>
 </html>

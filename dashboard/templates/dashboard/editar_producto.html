@@ -87,6 +87,16 @@
             </select>
         </div>
 
+        <!-- Campo Tipo de producto -->
+        <div>
+            <label for="id_tipo_producto" class="form-label">Tipo de producto</label>
+            <select id="id_tipo_producto" name="tipo_producto" class="form-input">
+                <option value="ropa">Ropa (camisetas, buzos, camisas)</option>
+                <option value="pantalones">Pantalones (jeans, sudaderas)</option>
+                <option value="zapatos">Zapatos (calzado)</option>
+            </select>
+        </div>
+
         <!-- Campo Precio -->
         <div>
             <label for="id_precio" class="form-label">Precio *</label>
@@ -99,10 +109,20 @@
             <input type="number" name="stock" id="id_stock" value="{{ form.stock.value }}" class="form-input" placeholder="0" min="0" required>
         </div>
 
-        <!-- Campo Talla -->
+        <!-- Campo Tallas (multi-select) -->
         <div>
-            <label for="id_talla" class="form-label">Talla</label>
-            <input type="text" name="talla" id="id_talla" value="{{ form.talla.value }}" class="form-input" placeholder="Ej: S, M, L, 38, 39">
+            <label for="id_tallas" class="form-label">Tallas</label>
+            <select id="id_tallas" name="tallas" multiple class="form-input">
+                <!-- Opciones cargadas por JS -->
+            </select>
+        </div>
+
+        <!-- Campo Colores (multi-select) -->
+        <div>
+            <label for="id_colores" class="form-label">Colores</label>
+            <select id="id_colores" name="colores" multiple class="form-input">
+                <!-- Opciones cargadas por JS -->
+            </select>
         </div>
 
         <!-- Campo Descripción -->
@@ -168,6 +188,64 @@
                 fileInput.classList.add('file-input');
             }
         });
+        // Lógica para tallas dinámicas en edición
+        (function(){
+            const SIZE_GROUPS = {
+                ropa: ['XS','S','M','L','XL','XXL'],
+                pantalones: ['28','30','32','34','36','38','40'],
+                zapatos: ['36','37','38','39','40','41','42','43','44']
+            };
+            const COLOR_GROUPS = {
+                ropa: ['Blanco','Negro','Rojo','Azul','Verde','Amarillo','Gris','Marrón','Rosa','Morado'],
+                pantalones: ['Negro','Azul','Gris','Marrón','Caqui'],
+                zapatos: ['Negro','Blanco','Marrón','Beige','Azul','Rojo']
+            };
+
+            const tipoSel = document.getElementById('id_tipo_producto');
+            const tallaSel = document.getElementById('id_tallas');
+            const existing = `{{ producto.talla|default:"" }}`;
+            const existingList = existing ? existing.split(',').map(s=>s.trim()) : [];
+
+            function populate(tipo){
+                tallaSel.innerHTML = '';
+                const arr = SIZE_GROUPS[tipo] || [];
+                arr.forEach(s => {
+                    const o = document.createElement('option');
+                    o.value = s; o.textContent = s;
+                    if (existingList.includes(s)) o.selected = true;
+                    tallaSel.appendChild(o);
+                });
+
+                // Colores
+                if (typeof COLOR_GROUPS !== 'undefined'){
+                    const colorSel = document.getElementById('id_colores');
+                    if (colorSel) {
+                        colorSel.innerHTML = '';
+                        const colors = COLOR_GROUPS[tipo] || [];
+                        const existingColors = (`{{ producto.colores|default:"" }}`) ? `{{ producto.colores|default:"" }}`.split(',').map(s=>s.trim()) : [];
+                        colors.forEach(c => {
+                            const o = document.createElement('option');
+                            o.value = c; o.textContent = c;
+                            if (existingColors.includes(c)) o.selected = true;
+                            colorSel.appendChild(o);
+                        });
+                    }
+                }
+            }
+
+            function inferTipo(){
+                if (!existingList.length) return 'ropa';
+                // si alguna talla coincide con zapatos
+                if (existingList.some(s=>SIZE_GROUPS.zapatos.includes(s))) return 'zapatos';
+                if (existingList.some(s=>SIZE_GROUPS.pantalones.includes(s))) return 'pantalones';
+                return 'ropa';
+            }
+
+            const inferred = inferTipo();
+            tipoSel.value = inferred;
+            populate(inferred);
+            tipoSel.addEventListener('change', ()=> populate(tipoSel.value));
+        })();
     </script>
 </body>
 </html>

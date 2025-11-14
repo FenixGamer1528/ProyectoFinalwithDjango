@@ -3,9 +3,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
 
-from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito
-from .forms import ProductoForm
+from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito, ProductoVariante, Inventario
+from .forms import ProductoForm, ProductoVarianteForm, InventarioForm
 
 User = get_user_model()
 
@@ -54,7 +57,22 @@ def gestion_productos(request):
         if 'guardar' in request.POST:
             form = ProductoForm(request.POST, request.FILES)
             if form.is_valid():
-                form.save()
+                # Permitimos múltiples tallas desde el campo multi-select 'tallas'.
+                instance = form.save(commit=False)
+                tallas = request.POST.getlist('tallas')
+                if tallas:
+                    # Guardamos como CSV en el campo 'talla' existente para compatibilidad
+                    instance.talla = ','.join(tallas)
+                else:
+                    # Fallback a valor individual si existe
+                    instance.talla = request.POST.get('talla', '')
+                # Colores (multi-select)
+                colores = request.POST.getlist('colores')
+                if colores:
+                    instance.colores = ','.join(colores)
+                else:
+                    instance.colores = request.POST.get('colores', instance.colores or '')
+                instance.save()
                 messages.success(request, 'Producto guardado exitosamente.')
                 return redirect('gestion_productos')
         elif 'eliminar' in request.POST:
@@ -79,7 +97,18 @@ def editar_producto(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES, instance=producto)
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            tallas = request.POST.getlist('tallas')
+            if tallas:
+                instance.talla = ','.join(tallas)
+            else:
+                instance.talla = request.POST.get('talla', instance.talla or '')
+            colores = request.POST.getlist('colores')
+            if colores:
+                instance.colores = ','.join(colores)
+            else:
+                instance.colores = request.POST.get('colores', instance.colores or '')
+            instance.save()
             messages.success(request, 'Producto actualizado.')
             return redirect('gestion_productos')
     else:
@@ -146,3 +175,267 @@ def dashboardCliente(request):
 
     # 5. Renderizar la plantilla con todos los datos
     return render(request, 'dashboard/cliente_dashboard.html', context)
+
+
+# ==================== GESTIÓN DE VARIANTES ====================
+
+@login_required
+def gestionar_variantes(request, producto_id):
+    """Vista para gestionar variantes de un producto"""
+    producto = get_object_or_404(Producto, id=producto_id)
+    variantes = ProductoVariante.objects.filter(producto=producto).select_related('producto')
+    
+    # Obtener tallas únicas (PRIMERO la talla base, luego las de variantes)
+    tallas_disponibles = []
+    if producto.talla:
+        tallas_disponibles.append(producto.talla)
+    
+    # Agregar tallas de variantes que no sean la base
+    for v in variantes:
+        if v.talla and v.talla not in tallas_disponibles:
+            tallas_disponibles.append(v.talla)
+    
+    # Obtener colores únicos (PRIMERO el color base, luego los de variantes)
+    colores_disponibles = []
+    if producto.colores:
+        colores_disponibles.append(producto.colores)
+    
+    # Agregar colores de variantes que no sean el base
+    for v in variantes:
+        if v.color and v.color not in colores_disponibles:
+            colores_disponibles.append(v.color)
+    
+    if request.method == 'POST':
+        form = ProductoVarianteForm(request.POST, request.FILES)
+        if form.is_valid():
+            variante = form.save(commit=False)
+            variante.producto = producto
+            variante.save()
+            
+            # Crear registro inicial en inventario
+            Inventario.objects.create(
+                variante=variante,
+                tipo_movimiento='entrada',
+                cantidad=variante.stock,
+                stock_anterior=0,
+                stock_nuevo=variante.stock,
+                usuario=request.user,
+                observaciones='Stock inicial al crear variante'
+            )
+            
+            messages.success(request, f'Variante {variante.talla} - {variante.color} creada exitosamente.')
+            return redirect('gestionar_variantes', producto_id=producto.id)
+    else:
+        form = ProductoVarianteForm()
+    
+    context = {
+        'producto': producto,
+        'variantes': variantes,
+        'tallas_disponibles': tallas_disponibles,
+        'colores_disponibles': colores_disponibles,
+        'form': form,
+    }
+    return render(request, 'dashboard/gestionar_variantes.html', context)
+
+
+@login_required
+def editar_variante(request, variante_id):
+    """Editar una variante existente"""
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    
+    if request.method == 'POST':
+        stock_anterior = variante.stock
+        form = ProductoVarianteForm(request.POST, request.FILES, instance=variante)
+        if form.is_valid():
+            variante = form.save()
+            
+            # Si cambió el stock, registrar en inventario
+            if variante.stock != stock_anterior:
+                diferencia = variante.stock - stock_anterior
+                tipo = 'entrada' if diferencia > 0 else 'salida'
+                Inventario.objects.create(
+                    variante=variante,
+                    tipo_movimiento=tipo,
+                    cantidad=abs(diferencia),
+                    stock_anterior=stock_anterior,
+                    stock_nuevo=variante.stock,
+                    usuario=request.user,
+                    observaciones='Ajuste manual de stock'
+                )
+            
+            messages.success(request, 'Variante actualizada.')
+            return redirect('gestionar_variantes', producto_id=variante.producto.id)
+    else:
+        form = ProductoVarianteForm(instance=variante)
+    
+    context = {'form': form, 'variante': variante}
+    return render(request, 'dashboard/editar_variante.html', context)
+
+
+@login_required
+@require_POST
+def eliminar_variante(request, variante_id):
+    """Eliminar una variante"""
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    producto_id = variante.producto.id
+    variante.delete()
+    messages.success(request, 'Variante eliminada.')
+    return redirect('gestionar_variantes', producto_id=producto_id)
+
+
+@login_required
+def historial_inventario(request, variante_id):
+    """Ver historial de movimientos de inventario de una variante"""
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    movimientos = Inventario.objects.filter(variante=variante).select_related('usuario')
+    
+    context = {
+        'variante': variante,
+        'movimientos': movimientos,
+    }
+    return render(request, 'dashboard/historial_inventario.html', context)
+
+
+@login_required
+def ajustar_inventario(request, variante_id):
+    """Registrar entrada/salida de inventario"""
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    
+    if request.method == 'POST':
+        form = InventarioForm(request.POST)
+        if form.is_valid():
+            movimiento = form.save(commit=False)
+            movimiento.variante = variante
+            movimiento.stock_anterior = variante.stock
+            movimiento.usuario = request.user
+            
+            # Calcular nuevo stock
+            if movimiento.tipo_movimiento == 'entrada':
+                movimiento.stock_nuevo = variante.stock + movimiento.cantidad
+            elif movimiento.tipo_movimiento == 'salida':
+                movimiento.stock_nuevo = max(0, variante.stock - movimiento.cantidad)
+            else:  # ajuste
+                movimiento.stock_nuevo = movimiento.cantidad
+                movimiento.cantidad = abs(movimiento.stock_nuevo - variante.stock)
+            
+            movimiento.save()
+            
+            # Actualizar stock de la variante
+            variante.stock = movimiento.stock_nuevo
+            variante.save()
+            
+            messages.success(request, f'Inventario actualizado. Stock nuevo: {variante.stock}')
+            return redirect('historial_inventario', variante_id=variante.id)
+    else:
+        form = InventarioForm()
+    
+    context = {
+        'variante': variante,
+        'form': form,
+    }
+    return render(request, 'dashboard/ajustar_inventario.html', context)
+
+
+# ==================== API para cambio de color con IA ====================
+
+@login_required
+def generar_imagen_color(request, variante_id):
+    """
+    Genera una nueva imagen del producto con el color seleccionado usando IA.
+    Por ahora retorna la imagen original, pero aquí se integraría:
+    - Replicate API (Stable Diffusion, ControlNet)
+    - OpenAI DALL-E
+    - Runway ML
+    - etc.
+    """
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    
+    # TODO: Integrar API de IA para cambio de color
+    # Ejemplo conceptual:
+    # imagen_original = variante.producto.imagen_url or variante.producto.imagen.url
+    # prompt = f"Change the color of this {variante.producto.nombre} to {variante.color}, maintaining texture and lighting"
+    # nueva_imagen_url = llamar_api_ia(imagen_original, prompt, variante.color)
+    # variante.imagen_url = nueva_imagen_url
+    # variante.imagen_generada_ia = True
+    # variante.save()
+    
+    return JsonResponse({
+        'success': True,
+        'mensaje': 'Funcionalidad de IA pendiente de integración',
+        'imagen_url': variante.imagen_url or (variante.producto.imagen_url if variante.producto.imagen_url else None)
+    })
+
+
+# ==================== API para obtener variantes ====================
+
+def obtener_variantes_producto(request, producto_id):
+    """API endpoint para obtener variantes de un producto (usado en frontend)"""
+    variantes = ProductoVariante.objects.filter(producto_id=producto_id).values(
+        'id', 'talla', 'color', 'stock', 'imagen_url', 'tipo_producto', 'imagen_generada_ia'
+    )
+    return JsonResponse(list(variantes), safe=False)
+
+
+def obtener_producto_detalle(request, producto_id):
+    """API endpoint para obtener información completa de un producto"""
+    try:
+        producto = Producto.objects.get(id=producto_id)
+        variantes = ProductoVariante.objects.filter(producto=producto).values(
+            'id', 'talla', 'color', 'stock', 'imagen_url', 'tipo_producto', 'imagen_generada_ia'
+        )
+        
+        data = {
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'precio': str(producto.precio),
+            'descripcion': producto.descripcion or 'Sin descripción',
+            'categoria': producto.get_categoria_display(),
+            'imagen_url': producto.imagen_url or (producto.imagen.url if producto.imagen else None),
+            'stock': producto.stock,
+            'destacado': producto.destacado,
+            'variantes': list(variantes),
+            'tallas_disponibles': list(set(v['talla'] for v in variantes)),
+            'colores_disponibles': list(set(v['color'] for v in variantes))
+        }
+        
+        return JsonResponse(data)
+    except Producto.DoesNotExist:
+        return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+
+
+def obtener_inventario_completo(request):
+    """API endpoint para obtener el inventario completo de todos los productos"""
+    productos = Producto.objects.all().prefetch_related('productovariante_set')
+    
+    inventario_data = []
+    for producto in productos:
+        variantes = producto.productovariante_set.all()
+        
+        if variantes.exists():
+            for variante in variantes:
+                inventario_data.append({
+                    'producto_id': producto.id,
+                    'producto_nombre': producto.nombre,
+                    'producto_imagen': producto.imagen_url or (producto.imagen.url if producto.imagen else None),
+                    'variante_id': variante.id,
+                    'talla': variante.talla,
+                    'color': variante.color,
+                    'stock': variante.stock,
+                    'tipo_producto': variante.tipo_producto,
+                    'precio': float(producto.precio)
+                })
+        else:
+            # Producto sin variantes
+            inventario_data.append({
+                'producto_id': producto.id,
+                'producto_nombre': producto.nombre,
+                'producto_imagen': producto.imagen_url or (producto.imagen.url if producto.imagen else None),
+                'variante_id': None,
+                'talla': '-',
+                'color': '-',
+                'stock': producto.stock,
+                'tipo_producto': None,
+                'precio': float(producto.precio)
+            })
+    
+    return JsonResponse(inventario_data, safe=False)

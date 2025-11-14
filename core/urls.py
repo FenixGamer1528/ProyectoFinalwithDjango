@@ -20,6 +20,7 @@ urlpatterns = [
     path('ofertas/', views.ofertas, name='ofertas'),
     path('toggle-favorito/<int:producto_id>/', views.toggle_favorito, name='toggle_favorito'),
     path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
+    path('producto/<int:producto_id>/', views.producto_detalle, name='producto_detalle'),
     
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

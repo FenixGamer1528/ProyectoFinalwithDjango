@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustar Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-black text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-[#C0A76B]">Ajustar Inventario</h1>
+                    <p class="text-gray-400 mt-2">{{ variante }}</p>
+                    <p class="text-sm text-gray-500">Stock actual: <span class="text-[#C0A76B] font-bold text-xl">{{ variante.stock }} unidades</span></p>
+                </div>
+                <a href="{% url 'historial_inventario' variante.id %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i> Volver
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-[#C0A76B] bg-opacity-20 border border-[#C0A76B] text-[#C0A76B] p-3 rounded-lg mt-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </header>
+
+        <div class="max-w-2xl mx-auto bg-[#1a1a1a] border border-[#C0A76B] p-8 rounded-lg shadow-lg">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="text-sm text-[#C0A76B] block mb-2">Tipo de Movimiento *</label>
+                    {{ form.tipo_movimiento }}
+                    <p class="text-xs text-gray-500 mt-1">
+                        <strong>Entrada:</strong> suma al stock | 
+                        <strong>Salida:</strong> resta del stock | 
+                        <strong>Ajuste:</strong> establece stock exacto
+                    </p>
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B] block mb-2">Cantidad *</label>
+                    {{ form.cantidad }}
+                    <p class="text-xs text-gray-500 mt-1">
+                        Para ajuste, ingresa el stock total deseado. Para entrada/salida, la cantidad a modificar.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="text-sm text-[#C0A76B] block mb-2">Observaciones</label>
+                    {{ form.observaciones }}
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-[#C0A76B] border-opacity-30">
+                    <button type="button" onclick="window.location.href='{% url 'historial_inventario' variante.id %}'" class="flex-1 px-6 py-3 border border-[#C0A76B] rounded-md text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition-all">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-3 bg-[#C0A76B] text-black font-semibold rounded-md hover:bg-yellow-400 transition-all">
+                        <i class="fas fa-save mr-2"></i> Guardar Movimiento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
