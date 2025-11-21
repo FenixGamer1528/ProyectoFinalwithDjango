@@ -58,6 +58,7 @@ class Producto(models.Model):
 
 class UsuarioPersonalizado(AbstractUser):
     telefono = models.CharField(max_length=15, blank=True)
+    favoritos = models.ManyToManyField(Producto, blank=True, related_name='favorited_by')
 
     def __str__(self):
         return self.username
@@ -85,6 +86,7 @@ class ItemCarrito(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
+    talla = models.CharField(max_length=20, blank=True, null=True)
 
     def subtotal(self):
         precio = self.producto.precio
