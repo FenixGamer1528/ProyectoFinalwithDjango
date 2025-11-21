@@ -1,0 +1,372 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ producto.nombre }} - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .talla-btn, .color-btn {
+            transition: all 0.3s ease;
+        }
+        .talla-btn.selected, .color-btn.selected {
+            background: #C0A76B !important;
+            color: black !important;
+            border-color: #C0A76B !important;
+            transform: scale(1.05);
+        }
+        .talla-btn.disabled, .color-btn.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <!-- Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <div class="container mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Imagen del producto -->
+            <div class="relative">
+                <img id="producto-imagen" 
+                     src="{{ producto.imagen_url|default:'/static/imagenes/placeholder.png' }}" 
+                     alt="{{ producto.nombre }}"
+                     class="w-full rounded-lg shadow-2xl border border-[#C0A76B]">
+                
+                <!-- Badge IA -->
+                <div id="ia-badge" class="hidden absolute top-4 left-4 bg-purple-900 bg-opacity-90 text-purple-300 px-4 py-2 rounded-lg border border-purple-400">
+                    <i class="fas fa-robot mr-2"></i> Color generado con IA
+                </div>
+
+                <!-- Badge Favorito -->
+                <button id="toggle-favorito" 
+                        data-producto-id="{{ producto.id }}"
+                        class="absolute top-4 right-4 bg-black bg-opacity-70 hover:bg-opacity-90 text-{{ es_favorito|yesno:'red-500,white' }} px-4 py-2 rounded-lg border border-{{ es_favorito|yesno:'red-500,[#C0A76B]' }} transition-all">
+                    <i class="fas fa-heart{% if not es_favorito %}-o{% endif %}"></i>
+                </button>
+            </div>
+
+            <!-- Información del producto -->
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-4xl font-bold text-[#C0A76B] mb-2">{{ producto.nombre }}</h1>
+                    <p class="text-gray-400">{{ producto.get_categoria_display }}</p>
+                </div>
+
+                <div class="text-3xl font-bold text-white">
+                    ${{ producto.precio }}
+                </div>
+
+                <div class="text-gray-300">
+                    {{ producto.descripcion|default:"Sin descripción disponible" }}
+                </div>
+
+                <!-- Información adicional del producto -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4 space-y-2">
+                    <h3 class="text-lg font-semibold text-[#C0A76B] mb-3">Información del Producto</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-400">Categoría:</p>
+                            <p class="text-white font-semibold">{{ producto.get_categoria_display }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">Tipo:</p>
+                            <p class="text-white font-semibold">{{ producto.get_tipo_producto_display|default:"General" }}</p>
+                        </div>
+                        {% if producto.stock %}
+                        <div>
+                            <p class="text-gray-400">Stock Base:</p>
+                            <p class="text-white font-semibold">{{ producto.stock }} unidades</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <p class="text-gray-400">Destacado:</p>
+                            <p class="text-white font-semibold">{% if producto.destacado %}Sí{% else %}No{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if variantes %}
+                <!-- Selector de Tallas -->
+                <div>
+                    <h3 class="text-lg font-semibold text-[#C0A76B] mb-3">Talla</h3>
+                    <div class="flex flex-wrap gap-3" id="tallas-container">
+                        {% for talla in tallas_disponibles %}
+                            <button class="talla-btn px-6 py-3 border border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all" 
+                                    data-talla="{{ talla }}">
+                                {{ talla }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Selector de Colores -->
+                <div>
+                    <h3 class="text-lg font-semibold text-[#C0A76B] mb-3">Color</h3>
+                    <div class="flex flex-wrap gap-3" id="colores-container">
+                        {% for color in colores_disponibles %}
+                            <button class="color-btn px-6 py-3 border border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all" 
+                                    data-color="{{ color }}">
+                                {{ color }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <!-- Mensaje cuando no hay variantes -->
+                <div class="bg-yellow-900 bg-opacity-20 border border-yellow-600 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-yellow-400 text-xl mt-1"></i>
+                        <div>
+                            <p class="text-yellow-400 font-semibold mb-1">Producto sin variantes configuradas</p>
+                            <p class="text-sm text-gray-300">Este producto aún no tiene tallas y colores disponibles. Por favor, contacta al administrador.</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Stock disponible -->
+                <div id="stock-info" class="hidden">
+                    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-4">
+                        <p class="text-sm text-gray-400">Stock disponible</p>
+                        <p id="stock-cantidad" class="text-2xl font-bold text-green-400"></p>
+                    </div>
+                </div>
+
+                <!-- Botón Agregar al Carrito -->
+                <div class="space-y-4">
+                    <button id="btn-agregar-carrito" 
+                            disabled
+                            class="w-full bg-[#C0A76B] hover:bg-yellow-400 text-black font-bold py-4 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-shopping-cart mr-2"></i> Agregar al Carrito
+                    </button>
+
+                    <p id="mensaje-seleccion" class="text-sm text-gray-400 text-center">
+                        Selecciona una talla y color para continuar
+                    </p>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="border-t border-gray-700 pt-6 space-y-3 text-sm text-gray-400">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-truck text-[#C0A76B]"></i>
+                        <span>Envío gratis en compras mayores a $50</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-undo text-[#C0A76B]"></i>
+                        <span>Devoluciones gratuitas en 30 días</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-shield-alt text-[#C0A76B]"></i>
+                        <span>Compra 100% segura</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de variantes (pasados desde Django)
+        const variantes = {{ variantes|safe }};
+        const variantesData = [
+            {% for v in variantes %}
+                {
+                    id: {{ v.id }},
+                    talla: '{{ v.talla }}',
+                    color: '{{ v.color }}',
+                    stock: {{ v.stock }},
+                    imagen_url: '{% if v.imagen_url %}{{ v.imagen_url }}{% elif v.producto.imagen_url %}{{ v.producto.imagen_url }}{% else %}/static/imagenes/placeholder.png{% endif %}',
+                    imagen_ia: {% if v.imagen_generada_ia %}true{% else %}false{% endif %}
+                },
+            {% endfor %}
+        ];
+
+        let tallaSeleccionada = null;
+        let colorSeleccionado = null;
+        let varianteActual = null;
+
+        const tallaBtns = document.querySelectorAll('.talla-btn');
+        const colorBtns = document.querySelectorAll('.color-btn');
+        const productoImagen = document.getElementById('producto-imagen');
+        const iaBadge = document.getElementById('ia-badge');
+        const stockInfo = document.getElementById('stock-info');
+        const stockCantidad = document.getElementById('stock-cantidad');
+        const btnAgregarCarrito = document.getElementById('btn-agregar-carrito');
+        const mensajeSeleccion = document.getElementById('mensaje-seleccion');
+
+        function actualizarVariante() {
+            // Encontrar variante que coincida con talla y color
+            varianteActual = variantesData.find(v => 
+                v.talla === tallaSeleccionada && v.color === colorSeleccionado
+            );
+
+            if (varianteActual) {
+                // Actualizar imagen
+                productoImagen.src = varianteActual.imagen_url;
+                
+                // Mostrar/ocultar badge IA
+                if (varianteActual.imagen_ia) {
+                    iaBadge.classList.remove('hidden');
+                } else {
+                    iaBadge.classList.add('hidden');
+                }
+
+                // Actualizar stock
+                stockInfo.classList.remove('hidden');
+                stockCantidad.textContent = `${varianteActual.stock} unidades`;
+                stockCantidad.className = varianteActual.stock > 0 ? 'text-2xl font-bold text-green-400' : 'text-2xl font-bold text-red-400';
+
+                // Habilitar/deshabilitar botón
+                if (varianteActual.stock > 0) {
+                    btnAgregarCarrito.disabled = false;
+                    mensajeSeleccion.textContent = '¡Listo para agregar al carrito!';
+                    mensajeSeleccion.classList.remove('text-gray-400');
+                    mensajeSeleccion.classList.add('text-green-400');
+                } else {
+                    btnAgregarCarrito.disabled = true;
+                    mensajeSeleccion.textContent = 'Producto agotado en esta combinación';
+                    mensajeSeleccion.classList.remove('text-green-400');
+                    mensajeSeleccion.classList.add('text-red-400');
+                }
+            } else {
+                stockInfo.classList.add('hidden');
+                btnAgregarCarrito.disabled = true;
+            }
+
+            // Actualizar estados de botones disponibles
+            actualizarBotonesDisponibles();
+        }
+
+        function actualizarBotonesDisponibles() {
+            // Deshabilitar tallas que no tienen stock en el color seleccionado
+            tallaBtns.forEach(btn => {
+                const talla = btn.dataset.talla;
+                if (colorSeleccionado) {
+                    const hayStock = variantesData.some(v => 
+                        v.talla === talla && v.color === colorSeleccionado && v.stock > 0
+                    );
+                    btn.classList.toggle('disabled', !hayStock);
+                    btn.disabled = !hayStock;
+                } else {
+                    btn.classList.remove('disabled');
+                    btn.disabled = false;
+                }
+            });
+
+            // Deshabilitar colores que no tienen stock en la talla seleccionada
+            colorBtns.forEach(btn => {
+                const color = btn.dataset.color;
+                if (tallaSeleccionada) {
+                    const hayStock = variantesData.some(v => 
+                        v.talla === tallaSeleccionada && v.color === color && v.stock > 0
+                    );
+                    btn.classList.toggle('disabled', !hayStock);
+                    btn.disabled = !hayStock;
+                } else {
+                    btn.classList.remove('disabled');
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        // Event listeners para tallas
+        tallaBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+                
+                tallaBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                tallaSeleccionada = btn.dataset.talla;
+                actualizarVariante();
+            });
+        });
+
+        // Event listeners para colores
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+                
+                colorBtns.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                colorSeleccionado = btn.dataset.color;
+                actualizarVariante();
+            });
+        });
+
+        // Agregar al carrito
+        btnAgregarCarrito.addEventListener('click', async () => {
+            if (!varianteActual) return;
+
+            try {
+                const response = await fetch('/carrito/agregar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: `producto_id={{ producto.id }}&talla=${varianteActual.talla}`
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Producto agregado al carrito');
+                    // Actualizar contador del carrito si existe
+                    const carritoCount = document.getElementById('carrito-count');
+                    if (carritoCount) {
+                        carritoCount.textContent = data.total_items || '';
+                    }
+                } else {
+                    alert(data.mensaje || 'Error al agregar al carrito');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al agregar al carrito');
+            }
+        });
+
+        // Toggle favorito
+        const toggleFavoritoBtn = document.getElementById('toggle-favorito');
+        if (toggleFavoritoBtn) {
+            toggleFavoritoBtn.addEventListener('click', async () => {
+                const productoId = toggleFavoritoBtn.dataset.productoId;
+                
+                try {
+                    const response = await fetch(`/toggle-favorito/${productoId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Actualizar UI
+                        const icon = toggleFavoritoBtn.querySelector('i');
+                        if (data.is_favorito) {
+                            icon.classList.remove('fa-heart-o');
+                            icon.classList.add('fa-heart');
+                            toggleFavoritoBtn.classList.add('text-red-500');
+                            toggleFavoritoBtn.classList.remove('text-white');
+                        } else {
+                            icon.classList.remove('fa-heart');
+                            icon.classList.add('fa-heart-o');
+                            toggleFavoritoBtn.classList.remove('text-red-500');
+                            toggleFavoritoBtn.classList.add('text-white');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        // Inicializar estado de botones
+        actualizarBotonesDisponibles();
+    </script>
+</body>
+</html>

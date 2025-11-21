@@ -1,11 +1,9 @@
 from django.contrib.auth import logout, authenticate, login
-from django.shortcuts import render,HttpResponse, redirect
-from .forms import LoginForm, RegistroForm 
-from carrito.models import Producto,Pedido, UsuarioPersonalizado
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
+from .forms import LoginForm, RegistroForm 
+from carrito.models import Producto, Pedido, UsuarioPersonalizado
 
 
 def home(request):
@@ -304,4 +302,36 @@ def toggle_favorito(request, producto_id):
 def mis_deseos(request):
     productos = request.user.favoritos.all()
     return render(request, 'core/mis_deseos.html', {'productos': productos})
+
+
+def producto_detalle(request, producto_id):
+    """Vista de detalle del producto con todas sus variantes"""
+    from carrito.models import ProductoVariante
+    
+    producto = get_object_or_404(Producto, id=producto_id)
+    variantes = ProductoVariante.objects.filter(producto=producto).order_by('talla', 'color')
+    
+    # Obtener tallas y colores únicos
+    tallas_disponibles = list(set(v.talla for v in variantes))
+    colores_disponibles = list(set(v.color for v in variantes))
+    
+    # Verificar si es favorito
+    es_favorito = False
+    if request.user.is_authenticated:
+        es_favorito = producto in request.user.favoritos.all()
+    
+    context = {
+        'producto': producto,
+        'variantes': variantes,
+        'tallas_disponibles': sorted(tallas_disponibles),
+        'colores_disponibles': sorted(colores_disponibles),
+        'es_favorito': es_favorito,
+    }
+    
+    # Si se solicita desde AJAX o con parámetro modal=true, devolver solo el contenido
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('modal') == 'true':
+        return render(request, 'core/producto_detalle_modal.html', context)
+    
+    # Vista completa normal
+    return render(request, 'core/producto_detalle.html', context)
 

@@ -17,6 +17,8 @@ class Producto(models.Model):
     imagen_url = models.URLField(blank=True, null=True)
     # Talla opcional del producto (ej: S, M, L, 38, 39, etc.)
     talla = models.CharField(max_length=20, blank=True, null=True)
+    # Colores disponibles para el producto (guardados como CSV: "Rojo,Azul")
+    colores = models.CharField(max_length=200, blank=True, null=True)
     destacado = models.BooleanField(default=False)  # Índice creado manualmente
     stock = models.IntegerField(default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
@@ -136,3 +138,106 @@ class ItemCarrito(models.Model):
         if isinstance(precio, Decimal):
             precio = self.producto.precio 
         return precio * self.cantidad
+
+
+class TipoProducto(models.TextChoices):
+    """Tipos de producto que determinan las tallas disponibles"""
+    ROPA = 'ropa', 'Ropa (camisetas, buzos, camisas)'
+    PANTALONES = 'pantalones', 'Pantalones'
+    ZAPATOS = 'zapatos', 'Zapatos'
+
+
+class ProductoVariante(models.Model):
+    """
+    Variante de un producto con talla, color e inventario independiente.
+    Cada variante es una combinación única de producto + talla + color.
+    """
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='variantes')
+    tipo_producto = models.CharField(
+        max_length=20,
+        choices=TipoProducto.choices,
+        default=TipoProducto.ROPA
+    )
+    talla = models.CharField(max_length=10)  # Ej: S, M, L, 32, 38
+    color = models.CharField(max_length=50)  # Ej: Negro, Rojo, Azul
+    stock = models.IntegerField(default=0)
+    # Imagen específica para esta variante (puede ser generada por IA)
+    imagen = models.ImageField(upload_to='variantes/', blank=True, null=True)
+    imagen_url = models.URLField(blank=True, null=True)
+    # Indica si la imagen fue generada por IA
+    imagen_generada_ia = models.BooleanField(default=False)
+    
+    class Meta:
+        # Una combinación producto+talla+color debe ser única
+        unique_together = ['producto', 'talla', 'color']
+        indexes = [
+            models.Index(fields=['producto', 'talla', 'color']),
+            models.Index(fields=['stock']),
+        ]
+        ordering = ['talla', 'color']
+    
+    def __str__(self):
+        return f"{self.producto.nombre} - {self.talla} - {self.color} (Stock: {self.stock})"
+    
+    def save(self, *args, **kwargs):
+        """Similar al Producto, sube imagen a Supabase si existe"""
+        try:
+            nueva_imagen = bool(self.imagen and getattr(self.imagen, "name", None))
+            imagen_cambio = False
+
+            if self.pk and nueva_imagen:
+                try:
+                    old = self.__class__.objects.get(pk=self.pk)
+                    old_name = getattr(old.imagen, "name", None)
+                    imagen_cambio = (old_name != self.imagen.name)
+                except self.__class__.DoesNotExist:
+                    imagen_cambio = True
+            else:
+                imagen_cambio = nueva_imagen and not self.imagen_url
+
+            if nueva_imagen and imagen_cambio:
+                url = subir_a_supabase(self.imagen)
+                self.imagen_url = url
+                try:
+                    self.imagen.delete(save=False)
+                except Exception:
+                    pass
+        except Exception as e:
+            print("Error subiendo imagen de variante a Supabase:", e)
+
+        super().save(*args, **kwargs)
+
+
+class Inventario(models.Model):
+    """
+    Registro de inventario por variante de producto.
+    Permite rastrear entradas, salidas y stock actual.
+    """
+    TIPO_MOVIMIENTO_CHOICES = [
+        ('entrada', 'Entrada'),
+        ('salida', 'Salida'),
+        ('ajuste', 'Ajuste'),
+    ]
+    
+    variante = models.ForeignKey(ProductoVariante, on_delete=models.CASCADE, related_name='movimientos')
+    tipo_movimiento = models.CharField(max_length=10, choices=TIPO_MOVIMIENTO_CHOICES)
+    cantidad = models.IntegerField()
+    stock_anterior = models.IntegerField()
+    stock_nuevo = models.IntegerField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
+    observaciones = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['-fecha']
+        indexes = [
+            models.Index(fields=['variante', '-fecha']),
+        ]
+    
+    def __str__(self):
+        return f"{self.tipo_movimiento.upper()} - {self.variante} - {self.cantidad} unidades"
