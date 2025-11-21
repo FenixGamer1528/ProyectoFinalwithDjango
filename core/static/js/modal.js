@@ -11,24 +11,49 @@ function mostrarCarrito() {
         .then(response => response.json())
         .then(data => {
             let contenido = '';
-            data.items.forEach(item => {
-                contenido += `
-                    <div class="item-carrito">
-                        <img src="${item.imagen}" alt="${item.producto}" class="img-carrito">
-                        <div class="info-carrito">
-                            <p><strong>${item.producto}</strong></p>
-                            <p>$${item.precio} x ${item.cantidad} = <strong>$${item.subtotal}</strong></p>
-                            <div class="acciones">
-                                <button onclick="cambiarCantidad(${item.id}, 'menos')">➖</button>
-                                <button onclick="cambiarCantidad(${item.id}, 'mas')">➕</button>
-                                <button onclick="eliminarItem(${item.id})">❌</button>
+            
+            // Verificar si hay items en el carrito
+            if (data.items.length === 0) {
+                contenido = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <p style="font-size: 1.2em; margin-bottom: 10px;">🛒</p>
+                        <p>Tu carrito está vacío</p>
+                    </div>
+                `;
+            } else {
+                // Generar HTML de los items
+                data.items.forEach(item => {
+                    contenido += `
+                        <div class="item-carrito">
+                            <img src="${item.imagen}" alt="${item.producto}" class="img-carrito">
+                            <div class="info-carrito">
+                                <p><strong>${item.producto}</strong></p>
+                                <p>$${item.precio} x ${item.cantidad} = <strong>$${item.subtotal}</strong></p>
+                                <div class="acciones">
+                                    <button onclick="cambiarCantidad(${item.id}, 'menos')">➖</button>
+                                    <button onclick="cambiarCantidad(${item.id}, 'mas')">➕</button>
+                                    <button onclick="eliminarItem(${item.id})">❌</button>
+                                </div>
                             </div>
                         </div>
+                        <hr>
+                    `;
+                });
+                
+                // 🆕 AGREGAR TOTAL Y BOTÓN DE PAGO
+                contenido += `
+                    <div class="carrito-footer">
+                        <div class="carrito-total">
+                            <strong>Total:</strong> 
+                            <span style="color: #667eea; font-size: 1.3em;">$${data.total.toLocaleString('es-CO')}</span>
+                        </div>
+                        <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
+                            Proceder al Pago
+                        </a>
                     </div>
-                    <hr>
                 `;
-            });
-            contenido += `<p style="text-align:right"><strong>Total:</strong> $${data.total}</p>`;
+            }
+
             document.getElementById('carritoContenido').innerHTML = contenido;
             document.getElementById('carritoModal').style.display = 'flex';
         });
@@ -82,6 +107,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const html = await response.text();
             productoContenido.innerHTML = html;
             console.log('✅ Modal cargado correctamente');
+            
+            // EJECUTAR SCRIPTS DEL MODAL DESPUÉS DE CARGAR EL CONTENIDO
+            const scriptMatches = html.match(/<script[^>]*>([\s\S]*?)<\/script>/gi);
+            if (scriptMatches) {
+                scriptMatches.forEach((scriptTag, index) => {
+                    const scriptContent = scriptTag.replace(/<script[^>]*>|<\/script>/gi, '');
+                    try {
+                        console.log(`🔧 Ejecutando script ${index + 1} del modal...`);
+                        eval(scriptContent);
+                        console.log(`✅ Script ${index + 1} ejecutado correctamente`);
+                    } catch (error) {
+                        console.error(`❌ Error en script ${index + 1}:`, error);
+                    }
+                });
+            }
             
         } catch (error) {
             console.error('❌ Error:', error);

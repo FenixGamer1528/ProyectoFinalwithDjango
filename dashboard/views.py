@@ -57,23 +57,13 @@ def gestion_productos(request):
         if 'guardar' in request.POST:
             form = ProductoForm(request.POST, request.FILES)
             if form.is_valid():
-                # Permitimos múltiples tallas desde el campo multi-select 'tallas'.
+                # Guardar producto base con stock general
                 instance = form.save(commit=False)
-                tallas = request.POST.getlist('tallas')
-                if tallas:
-                    # Guardamos como CSV en el campo 'talla' existente para compatibilidad
-                    instance.talla = ','.join(tallas)
-                else:
-                    # Fallback a valor individual si existe
-                    instance.talla = request.POST.get('talla', '')
-                # Colores (multi-select)
-                colores = request.POST.getlist('colores')
-                if colores:
-                    instance.colores = ','.join(colores)
-                else:
-                    instance.colores = request.POST.get('colores', instance.colores or '')
+                # Guardar el tipo_producto como campo adicional (puedes usarlo en variantes)
+                tipo_producto = request.POST.get('tipo_producto', 'ropa')
+                # Guardamos temporalmente en un campo o lo usamos en el contexto
                 instance.save()
-                messages.success(request, 'Producto guardado exitosamente.')
+                messages.success(request, f'Producto creado con {instance.stock} unidades totales. Ahora distribuye el stock en variantes (tallas y colores) desde el botón "Variantes".')
                 return redirect('gestion_productos')
         elif 'eliminar' in request.POST:
             producto_id = request.POST.get('producto_id')
@@ -97,19 +87,9 @@ def editar_producto(request, pk):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES, instance=producto)
         if form.is_valid():
-            instance = form.save(commit=False)
-            tallas = request.POST.getlist('tallas')
-            if tallas:
-                instance.talla = ','.join(tallas)
-            else:
-                instance.talla = request.POST.get('talla', instance.talla or '')
-            colores = request.POST.getlist('colores')
-            if colores:
-                instance.colores = ','.join(colores)
-            else:
-                instance.colores = request.POST.get('colores', instance.colores or '')
-            instance.save()
-            messages.success(request, 'Producto actualizado.')
+            # Guardar solo campos base del producto
+            form.save()
+            messages.success(request, 'Producto actualizado. Gestiona tallas y colores desde "Variantes".')
             return redirect('gestion_productos')
     else:
         form = ProductoForm(instance=producto)
@@ -185,6 +165,10 @@ def gestionar_variantes(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     variantes = ProductoVariante.objects.filter(producto=producto).select_related('producto')
     
+    # Calcular stock total asignado en variantes
+    stock_asignado = sum(v.stock for v in variantes)
+    stock_disponible = producto.stock - stock_asignado
+    
     # Obtener tallas únicas (PRIMERO la talla base, luego las de variantes)
     tallas_disponibles = []
     if producto.talla:
@@ -210,6 +194,24 @@ def gestionar_variantes(request, producto_id):
         if form.is_valid():
             variante = form.save(commit=False)
             variante.producto = producto
+            
+            # Validar que el stock de la variante no exceda el disponible
+            if variante.stock > stock_disponible:
+                exceso = variante.stock - stock_disponible
+                messages.error(
+                    request, 
+                    f'❌ ERROR: No hay suficiente stock. '
+                    f'Intentas asignar {variante.stock} unidades pero solo hay {stock_disponible} disponibles. '
+                    f'Te excedes por {exceso} unidad{"es" if exceso > 1 else ""}. '
+                    f'(Stock total: {producto.stock} | Ya asignado: {stock_asignado})'
+                )
+                return redirect('gestionar_variantes', producto_id=producto.id)
+            
+            # Validar stock mínimo
+            if variante.stock <= 0:
+                messages.error(request, '❌ ERROR: El stock debe ser mayor a 0.')
+                return redirect('gestionar_variantes', producto_id=producto.id)
+            
             variante.save()
             
             # Crear registro inicial en inventario
@@ -223,7 +225,17 @@ def gestionar_variantes(request, producto_id):
                 observaciones='Stock inicial al crear variante'
             )
             
-            messages.success(request, f'Variante {variante.talla} - {variante.color} creada exitosamente.')
+            # Recalcular stock disponible
+            nuevo_stock_asignado = stock_asignado + variante.stock
+            nuevo_stock_disponible = producto.stock - nuevo_stock_asignado
+            porcentaje = int((nuevo_stock_asignado / producto.stock) * 100) if producto.stock > 0 else 0
+            
+            messages.success(
+                request, 
+                f'✅ Variante {variante.color} - {variante.talla} creada con {variante.stock} unidades. '
+                f'Stock distribuido: {nuevo_stock_asignado}/{producto.stock} ({porcentaje}%) | '
+                f'Stock disponible: {nuevo_stock_disponible} unidades.'
+            )
             return redirect('gestionar_variantes', producto_id=producto.id)
     else:
         form = ProductoVarianteForm()
@@ -234,6 +246,9 @@ def gestionar_variantes(request, producto_id):
         'tallas_disponibles': tallas_disponibles,
         'colores_disponibles': colores_disponibles,
         'form': form,
+        'stock_total': producto.stock,
+        'stock_asignado': stock_asignado,
+        'stock_disponible': stock_disponible,
     }
     return render(request, 'dashboard/gestionar_variantes.html', context)
 
@@ -405,11 +420,11 @@ def obtener_producto_detalle(request, producto_id):
 
 def obtener_inventario_completo(request):
     """API endpoint para obtener el inventario completo de todos los productos"""
-    productos = Producto.objects.all().prefetch_related('productovariante_set')
+    productos = Producto.objects.all().prefetch_related('variantes')
     
     inventario_data = []
     for producto in productos:
-        variantes = producto.productovariante_set.all()
+        variantes = producto.variantes.all()
         
         if variantes.exists():
             for variante in variantes:
