@@ -13,43 +13,104 @@
             box-shadow: 0 10px 20px rgba(192, 167, 107, 0.2); 
         }
         .transition-all { transition: all 0.3s ease; }
-        #productModal input, 
+        
+        /* Estilos para los campos del formulario en el modal */
+        #productModal input[type="text"],
+        #productModal input[type="number"],
+        #productModal input[type="file"],
         #productModal select, 
         #productModal textarea {
             color: #000000 !important;
             background: #ffffff !important;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border: 1px solid #C0A76B;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        #productModal input:focus,
+        #productModal select:focus,
+        #productModal textarea:focus {
+            outline: none;
+            border-color: #C0A76B;
+            box-shadow: 0 0 0 3px rgba(192, 167, 107, 0.1);
+        }
+        
+        #productModal textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        #productModal input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #C0A76B;
         }
         
         /* Estilos personalizados para el scroll */
-        #productModal .overflow-y-auto {
+        .scrollbar-custom {
             scrollbar-width: thin;
             scrollbar-color: #C0A76B #1a1a1a;
         }
         
-        #productModal .overflow-y-auto::-webkit-scrollbar {
-            width: 8px;
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 10px;
         }
         
-        #productModal .overflow-y-auto::-webkit-scrollbar-track {
+        .scrollbar-custom::-webkit-scrollbar-track {
             background: #1a1a1a;
-            border-radius: 4px;
+            border-radius: 5px;
         }
         
-        #productModal .overflow-y-auto::-webkit-scrollbar-thumb {
+        .scrollbar-custom::-webkit-scrollbar-thumb {
             background: #C0A76B;
-            border-radius: 4px;
+            border-radius: 5px;
+            border: 2px solid #1a1a1a;
         }
         
-        #productModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
             background: #d4b87a;
         }
         
-        /* Responsive para el modal */
-        @media (max-width: 640px) {
-            #productModal > div {
-                max-height: 85vh;
-                margin: 1rem;
+        /* Animación suave para el modal */
+        #productModal > div {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
             }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        /* Responsive para el modal */
+        @media (max-width: 768px) {
+            #productModal > div {
+                max-height: 95vh;
+                max-width: 95%;
+            }
+            
+            #productModal .grid.md\\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Mejorar selects múltiples */
+        #productModal select[multiple] option {
+            padding: 8px 12px;
+            margin: 2px 0;
+        }
+        
+        #productModal select[multiple] option:checked {
+            background: #C0A76B !important;
+            color: #000000 !important;
         }
     </style>
 </head>
@@ -158,81 +219,146 @@
 
     <!-- Modal para agregar/editar producto -->
     <div id="productModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
-        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl">
             <!-- Header del modal (fijo) -->
-            <div class="flex justify-between items-center p-6 pb-4 border-b border-[#C0A76B] border-opacity-30">
-                <h2 id="modalTitle" class="text-xl font-semibold text-[#C0A76B]">Agregar Nuevo Producto</h2>
+            <div class="flex justify-between items-center px-6 py-5 border-b border-[#C0A76B] border-opacity-30 bg-[#1a1a1a]">
+                <h2 id="modalTitle" class="text-2xl font-bold text-[#C0A76B]">
+                    <i class="fas fa-box-open mr-2"></i>Agregar Nuevo Producto
+                </h2>
                 <button id="closeModal" class="text-gray-400 hover:text-[#C0A76B] transition duration-300">
-                    <i class="fas fa-times text-xl"></i>
+                    <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
 
-            <form id="productForm" method="post" enctype="multipart/form-data" class="space-y-4">
-                {% csrf_token %}
-                <!-- Renderizamos campos individualmente para poder controlar tallas dinámicas -->
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Nombre *</label>
-                    {{ form.nombre }}
-                </div>
+            <!-- Contenido con scroll -->
+            <div class="overflow-y-auto px-6 py-5 flex-1 scrollbar-custom">
+                <form id="productForm" method="post" enctype="multipart/form-data" class="space-y-5">
+                    {% csrf_token %}
+                    
+                    <!-- Información básica -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Información Básica
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">Nombre del Producto *</label>
+                                {{ form.nombre }}
+                            </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Categoría *</label>
-                    {{ form.categoria }}
-                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">Categoría *</label>
+                                {{ form.categoria }}
+                            </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Tipo de producto</label>
-                    <select id="id_tipo_producto" name="tipo_producto" class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
-                        <option value="ropa">Ropa (camisetas, buzos, camisas)</option>
-                        <option value="pantalones">Pantalones (jeans, sudaderas)</option>
-                        <option value="zapatos">Zapatos (calzado)</option>
-                    </select>
-                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">Tipo de Producto</label>
+                                <select id="id_tipo_producto" name="tipo_producto" class="w-full px-4 py-3 bg-white border border-[#C0A76B] rounded-md text-black focus:ring-2 focus:ring-[#C0A76B] focus:outline-none">
+                                    <option value="ropa">Ropa (camisetas, buzos, camisas)</option>
+                                    <option value="pantalones">Pantalones (jeans, sudaderas)</option>
+                                    <option value="zapatos">Zapatos (calzado)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Precio *</label>
-                    {{ form.precio }}
-                </div>
+                    <!-- Precio y Stock -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-dollar-sign mr-2"></i>Precio y Disponibilidad
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">Precio *</label>
+                                {{ form.precio }}
+                            </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Stock *</label>
-                    {{ form.stock }}
-                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">Stock Disponible *</label>
+                                {{ form.stock }}
+                            </div>
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Tallas (selecciona una o varias)</label>
-                    <select id="id_tallas" name="tallas" multiple class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
-                        <!-- Opciones se cargan desde JS según tipo -->
-                    </select>
-                </div>
+                    <!-- Características del Producto -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-tags mr-2"></i>Características
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">
+                                    Tallas 
+                                    <span class="text-xs text-gray-400">(Mantén Ctrl para seleccionar varias)</span>
+                                </label>
+                                <select id="id_tallas" name="tallas" multiple size="6" class="w-full px-4 py-3 bg-white border border-[#C0A76B] rounded-md text-black focus:ring-2 focus:ring-[#C0A76B] focus:outline-none">
+                                    <!-- Opciones se cargan desde JS según tipo -->
+                                </select>
+                            </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Colores (selecciona una o varias)</label>
-                    <select id="id_colores" name="colores" multiple class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
-                        <!-- Opciones se cargan desde JS según tipo -->
-                    </select>
-                </div>
+                            <div>
+                                <label class="block text-sm font-medium text-[#C0A76B] mb-2">
+                                    Colores
+                                    <span class="text-xs text-gray-400">(Mantén Ctrl para seleccionar varios)</span>
+                                </label>
+                                <select id="id_colores" name="colores" multiple size="6" class="w-full px-4 py-3 bg-white border border-[#C0A76B] rounded-md text-black focus:ring-2 focus:ring-[#C0A76B] focus:outline-none">
+                                    <!-- Opciones se cargan desde JS según tipo -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Descripción</label>
-                    {{ form.descripcion }}
-                </div>
+                    <!-- Descripción -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-align-left mr-2"></i>Descripción
+                        </h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-[#C0A76B] mb-2">Descripción del Producto</label>
+                            {{ form.descripcion }}
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="text-sm text-[#C0A76B]">Imagen</label>
-                    {{ form.imagen }}
-                </div>
+                    <!-- Imagen -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-image mr-2"></i>Imagen del Producto
+                        </h3>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-[#C0A76B] mb-2">Seleccionar Imagen</label>
+                            {{ form.imagen }}
+                            <p class="text-xs text-gray-400 mt-2">Formatos aceptados: JPG, PNG, WEBP. Tamaño máximo: 5MB</p>
+                        </div>
+                    </div>
 
-                <div class="flex items-center gap-3">
-                    {{ form.destacado }}
-                    <label class="text-sm text-[#C0A76B]">Destacado</label>
-                </div>
-                <div class="flex justify-end space-x-3 pt-4 border-t border-[#C0A76B] border-opacity-30">
-                    <button type="button" id="cancelBtn" class="px-4 py-2 border border-[#C0A76B] rounded-md text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition-all">Cancelar</button>
-                    <button type="submit" name="guardar" id="saveBtn" class="px-4 py-2 bg-[#C0A76B] text-black font-semibold rounded-md hover:bg-yellow-400 transition-all">Guardar</button>
-                </div>
-            </form>
->>>>>>> c154d8a74e807a4660285861f2f641f13d4b4a75
+                    <!-- Opciones adicionales -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-star mr-2"></i>Opciones Adicionales
+                        </h3>
+                        
+                        <div class="flex items-center gap-3 p-4 bg-black bg-opacity-30 rounded-lg border border-[#C0A76B] border-opacity-20">
+                            {{ form.destacado }}
+                            <label class="text-sm font-medium text-[#C0A76B]">Marcar como Producto Destacado</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer del modal (fijo) -->
+            <div class="flex justify-end space-x-3 px-6 py-5 border-t border-[#C0A76B] border-opacity-30 bg-[#1a1a1a]">
+                <button type="button" id="cancelBtn" class="px-6 py-3 border-2 border-[#C0A76B] rounded-md text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition-all">
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                </button>
+                <button type="submit" form="productForm" name="guardar" id="saveBtn" class="px-6 py-3 bg-[#C0A76B] text-black font-semibold rounded-md hover:bg-yellow-400 transition-all shadow-lg">
+                    <i class="fas fa-save mr-2"></i>Guardar
+                </button>
+            </div>
         </div>
     </div>
 
