@@ -178,8 +178,10 @@ if not DEBUG:
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1',
-    '.trycloudflare.com',  # Permite cualquier subdominio
+    '127.0.0.1', 
+    'cafe-thriller-band-jewellery.trycloudflare.com',
+    'counting-incidents-perspectives-teacher.trycloudflare.com',
+    '*.trycloudflare.com',
 ]
 
 WOMPI_PUBLIC_KEY_TEST = 'pub_test_lAKUj3fWSMRl1jGXcT4pgdhhkBfr8ftP'
@@ -203,4 +205,19 @@ WOMPI_EVENTS_SECRET = WOMPI_EVENTS_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI
 WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI_INTEGRITY_SECRET_PROD
 
 # Para webhooks
-CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co']
+cloudflare_domains = [
+    'https://cafe-thriller-band-jewellery.trycloudflare.com',
+    'https://counting-incidents-perspectives-teacher.trycloudflare.com',
+    'https://*.trycloudflare.com',
+]
+
+CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co'] + cloudflare_domains + [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    # Agrega tu dominio de producción
+]
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True

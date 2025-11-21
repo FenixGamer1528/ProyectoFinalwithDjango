@@ -290,6 +290,13 @@ def checkout_desde_carrito(request):
     print(f"Firma: {firma}")
     print("="*60)
     
+     # Determinar la URL de redirección según el entorno
+    if settings.DEBUG:
+        # En desarrollo con cloudflared - CAMBIA ESTA URL POR LA QUE TE DIO CLOUDFLARED
+        redirect_url = "https://counting-incidents-perspectives-teacher.trycloudflare.com/pagos/confirmacion-carrito/"
+    else:
+        # En producción
+        redirect_url = request.build_absolute_uri('/pagos/confirmacion-carrito/')
     # Preparar contexto para el template
     context = {
         'public_key': settings.WOMPI_PUBLIC_KEY,
@@ -299,7 +306,7 @@ def checkout_desde_carrito(request):
         'firma': firma,
         'descripcion': f'Compra de {len(detalle_productos)} producto(s)',
         'transaccion_id': transaccion.id,
-        'redirect_url': request.build_absolute_uri('/pagos/confirmacion/'),
+        'redirect_url': redirect_url,
         'carrito': carrito,
         'items': items,
         'detalle_productos': detalle_productos
@@ -345,7 +352,7 @@ def confirmar_pago_carrito(request):
                 
                 # Crear un pedido por cada producto
                 for prod_data in productos:
-                    from core.models import Producto
+                    from carrito.models import Producto
                     try:
                         producto = Producto.objects.get(id=prod_data['producto_id'])
                         Pedido.objects.create(

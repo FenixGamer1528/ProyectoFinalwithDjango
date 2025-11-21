@@ -107,7 +107,7 @@
                 <p class="text-white font-mono text-lg tracking-wider">{{ referencia }}</p>
             </div>
         </div>
-
+    
         <!-- Botón de Pago Principal -->
         <form action="https://checkout.wompi.co/p/" method="GET" class="mb-4">
             <input type="hidden" name="public-key" value="{{ public_key }}">
@@ -115,6 +115,7 @@
             <input type="hidden" name="amount-in-cents" value="{{ monto_centavos }}">
             <input type="hidden" name="reference" value="{{ referencia }}">
             <input type="hidden" name="signature:integrity" value="{{ firma }}">
+            <input type="hidden" name="redirect-url" value="{{ redirect_url }}">
             
             
             <button type="submit" class="glamour-gold text-black font-semibold py-5 px-6 rounded-xl w-full hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 text-lg elegant-shadow flex items-center justify-center gap-3">
