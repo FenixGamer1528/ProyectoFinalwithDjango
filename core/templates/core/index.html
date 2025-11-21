@@ -3,8 +3,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
   <link href="{% static 'css/output.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
@@ -282,29 +282,28 @@
       </div>
     </div>
   </footer>
-
   <!-- 🛒 MODAL CARRITO -->
   <div id="carritoModal" class="modal hidden">
-    <div class="modal-contenido">
-        <!-- Header Mejorado -->
-        <div class="carrito-header">
-            <button onclick="cerrarModal()" class="cerrar">&times;</button>
-            <h2>Carrito de Compras</h2>
-            <p class="carrito-subtitle">Glamoure Collection</p>
-        </div>
+      <div class="modal-contenido">
+          <!-- Header -->
+          <div class="carrito-header">
+              <button onclick="cerrarModal()" class="cerrar">&times;</button>
+              <h2>Carrito de Compras</h2>
+              <p class="carrito-subtitle">Glamoure Collection</p>
+          </div>
 
-        <!-- Contenido -->
-        <div class="carrito-body">
-            <div id="carritoContenido"></div>
-        </div>
-    </div>
-</div>
+          <!-- Contenido (se rellena con JavaScript) -->
+          <div class="carrito-body">
+              <div id="carritoContenido"></div>
+          </div>
+      </div>
+  </div>
 
   <div id="productoModal" class="modal">
-        <div class="modal-contenido">
-            <div id="productoContenido"></div>
-        </div>
-    </div>
+      <div class="modal-contenido">
+          <div id="productoContenido"></div>
+      </div>
+  </div>
 
   <script src="{% static 'js/modal.js' %}"></script>
   <script>

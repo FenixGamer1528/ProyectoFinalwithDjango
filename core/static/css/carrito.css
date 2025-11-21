@@ -14,7 +14,6 @@
     backdrop-filter: blur(10px);
 }
 
-/* Contenido del modal - Estilo oscuro elegante */
 .modal-contenido {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     padding: 0;
@@ -29,7 +28,6 @@
     color: #e2e8f0;
 }
 
-/* Header del carrito - Dorado elegante */
 .carrito-header {
     background: linear-gradient(135deg, #C0A76B, #A8915C);
     color: #1a1a1a;
@@ -54,7 +52,6 @@
     color: #1a1a1a;
 }
 
-/* Botón cerrar - Estilo dorado */
 .cerrar {
     position: absolute;
     top: 20px;
@@ -80,7 +77,6 @@
     transform: scale(1.1);
 }
 
-/* Contenido del carrito - Fondo oscuro */
 .carrito-body {
     padding: 25px;
     max-height: 400px;
@@ -88,7 +84,6 @@
     background: #1a1a1a;
 }
 
-/* Items del carrito - Tarjetas oscuras con bordes dorados */
 .item-carrito {
     display: flex;
     gap: 15px;
@@ -149,7 +144,6 @@
     font-size: 16px;
 }
 
-/* Acciones - Botones con estilo dorado */
 .acciones {
     display: flex;
     gap: 8px;
@@ -189,7 +183,6 @@
     color: #f87171;
 }
 
-/* Separador - Sutil */
 hr {
     border: 0;
     border-top: 1px solid #333;
@@ -197,21 +190,6 @@ hr {
     border-radius: 2px;
 }
 
-/* Total - Destacado en dorado */
-.total-carrito {
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #C0A76B;
-    margin-top: 25px;
-    padding: 20px;
-    background: linear-gradient(135deg, rgba(192, 167, 107, 0.1), rgba(168, 145, 92, 0.1));
-    border-radius: 12px;
-    border: 1px solid #C0A76B;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-/* Scrollbar personalizado - Dorado */
 .carrito-body::-webkit-scrollbar {
     width: 6px;
 }
@@ -230,7 +208,6 @@ hr {
     background: linear-gradient(135deg, #A8915C, #8a7848);
 }
 
-/* Estado vacío del carrito */
 .carrito-vacio {
     text-align: center;
     padding: 40px 20px;
@@ -242,21 +219,69 @@ hr {
     font-size: 16px;
 }
 
-/* Mejora para el texto del total que genera JavaScript */
-#carritoContenido p[style*="text-align:right"] {
-    text-align: center !important;
-    font-size: 1.4rem !important;
-    font-weight: 800 !important;
-    color: #C0A76B !important;
-    margin-top: 25px !important;
-    padding: 20px !important;
-    background: linear-gradient(135deg, rgba(192, 167, 107, 0.1), rgba(168, 145, 92, 0.1)) !important;
-    border-radius: 12px !important;
-    border: 1px solid #C0A76B !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+/* NUEVOS ESTILOS CORREGIDOS */
+.carrito-footer {
+    margin-top: 25px;
+    padding: 25px;
+    border-top: 1px solid #C0A76B;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 0 0 16px 16px;
+    text-align: center;
 }
 
-/* Responsive */
+.carrito-total {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #ffffff;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(192, 167, 107, 0.1), rgba(168, 145, 92, 0.05));
+    border-radius: 10px;
+    border: 1px solid rgba(192, 167, 107, 0.2);
+}
+
+.carrito-total strong {
+    color: #C0A76B;
+    display: block;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.carrito-total span {
+    color: #ffd700 !important;
+    font-size: 1.4em !important;
+    font-weight: 700;
+}
+
+.btn-proceder-pago {
+    background: linear-gradient(135deg, #C0A76B 0%, #ffd700 100%);
+    color: #1a1a1a !important;
+    text-decoration: none;
+    border: none;
+    padding: 15px 30px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: 0 4px 15px rgba(192, 167, 107, 0.3);
+}
+
+.btn-proceder-pago:hover {
+    background: linear-gradient(135deg, #ffd700 0%, #C0A76B 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(192, 167, 107, 0.4);
+    color: #1a1a1a !important;
+}
+
 @media (max-width: 480px) {
     .modal-contenido {
         width: 95%;
@@ -275,5 +300,14 @@ hr {
     
     .carrito-header {
         padding: 20px 15px;
+    }
+    
+    .carrito-footer {
+        padding: 20px 15px;
+    }
+    
+    .btn-proceder-pago {
+        padding: 12px 25px;
+        font-size: 13px;
     }
 }

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from .views import ReporteListView, exportar_excel, exportar_pdf
 from django.conf import settings
@@ -20,6 +20,5 @@ urlpatterns = [
     path('ofertas/', views.ofertas, name='ofertas'),
     path('toggle-favorito/<int:producto_id>/', views.toggle_favorito, name='toggle_favorito'),
     path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
-    
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

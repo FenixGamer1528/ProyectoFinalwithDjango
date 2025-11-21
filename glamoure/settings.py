@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'tailwind',
     'frontend',
     'django_browser_reload',
-    'payments',
+    'pagos',
 ]
 
 MIDDLEWARE = [
@@ -117,11 +117,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'es-co'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'America/Bogota'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -176,8 +174,33 @@ if not DEBUG:
         ]),
     ]
 
-# Django Payments Settings
-WOMPI_PUBLIC_KEY = os.getenv("WOMPI_PUBLIC_KEY", "pub_test_yourkey")
-WOMPI_PRIVATE_KEY = os.getenv("WOMPI_PRIVATE_KEY", "prv_test_yourkey")
-WOMPI_BASE_URL = "https://sandbox.wompi.co/v1"
-WOMPI_REDIRECT_URL = "http://127.0.0.1:8000/payments/confirm/" 
+
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.trycloudflare.com',  # Permite cualquier subdominio
+]
+
+WOMPI_PUBLIC_KEY_TEST = 'pub_test_lAKUj3fWSMRl1jGXcT4pgdhhkBfr8ftP'
+WOMPI_PRIVATE_KEY_TEST = 'prv_test_XefgTCdlErJRoEZfnVGtq6UhonaNlTk2'
+WOMPI_EVENTS_SECRET_TEST = 'test_events_y0W4ySwZjHC1Wv0jheDOC7MIaIGkqqbC'
+WOMPI_INTEGRITY_SECRET_TEST = 'test_integrity_nslqVWZD7wlccQ8AjxLYITkIgpqgFmjv'
+
+# Claves de producción (cuando las tengas)
+WOMPI_PUBLIC_KEY_PROD = ''
+WOMPI_PRIVATE_KEY_PROD = ''
+WOMPI_EVENTS_SECRET_PROD = ''
+WOMPI_INTEGRITY_SECRET_PROD = ''
+
+# Ambiente actual
+WOMPI_ENV = 'TEST'  # Cambiar a 'PROD' en producción
+
+# Claves activas
+WOMPI_PUBLIC_KEY = WOMPI_PUBLIC_KEY_TEST if WOMPI_ENV == 'TEST' else WOMPI_PUBLIC_KEY_PROD
+WOMPI_PRIVATE_KEY = WOMPI_PRIVATE_KEY_TEST if WOMPI_ENV == 'TEST' else WOMPI_PRIVATE_KEY_PROD
+WOMPI_EVENTS_SECRET = WOMPI_EVENTS_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI_EVENTS_SECRET_PROD
+WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI_INTEGRITY_SECRET_PROD
+
+# Para webhooks
+CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co']

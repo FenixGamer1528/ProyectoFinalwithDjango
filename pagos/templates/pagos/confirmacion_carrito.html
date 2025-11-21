@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Compra - Glamoure</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .status-header {
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+        
+        .status-header.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .status-header.error {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+        
+        .status-header.pending {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        .status-header h1 { font-size: 2em; margin-bottom: 10px; }
+        
+        .content { padding: 40px; }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section h2 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .detail-row:last-child { border-bottom: none; }
+        
+        .label { color: #666; }
+        .value { color: #333; font-weight: 600; text-align: right; }
+        
+        .producto-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover { transform: translateY(-2px); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        {% if transaccion.estado == 'APPROVED' %}
+            <div class="status-header success">
+                <div class="icon">✓</div>
+                <h1>¡Compra Exitosa!</h1>
+                <p>Tu pedido ha sido confirmado</p>
+            </div>
+        {% elif transaccion.estado == 'DECLINED' %}
+            <div class="status-header error">
+                <div class="icon">✗</div>
+                <h1>Pago Rechazado</h1>
+                <p>La transacción no pudo ser procesada</p>
+            </div>
+        {% else %}
+            <div class="status-header pending">
+                <div class="icon">⏳</div>
+                <h1>Pago Pendiente</h1>
+                <p>Tu transacción está siendo verificada</p>
+            </div>
+        {% endif %}
+        
+        <div class="content">
+            <!-- Información de la Transacción -->
+            <div class="section">
+                <h2>📋 Información de la Compra</h2>
+                <div class="detail-row">
+                    <span class="label">Referencia</span>
+                    <span class="value">{{ transaccion.referencia }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Total Pagado</span>
+                    <span class="value">${{ transaccion.monto|floatformat:0 }} COP</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Estado</span>
+                    <span class="value">{{ transaccion.get_estado_display }}</span>
+                </div>
+                {% if transaccion.metodo_pago %}
+                <div class="detail-row">
+                    <span class="label">Método de Pago</span>
+                    <span class="value">{{ transaccion.metodo_pago }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <span class="label">Fecha</span>
+                    <span class="value">{{ transaccion.creado|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+            
+            <!-- Productos Comprados -->
+            {% if transaccion.get_productos %}
+            <div class="section">
+                <h2>🛍️ Productos Comprados ({{ transaccion.get_total_productos }})</h2>
+                {% for producto in transaccion.get_productos %}
+                <div class="producto-item">
+                    <div>
+                        <strong>{{ producto.nombre }}</strong><br>
+                        <small style="color: #666;">
+                            Cantidad: {{ producto.cantidad }}
+                            {% if producto.talla %} | Talla: {{ producto.talla }}{% endif %}
+                        </small>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong>${{ producto.subtotal|floatformat:0 }}</strong><br>
+                        <small style="color: #666;">${{ producto.precio|floatformat:0 }} c/u</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Mensaje de Éxito -->
+            {% if transaccion.estado == 'APPROVED' %}
+            <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <strong style="color: #155724;">¡Gracias por tu compra!</strong><br>
+                <span style="color: #155724;">
+                    Recibirás un email de confirmación en {{ transaccion.email }}
+                </span>
+            </div>
+            {% endif %}
+            
+            <!-- Acciones -->
+            <div class="actions">
+                <a href="/" class="btn btn-primary">Seguir Comprando</a>
+                <a href="/cliente-dashboard/" class="btn btn-secondary">Ver Mis Pedidos</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
