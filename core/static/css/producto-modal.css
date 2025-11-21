@@ -1,5 +1,67 @@
 /* === ESTILOS PARA EL MODAL DE DETALLES DEL PRODUCTO (TEMA OSCURO/DORADO) === */
 
+/* Botones de colores circulares */
+.modal-color-btn {
+    position: relative;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.modal-color-btn:hover {
+    transform: translateY(-2px);
+}
+
+.modal-color-btn .checkmark {
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
+}
+
+/* Botones de tallas mejorados */
+.modal-talla-btn {
+    position: relative;
+    min-width: 60px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-talla-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(192, 167, 107, 0.3);
+}
+
+.modal-talla-btn:active {
+    transform: scale(0.95);
+}
+
+/* Animación para stock info */
+#modal-stock-info {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive para botones de colores */
+@media (max-width: 640px) {
+    .modal-color-btn {
+        margin-bottom: 1rem;
+    }
+}
+
 /* --- PARTE 1: Estilos base (coherentes con carrito.css) --- */
 
 /* Fondo oscuro del modal */

@@ -4,6 +4,7 @@ from . import settings
 from django.conf.urls.static import static
 from core import views
 from django.contrib.auth import views as auth_views
+from django.views.generic import TemplateView
 
 
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('', include('carrito.urls')),
+    path('pagos/', include('pagos.urls')),
 ] 
 
 if settings.DEBUG:

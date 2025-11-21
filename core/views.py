@@ -1,11 +1,9 @@
 from django.contrib.auth import logout, authenticate, login
-from django.shortcuts import render,HttpResponse, redirect
-from .forms import LoginForm, RegistroForm 
-from carrito.models import Producto,Pedido, UsuarioPersonalizado
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-
+from .forms import LoginForm, RegistroForm 
+from carrito.models import Producto, Pedido, UsuarioPersonalizado
 
 
 def home(request):
