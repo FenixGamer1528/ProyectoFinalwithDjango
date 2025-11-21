@@ -48,7 +48,7 @@ function mostrarCarrito() {
                             <span style="color: #667eea; font-size: 1.3em;">$${data.total.toLocaleString('es-CO')}</span>
                         </div>
                         <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
-                            🚀 Proceder al Pago
+                            Proceder al Pago
                         </a>
                     </div>
                 `;
