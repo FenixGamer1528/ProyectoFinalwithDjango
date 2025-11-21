@@ -2,6 +2,8 @@ from django.contrib.auth import logout, authenticate, login
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.db.models import Q
 from .forms import LoginForm, RegistroForm 
 from carrito.models import Producto, Pedido, UsuarioPersonalizado
 
@@ -15,15 +17,24 @@ def about(request):
     return render(request, "about.html",{})
 
 def index(request):
-    # Optimizado: solo cargar campos necesarios
-    productos = Producto.objects.only('id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria')
+    # Cargar productos destacados (para "Lo Más Vendido")
+    productos = Producto.objects.filter(destacado=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria'
+    )
+    
+    # Cargar productos en oferta (para "Ofertas Especiales")
+    productos_ofertas = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta'
+    )
     
     # Prefetch favoritos si el usuario está autenticado
     if request.user.is_authenticated:
         productos = productos.prefetch_related('favorited_by')
+        productos_ofertas = productos_ofertas.prefetch_related('favorited_by')
     
     return render(request, 'index.html', {
-        'productos': productos
+        'productos': productos,
+        'productos_ofertas': productos_ofertas
     })
   
 
@@ -120,8 +131,28 @@ def portfolio(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+def buscar_productos(request):
+    query = request.GET.get('q', '').strip()
+    productos = []
 
+    if query:
+        # Búsqueda más precisa por nombre
+        productos = Producto.objects.filter(nombre__iexact=query)
+        
+        # Si no encuentra resultados exactos, busca coincidencias parciales
+        if not productos:
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(categoria__icontains=query)
+            )
 
+    context = {
+        'productos': productos,
+        'query': query,
+    }
+    
+    return render(request, 'core/resultados_busqueda.html', context)
 
 
 from django.views.generic import ListView
@@ -254,46 +285,36 @@ def ofertas(request):
 
 
 @login_required
+@require_POST
 def toggle_favorito(request, producto_id):
-    # Aceptar tanto POST como GET para depuración
-    if request.method not in ['POST', 'GET']:
-        return JsonResponse({
-            'success': False,
-            'error': 'Método no permitido'
-        }, status=405)
+    """Alterna el favorito (lista de deseos) del usuario para un producto.
     
+    Responde JSON: {ok: True, added: True/False, total_favorites: int}
+    """
     try:
-        print(f"Usuario: {request.user}, Producto ID: {producto_id}")  # Debug
-        
         producto = get_object_or_404(Producto, id=producto_id)
         usuario = request.user
         
         # Verificar si el producto ya está en favoritos
         if producto in usuario.favoritos.all():
             usuario.favoritos.remove(producto)
-            is_favorito = False
-            mensaje = 'Producto eliminado de favoritos'
-            print(f"Producto {producto_id} eliminado de favoritos")  # Debug
+            added = False
         else:
             usuario.favoritos.add(producto)
-            is_favorito = True
-            mensaje = 'Producto agregado a favoritos'
-            print(f"Producto {producto_id} agregado a favoritos")  # Debug
+            added = True
         
         # Contar favoritos actualizados
         total_favoritos = usuario.favoritos.count()
-        print(f"Total favoritos: {total_favoritos}")  # Debug
         
         return JsonResponse({
-            'success': True,
-            'is_favorito': is_favorito,
-            'mensaje': mensaje,
-            'total_favoritos': total_favoritos
+            'ok': True,
+            'added': added,
+            'total_favorites': total_favoritos,
+            'producto_id': producto.id
         })
     except Exception as e:
-        print(f"Error en toggle_favorito: {str(e)}")  # Debug
         return JsonResponse({
-            'success': False,
+            'ok': False,
             'error': str(e)
         }, status=400)
 
