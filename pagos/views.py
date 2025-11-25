@@ -7,7 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Transaccion
 from .utils import WompiUtils
-import json
+from django.utils import timezone
+import json, random
 
 # Importar modelos de tu app core
 from carrito.models import Carrito, ItemCarrito, Pedido
@@ -293,7 +294,7 @@ def checkout_desde_carrito(request):
      # Determinar la URL de redirección según el entorno
     if settings.DEBUG:
         # En desarrollo con cloudflared - CAMBIA ESTA URL POR LA QUE TE DIO CLOUDFLARED
-        redirect_url = "https://counting-incidents-perspectives-teacher.trycloudflare.com/pagos/confirmacion-carrito/"
+        redirect_url = "https://pod-filme-rate-injured.trycloudflare.com/pagos/confirmacion-carrito/"
     else:
         # En producción
         redirect_url = request.build_absolute_uri('/pagos/confirmacion-carrito/')
@@ -355,11 +356,17 @@ def confirmar_pago_carrito(request):
                     from carrito.models import Producto
                     try:
                         producto = Producto.objects.get(id=prod_data['producto_id'])
+                        
                         Pedido.objects.create(
                             usuario=transaccion.usuario,
                             producto=producto,
-                            cantidad=prod_data['cantidad']
+                            cantidad=prod_data['cantidad'],
+                            estado='confirmado',
+                            fecha_actualizacion=timezone.now(),
+                            total=producto.precio * prod_data['cantidad']
+                            # ✅ YA NO necesitas el campo 'numero' - se genera automáticamente
                         )
+                        print(f"✅ Pedido creado: {producto.nombre}")
                     except Producto.DoesNotExist:
                         print(f"Producto {prod_data['producto_id']} no encontrado")
                 

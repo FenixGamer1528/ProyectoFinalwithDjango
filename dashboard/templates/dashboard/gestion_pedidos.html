@@ -46,6 +46,11 @@
                 <p class="text-gray-400 text-sm">Administra los pedidos de Glamoure</p>
             </div>
         </div>
+        <a href="{% url 'dashboard' %}" 
+            class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+            <i class="fas fa-arrow-left"></i>
+            <span class="group-hover:underline">Volver al Dashboard</span>
+        </a>
         <a href="{% url 'logout' %}" 
            class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -222,11 +227,7 @@
 </main>
 
 <!-- Botón Volver al Dashboard -->
-<a href="{% url 'dashboard' %}" 
-   class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
-    <i class="fas fa-arrow-left"></i>
-    <span class="group-hover:underline">Volver al Dashboard</span>
-</a>
+
 
 </body>
 </html>

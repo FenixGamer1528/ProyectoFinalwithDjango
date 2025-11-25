@@ -180,7 +180,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1', 
     'cafe-thriller-band-jewellery.trycloudflare.com',
-    'counting-incidents-perspectives-teacher.trycloudflare.com',
+    'pod-filme-rate-injured.trycloudflare.com',
     '*.trycloudflare.com',
 ]
 
@@ -207,7 +207,7 @@ WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else
 # Para webhooks
 cloudflare_domains = [
     'https://cafe-thriller-band-jewellery.trycloudflare.com',
-    'https://counting-incidents-perspectives-teacher.trycloudflare.com',
+    'https://pod-filme-rate-injured.trycloudflare.com',
     'https://*.trycloudflare.com',
 ]
 
@@ -219,5 +219,42 @@ CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co'] + cloudflare_domains + [
 
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+
+
+#recuperar contraseña
+# Configuración para emails REALES
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'juanchogamer123@gmail.com'  # Cambia por tu email real
+EMAIL_HOST_PASSWORD = 'oviq ocqq edur jieg'  # La que copiaste en el paso anterior
+
+# Configuración adicional importante
+DEFAULT_FROM_EMAIL = 'juachogamer123@gmail.com'  # Mismo email de arriba
+SERVER_EMAIL = 'tu_email@gmail.com'  # Para errores
+
+# Configuración para recuperación de contraseña
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/index/'
+LOGOUT_REDIRECT_URL = '/index/'
+
+# Configuración para emails y dominio correcto
+if DEBUG:
+    # En desarrollo
+    SITE_DOMAIN = 'http://localhost:8000'
+else:
+    # En producción con Cloudflare
+    SITE_DOMAIN = 'https://rep-likewise-proceed-girlfriend.trycloudflare.com'
+
+# Configuración SSL/HTTPS (al final del settings.py)
+if DEBUG:
+    # En desarrollo: HTTP
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    # En producción: HTTPS
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

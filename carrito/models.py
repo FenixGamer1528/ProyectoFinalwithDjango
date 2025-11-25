@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from decimal import Decimal
 from core.utils.supabase_storage import subir_a_supabase
+from django.utils import timezone
+import random
 
 class Producto(models.Model):
     class CategoriaEnum(models.TextChoices):
@@ -102,19 +104,44 @@ class UsuarioPersonalizado(AbstractUser):
         return self.username
 
 class Pedido(models.Model):
+    ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
+        ('confirmado', 'Confirmado'),
+        ('en_proceso', 'En Proceso'),
+        ('enviado', 'Enviado'),
+        ('entregado', 'Entregado'),
+        ('cancelado', 'Cancelado'),
+    ]
+    
     usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    producto = models.ForeignKey('Producto', on_delete=models.CASCADE)
     cantidad = models.IntegerField()
-    fecha = models.DateTimeField(auto_now_add=True)  # Índice creado manualmente
-
+    fecha = models.DateTimeField(auto_now_add=True)
+    
+    # SOLO los campos esenciales que sabemos que funcionan
+    estado = models.CharField(
+        max_length=20, 
+        choices=ESTADO_CHOICES, 
+        default='pendiente'
+    )
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
     class Meta:
         indexes = [
-            models.Index(fields=['usuario', '-fecha']),  # Para consultas del historial
+            models.Index(fields=['usuario', '-fecha']),
         ]
         ordering = ['-fecha']
-
+    
     def __str__(self):
         return f"Pedido #{self.id} de {self.usuario}"
+    
+    def save(self, *args, **kwargs):
+        # Calcular automáticamente el total
+        if not self.total and self.producto:
+            self.total = self.producto.precio * self.cantidad
+        super().save(*args, **kwargs)
+
 class Carrito(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 

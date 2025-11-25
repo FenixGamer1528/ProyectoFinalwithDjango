@@ -35,6 +35,19 @@
     <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
       <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
     </button>
+    <!-- Wishlist counter -->
+    <div class="relative">
+      {% if user.is_authenticated %}
+      <a href="{% url 'mis_deseos' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
+        <i id="wishlist-icon" class="fa-regular fa-heart text-2xl"></i>
+        <span id="wishlist-count" class="ml-1 text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
+      </a>
+      {% else %}
+      <a href="{% url 'login' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
+        <i class="fa-regular fa-heart text-2xl"></i>
+      </a>
+      {% endif %}
+    </div>
     
     <div class="hidden md:flex gap-4 text-sm">
       {% if user.is_authenticated %}
