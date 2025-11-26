@@ -294,7 +294,7 @@ def checkout_desde_carrito(request):
      # Determinar la URL de redirección según el entorno
     if settings.DEBUG:
         # En desarrollo con cloudflared - CAMBIA ESTA URL POR LA QUE TE DIO CLOUDFLARED
-        redirect_url = "https://pod-filme-rate-injured.trycloudflare.com/pagos/confirmacion-carrito/"
+        redirect_url = "https://app.glamoure.tech/pages/confirmation-carrito/"
     else:
         # En producción
         redirect_url = request.build_absolute_uri('/pagos/confirmacion-carrito/')

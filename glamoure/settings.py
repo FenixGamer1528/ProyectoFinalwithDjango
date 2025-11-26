@@ -179,8 +179,7 @@ if not DEBUG:
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1', 
-    'cafe-thriller-band-jewellery.trycloudflare.com',
-    'pod-filme-rate-injured.trycloudflare.com',
+    'app.glamoure.tech',
     '*.trycloudflare.com',
 ]
 
@@ -206,15 +205,13 @@ WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else
 
 # Para webhooks
 cloudflare_domains = [
-    'https://cafe-thriller-band-jewellery.trycloudflare.com',
-    'https://pod-filme-rate-injured.trycloudflare.com',
+    'https://app.glamoure.tech',
     'https://*.trycloudflare.com',
 ]
 
 CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co'] + cloudflare_domains + [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    # Agrega tu dominio de producción
 ]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -245,7 +242,7 @@ if DEBUG:
     SITE_DOMAIN = 'http://localhost:8000'
 else:
     # En producción con Cloudflare
-    SITE_DOMAIN = 'https://rep-likewise-proceed-girlfriend.trycloudflare.com'
+    SITE_DOMAIN = 'https://app.glamoure.tech'
 
 # Configuración SSL/HTTPS (al final del settings.py)
 if DEBUG:
