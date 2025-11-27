@@ -98,8 +98,41 @@ def editar_producto(request, pk):
 
 
 def gestion_pedidos(request):
-    pedidos = Pedido.objects.all()
-    return render(request, 'dashboard/gestion_pedidos.html', {'pedidos': pedidos})
+    """Vista principal de gestión de pedidos con filtros y búsqueda"""
+    pedidos = Pedido.objects.select_related('usuario', 'producto').all()
+    
+    # Filtro por búsqueda
+    search = request.GET.get('search', '')
+    if search:
+        pedidos = pedidos.filter(
+            Q(numero__icontains=search) |
+            Q(usuario__username__icontains=search) |
+            Q(usuario__email__icontains=search) |
+            Q(usuario__first_name__icontains=search) |
+            Q(usuario__last_name__icontains=search)
+        )
+    
+    # Filtro por estado
+    estado = request.GET.get('estado', '')
+    if estado and estado != 'todos':
+        pedidos = pedidos.filter(estado=estado)
+    
+    # Estadísticas
+    total_pedidos = Pedido.objects.count()
+    pedidos_pendientes = Pedido.objects.filter(estado='pendiente').count()
+    pedidos_procesando = Pedido.objects.filter(estado='procesando').count()
+    pedidos_completados = Pedido.objects.filter(estado='completado').count()
+    
+    context = {
+        'pedidos': pedidos,
+        'total_pedidos': total_pedidos,
+        'pedidos_pendientes': pedidos_pendientes,
+        'pedidos_procesando': pedidos_procesando,
+        'pedidos_completados': pedidos_completados,
+        'search_query': search,
+        'estado_filtro': estado,
+    }
+    return render(request, 'dashboard/gestion_pedidos.html', context)
 
 
 def gestion_reportes(request):
@@ -454,3 +487,112 @@ def obtener_inventario_completo(request):
             })
     
     return JsonResponse(inventario_data, safe=False)
+
+
+# ==================== GESTIÓN DE PEDIDOS ====================
+
+@login_required
+def detalle_pedido(request, pedido_id):
+    """Vista para ver los detalles completos de un pedido"""
+    pedido = get_object_or_404(Pedido, id=pedido_id)
+    
+    context = {
+        'pedido': pedido,
+    }
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Si es una petición AJAX, devolver JSON
+        data = {
+            'numero': pedido.numero,
+            'cliente': pedido.cliente,
+            'email': pedido.email,
+            'telefono': pedido.telefono or 'No especificado',
+            'direccion': pedido.direccion or 'No especificada',
+            'ciudad': pedido.ciudad or 'No especificada',
+            'codigo_postal': pedido.codigo_postal or 'No especificado',
+            'producto': {
+                'nombre': pedido.producto.nombre,
+                'imagen': pedido.producto.imagen_url or (pedido.producto.imagen.url if pedido.producto.imagen else None),
+                'precio': str(pedido.producto.precio),
+            },
+            'cantidad': pedido.cantidad,
+            'total': str(pedido.total),
+            'estado': pedido.get_estado_display(),
+            'estado_valor': pedido.estado,
+            'notas': pedido.notas or 'Sin notas',
+            'fecha': pedido.fecha.strftime('%d/%m/%Y %H:%M'),
+            'fecha_actualizacion': pedido.fecha_actualizacion.strftime('%d/%m/%Y %H:%M'),
+        }
+        return JsonResponse(data)
+    
+    return render(request, 'dashboard/detalle_pedido.html', context)
+
+
+@login_required
+@require_POST
+def actualizar_estado_pedido(request, pedido_id):
+    """Vista para actualizar el estado de un pedido"""
+    pedido = get_object_or_404(Pedido, id=pedido_id)
+    
+    nuevo_estado = request.POST.get('estado')
+    
+    if nuevo_estado in ['pendiente', 'procesando', 'completado', 'cancelado']:
+        pedido.estado = nuevo_estado
+        pedido.save()
+        
+        messages.success(request, f'Estado del pedido {pedido.numero} actualizado a {pedido.get_estado_display()}')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'mensaje': f'Estado actualizado a {pedido.get_estado_display()}',
+                'estado': pedido.estado,
+                'estado_display': pedido.get_estado_display()
+            })
+    else:
+        messages.error(request, 'Estado no válido')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'mensaje': 'Estado no válido'}, status=400)
+    
+    return redirect('gestion_pedidos')
+
+
+@login_required
+def eliminar_pedido(request, pedido_id):
+    """Vista para eliminar un pedido"""
+    pedido = get_object_or_404(Pedido, id=pedido_id)
+    numero = pedido.numero
+    
+    if request.method == 'POST':
+        pedido.delete()
+        messages.success(request, f'Pedido {numero} eliminado correctamente')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'mensaje': f'Pedido {numero} eliminado'})
+        
+        return redirect('gestion_pedidos')
+    
+    return redirect('gestion_pedidos')
+
+
+@login_required
+def actualizar_pedido(request, pedido_id):
+    """Vista para actualizar información del pedido"""
+    pedido = get_object_or_404(Pedido, id=pedido_id)
+    
+    if request.method == 'POST':
+        # Actualizar campos editables
+        pedido.direccion = request.POST.get('direccion', pedido.direccion)
+        pedido.telefono = request.POST.get('telefono', pedido.telefono)
+        pedido.ciudad = request.POST.get('ciudad', pedido.ciudad)
+        pedido.codigo_postal = request.POST.get('codigo_postal', pedido.codigo_postal)
+        pedido.notas = request.POST.get('notas', pedido.notas)
+        pedido.estado = request.POST.get('estado', pedido.estado)
+        
+        pedido.save()
+        messages.success(request, f'Pedido {pedido.numero} actualizado correctamente')
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'mensaje': 'Pedido actualizado'})
+    
+    return redirect('gestion_pedidos')

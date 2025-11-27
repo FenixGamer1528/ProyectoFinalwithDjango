@@ -8,7 +8,14 @@ urlpatterns = [
     path('usuarios/eliminar/<int:user_id>/', views.eliminar_usuario, name='eliminar_usuario'),
 
     path('productos/', views.gestion_productos, name='gestion_productos'),
+    
+    # Gestión de pedidos
     path('pedidos/', views.gestion_pedidos, name='gestion_pedidos'),
+    path('pedidos/<int:pedido_id>/detalle/', views.detalle_pedido, name='detalle_pedido'),
+    path('pedidos/<int:pedido_id>/actualizar-estado/', views.actualizar_estado_pedido, name='actualizar_estado_pedido'),
+    path('pedidos/<int:pedido_id>/actualizar/', views.actualizar_pedido, name='actualizar_pedido'),
+    path('pedidos/<int:pedido_id>/eliminar/', views.eliminar_pedido, name='eliminar_pedido'),
+    
     path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
     
     path('reportes/', views.gestion_reportes, name='gestion_reportes'),

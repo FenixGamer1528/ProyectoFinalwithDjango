@@ -179,8 +179,7 @@ if not DEBUG:
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1', 
-    'cafe-thriller-band-jewellery.trycloudflare.com',
-    'counting-incidents-perspectives-teacher.trycloudflare.com',
+     'app.glamoure.tech',
     '*.trycloudflare.com',
 ]
 
@@ -206,8 +205,7 @@ WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else
 
 # Para webhooks
 cloudflare_domains = [
-    'https://cafe-thriller-band-jewellery.trycloudflare.com',
-    'https://counting-incidents-perspectives-teacher.trycloudflare.com',
+    'https://app.glamoure.tech',
     'https://*.trycloudflare.com',
 ]
 

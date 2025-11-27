@@ -227,7 +227,7 @@
                                 <!-- Botones de acción -->
                                 <div class="flex justify-between items-center mt-4">
                                     <a href="{% url 'gestionar_variantes' producto.id %}" class="text-center bg-[#C0A76B] bg-opacity-20 hover:bg-opacity-30 text-[#C0A76B] px-3 py-2 rounded-md text-sm transition-all border border-[#C0A76B] border-opacity-50 flex-1 mr-2">
-                                        <i class="fas fa-boxes mr-1"></i> Variantes
+                                        <i class="fas fa-boxes mr-1"></i> Distribución
                                     </a>
                                     <div class="flex space-x-3">
                                         <button onclick="editProduct({{ producto.id }})" class="text-[#C0A76B] hover:text-yellow-400 transition duration-300 px-2">
@@ -288,7 +288,7 @@
                                 <ol class="text-sm space-y-1 ml-4 list-decimal">
                                     <li>Define el <strong>stock total</strong> del producto aquí</li>
                                     <li>Guarda el producto</li>
-                                    <li>Haz clic en <strong class="text-[#C0A76B]">"Variantes"</strong> para distribuirlo en tallas y colores</li>
+                                    <li>Haz clic en <strong class="text-[#C0A76B]">"Distribución"</strong> para distribuirlo en tallas y colores</li>
                                 </ol>
                             </div>
                         </div>
@@ -403,11 +403,11 @@
                 <div>
                     <h2 id="inventarioModalTitle" class="text-3xl font-bold text-[#C0A76B] flex items-center gap-3">
                         <i class="fas fa-warehouse"></i>
-                        Inventario Completo - Todas las Variantes
+                        Inventario Completo - Toda la Distribución
                     </h2>
                     <p class="text-gray-400 text-sm mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Visualiza y gestiona el stock de todas las variantes (tallas y colores) de todos los productos
+                        Visualiza y gestiona el stock de toda la distribución (tallas y colores) de todos los productos
                     </p>
                 </div>
                 <button id="closeInventarioModal" class="text-gray-400 hover:text-[#C0A76B] hover:bg-[#C0A76B] hover:bg-opacity-20 transition-all p-3 rounded-lg">
