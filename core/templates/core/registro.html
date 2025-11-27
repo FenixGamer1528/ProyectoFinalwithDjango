@@ -5,66 +5,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <title>Registro - Glamoure</title>
 </head>
-<body class="bg-black min-h-screen flex items-center justify-center">
-    <div class="bg-black border border-[#C0A76B] rounded-2xl p-8 max-w-md w-full">
-        <h2 class="text-2xl font-bold text-[#C0A76B] text-center mb-6">REGISTRARSE</h2>
-        
-        {% if form.errors %}
-            <div class="bg-red-900 border border-red-500 text-red-200 p-3 rounded mb-4 text-sm">
-                {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                        <p>❌ {{ error }}</p>
+<body class="bg-black min-h-screen flex items-center justify-center p-4">
+    <!-- Fondo con imagen -->
+    <div class="fixed inset-0 bg-cover bg-center opacity-20" style="background-image: url('{% static 'imagenes/pexels-steve-29708304.jpg' %}');"></div>
+    
+    <!-- Contenedor del formulario -->
+    <div class="relative z-10 w-full max-w-md">  
+        <div class="bg-black border border-[#C0A76B] rounded-2xl p-8 w-full">
+            <h2 class="text-2xl font-bold text-[#C0A76B] text-center mb-6">REGISTRARSE</h2>
+            
+            {% if form.errors %}
+                <div class="bg-red-900 border border-red-500 text-red-200 p-3 rounded mb-4 text-sm">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            <p>❌ {{ error }}</p>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-            </div>
-        {% endif %}
+                </div>
+            {% endif %}
 
-        <form method="POST">
-            {% csrf_token %}
+            <form method="POST">
+                {% csrf_token %}
+                
+                <!-- Campo Usuario -->
+                <div class="mb-4">
+                    <label class="text-white block mb-2">Usuario:</label>
+                    <input type="text" name="username" 
+                        class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded focus:outline-none focus:ring-1 focus:ring-[#C0A76B]"
+                        value="{{ form.username.value|default:'' }}" required>
+                </div>
+                
+                <!-- Campo Email -->
+                <div class="mb-4">
+                    <label class="text-white block mb-2">Correo Electrónico:</label>
+                    <input type="email" name="email" 
+                        class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded focus:outline-none focus:ring-1 focus:ring-[#C0A76B]"
+                        value="{{ form.email.value|default:'' }}" required>
+                </div>
+                
+                <!-- Campo Contraseña -->
+                <div class="mb-4">
+                    <label class="text-white block mb-2">Contraseña:</label>
+                    <input type="password" name="password1" 
+                        class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded focus:outline-none focus:ring-1 focus:ring-[#C0A76B]" required>
+                    <p class="text-gray-400 text-xs mt-1">Mínimo 8 caracteres</p>
+                </div>
+                
+                <!-- Confirmar Contraseña -->
+                <div class="mb-6">
+                    <label class="text-white block mb-2">Confirmar Contraseña:</label>
+                    <input type="password" name="password2" 
+                        class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded focus:outline-none focus:ring-1 focus:ring-[#C0A76B]" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-[#C0A76B] text-black font-bold py-3 rounded hover:bg-yellow-400 transition duration-200">
+                    REGISTRARSE
+                </button>
+            </form>
             
-            <!-- Campo Usuario -->
-            <div class="mb-4">
-                <label class="text-white">Usuario:</label>
-                <input type="text" name="username" 
-                       class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded"
-                       value="{{ form.username.value|default:'' }}" required>
+            <div class="mt-4 text-center">
+                <a href="{% url 'login' %}" class="text-[#C0A76B] hover:underline transition duration-200">
+                    ¿Ya tienes cuenta? Inicia sesión
+                </a>
             </div>
-            
-            <!-- Campo Email -->
-            <div class="mb-4">
-                <label class="text-white">Correo Electrónico:</label>
-                <input type="email" name="email" 
-                       class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded"
-                       value="{{ form.email.value|default:'' }}" required>
-            </div>
-            
-            <!-- Campo Contraseña -->
-            <div class="mb-4">
-                <label class="text-white">Contraseña:</label>
-                <input type="password" name="password1" 
-                       class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded" required>
-                <p class="text-gray-400 text-xs mt-1">Mínimo 8 caracteres</p>
-            </div>
-            
-            <!-- Confirmar Contraseña -->
-            <div class="mb-6">
-                <label class="text-white">Confirmar Contraseña:</label>
-                <input type="password" name="password2" 
-                       class="w-full bg-[#1a1a1a] border border-[#C0A76B] text-white p-3 rounded" required>
-            </div>
-            
-            <button type="submit" class="w-full bg-[#C0A76B] text-black font-bold py-3 rounded hover:bg-yellow-400">
-                REGISTRARSE
-            </button>
-        </form>
-        
-        <div class="mt-4 text-center">
-            <a href="{% url 'login' %}" class="text-[#C0A76B] hover:underline">
-                ¿Ya tienes cuenta? Inicia sesión
-            </a>
         </div>
     </div>
 </body>
