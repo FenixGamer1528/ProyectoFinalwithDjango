@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from decimal import Decimal
+from datetime import datetime
+import uuid
 from core.utils.supabase_storage import subir_a_supabase
 
 class Producto(models.Model):
@@ -151,12 +153,9 @@ class Pedido(models.Model):
         
         # Generar número de pedido único si no existe
         if not self.numero:
-            import uuid
-            from datetime import datetime
             self.numero = f"PED-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
         
         # Calcular total si no está establecido o es cero
-        from decimal import Decimal
         if not self.total or self.total == Decimal('0'):
             self.total = self.producto.precio * self.cantidad
         
