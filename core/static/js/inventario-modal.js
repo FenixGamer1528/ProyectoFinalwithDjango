@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const rowBg = index % 2 === 0 ? 'bg-black bg-opacity-40' : 'bg-transparent';
                         
                         html += `
-                            <tr class="border-t border-[#C0A76B] border-opacity-20 hover:bg-[#C0A76B] hover:bg-opacity-10 transition-all ${rowBg}">`
+                            <tr class="border-t border-[#C0A76B] border-opacity-20 hover:bg-[#C0A76B] hover:bg-opacity-10 transition-all ${rowBg}">
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center justify-center bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] font-bold px-3 py-1 rounded-md text-sm border border-[#C0A76B] border-opacity-40">
                                         ${v.talla}
