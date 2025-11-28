@@ -8,11 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .product-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 20px rgba(192, 167, 107, 0.2); 
-        }
         .transition-all { transition: all 0.3s ease; }
+        
+        /* Estilos para la tabla optimizada */
+        table tbody tr:hover {
+            background: rgba(192, 167, 107, 0.05);
+        }
         
         /* Estilos para los campos del formulario en el modal */
         #productModal input[type="text"],
@@ -194,59 +195,82 @@
                 </div>
             </div>
 
-            <!-- Lista de productos -->
+            <!-- Tabla de productos optimizada -->
             <div class="lg:col-span-2">
-                <div id="productsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for producto in productos %}
-                        <div class="product-card bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg shadow-lg overflow-hidden transition-all">
-                            <div class="h-48 bg-black overflow-hidden">
-                                {% if producto.imagen_url %}
-                                    <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x400/1a1a1a/C0A76B?text=Imagen+no+disponible'">
-                                {% elif producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/600x400/1a1a1a/C0A76B?text=Imagen+no+disponible'">
-                                {% else %}
-                                    <img src="https://placehold.co/600x400/1a1a1a/C0A76B?text=Imagen+no+disponible" alt="Sin imagen" class="w-full h-full object-cover">
-                                {% endif %}
-                            </div>
-                            <div class="p-4">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h3 class="font-semibold text-lg text-white">{{ producto.nombre }}</h3>
-                                    <span class="bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] text-xs px-2 py-1 rounded-full border border-[#C0A76B] border-opacity-30">{{ producto.get_categoria_display }}</span>
-                                </div>
-                                <p class="text-gray-400 text-sm mb-3 line-clamp-2">{{ producto.descripcion|default:"Sin descripción" }}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-[#C0A76B]">${{ producto.precio }}</span>
-                                    <span class="text-sm {% if producto.stock > 0 %}text-green-400{% else %}text-red-400{% endif %}">
-                                        {% if producto.stock > 0 %}{{ producto.stock }} en stock{% else %}Agotado{% endif %}
-                                    </span>
-                                </div>
-                                {% if producto.destacado %}
-                                    <span class="inline-block mt-2 bg-yellow-900 bg-opacity-20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-400 border-opacity-30">Destacado</span>
-                                {% endif %}
-                                
-                                <!-- Botones de acción -->
-                                <div class="flex justify-between items-center mt-4">
-                                    <a href="{% url 'gestionar_variantes' producto.id %}" class="text-center bg-[#C0A76B] bg-opacity-20 hover:bg-opacity-30 text-[#C0A76B] px-3 py-2 rounded-md text-sm transition-all border border-[#C0A76B] border-opacity-50 flex-1 mr-2">
-                                        <i class="fas fa-boxes mr-1"></i> Distribución
-                                    </a>
-                                    <div class="flex space-x-3">
-                                        <button onclick="editProduct({{ producto.id }})" class="text-[#C0A76B] hover:text-yellow-400 transition duration-300 px-2">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <form method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?')">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                            <button type="submit" name="eliminar" class="text-red-400 hover:text-red-300 transition duration-300 px-2">
-                                                <i class="fas fa-trash"></i>
+                <div id="productsContainer" class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg shadow-lg overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-[#C0A76B] bg-opacity-10 border-b-2 border-[#C0A76B]">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Producto</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Descripción</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Categoría</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Precio</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Stock</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Estado</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                {% for producto in productos %}
+                                <tr class="hover:bg-[#C0A76B] hover:bg-opacity-5 transition-colors">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-white">{{ producto.nombre }}</div>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <div class="text-sm text-gray-400 max-w-xs truncate">{{ producto.descripcion|default:"Sin descripción"|truncatewords:10 }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] border border-[#C0A76B] border-opacity-30">
+                                            {{ producto.get_categoria_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-bold text-[#C0A76B]">${{ producto.precio }}</div>
+                                    </td>
+                                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if producto.stock > 10 %}bg-green-900 text-green-400 border border-green-400{% elif producto.stock > 0 %}bg-yellow-900 text-yellow-400 border border-yellow-400{% else %}bg-red-900 text-red-400 border border-red-400{% endif %} border-opacity-30">
+                                            {% if producto.stock > 0 %}{{ producto.stock }} unidades{% else %}Agotado{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                                        {% if producto.destacado %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900 bg-opacity-20 text-yellow-400 border border-yellow-400 border-opacity-30">
+                                            <i class="fas fa-star mr-1"></i> Destacado
+                                        </span>
+                                        {% else %}
+                                        <span class="text-gray-600 text-xs">Regular</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <a href="{% url 'gestionar_variantes' producto.id %}" class="inline-flex items-center px-3 py-1.5 bg-[#C0A76B] bg-opacity-20 hover:bg-opacity-30 text-[#C0A76B] rounded-md text-xs transition-all border border-[#C0A76B] border-opacity-50" title="Distribución">
+                                                <i class="fas fa-boxes mr-1"></i> Distribución
+                                            </a>
+                                            <button onclick="editProduct({{ producto.id }})" class="p-2 text-[#C0A76B] hover:text-yellow-400 hover:bg-[#C0A76B] hover:bg-opacity-10 rounded-md transition-all" title="Editar">
+                                                <i class="fas fa-edit"></i>
                                             </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="text-gray-400 col-span-2 text-center py-8">No se encontraron productos</p>
-                    {% endfor %}
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?')">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                <button type="submit" name="eliminar" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-900 hover:bg-opacity-20 rounded-md transition-all" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                                        <i class="fas fa-inbox text-4xl mb-2 opacity-20"></i>
+                                        <p>No se encontraron productos</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
