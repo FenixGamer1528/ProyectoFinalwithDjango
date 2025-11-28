@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const productoId = producto.variantes[0]?.producto_id;
                     
                     html += `
-                        <div class="bg-gray-900 rounded-lg overflow-hidden border border-[#C0A76B] border-opacity-30 hover:border-[#C0A76B] hover:border-opacity-60 transition-all">
-                            <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30">
+                        <div class="bg-[#1a1a1a] rounded-lg overflow-hidden border border-[#C0A76B] border-opacity-30 hover:border-[#C0A76B] hover:border-opacity-60 transition-all">
+                            <div class="flex items-center gap-4 p-4 bg-black bg-opacity-40">
                                 ${producto.imagen ? `
                                     <img src="${producto.imagen}" alt="${producto.nombre}" 
                                          class="w-20 h-20 object-cover rounded-lg border-2 border-[#C0A76B] border-opacity-30"
@@ -99,10 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     producto.variantes.forEach((v, index) => {
                         const stockClass = v.stock >= 10 ? 'text-green-400' : v.stock >= 5 ? 'text-yellow-400' : 'text-red-400';
                         const stockIcon = v.stock >= 10 ? 'fa-check-circle' : v.stock >= 5 ? 'fa-exclamation-circle' : 'fa-times-circle';
-                        const rowBg = index % 2 === 0 ? 'bg-gray-800 bg-opacity-30' : 'bg-transparent';
+                        const rowBg = index % 2 === 0 ? 'bg-black bg-opacity-40' : 'bg-transparent';
                         
                         html += `
-                            <tr class="border-t border-gray-800 hover:bg-[#C0A76B] hover:bg-opacity-10 transition-all ${rowBg}">
+                            <tr class="border-t border-[#C0A76B] border-opacity-20 hover:bg-[#C0A76B] hover:bg-opacity-10 transition-all ${rowBg}">`
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center justify-center bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] font-bold px-3 py-1 rounded-md text-sm border border-[#C0A76B] border-opacity-40">
                                         ${v.talla}
