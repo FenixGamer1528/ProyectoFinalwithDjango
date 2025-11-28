@@ -139,40 +139,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="mt-6 pt-6 border-t-2 border-[#C0A76B] border-opacity-30">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="bg-gradient-to-br from-blue-900 to-blue-800 p-4 rounded-lg border border-blue-400 border-opacity-30">
+                            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-lg border border-[#C0A76B] border-opacity-30">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-blue-300 text-sm font-semibold">Total Productos</p>
+                                        <p class="text-gray-300 text-sm font-semibold">Total Productos</p>
                                         <p class="text-3xl font-bold text-white mt-1">${Object.keys(productosMap).length}</p>
                                     </div>
-                                    <i class="fas fa-boxes text-blue-400 text-3xl opacity-50"></i>
+                                    <i class="fas fa-boxes text-[#C0A76B] text-3xl opacity-50"></i>
                                 </div>
                             </div>
-                            <div class="bg-gradient-to-br from-purple-900 to-purple-800 p-4 rounded-lg border border-purple-400 border-opacity-30">
+                            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-lg border border-[#C0A76B] border-opacity-30">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-purple-300 text-sm font-semibold">Total Variantes</p>
+                                        <p class="text-gray-300 text-sm font-semibold">Total Variantes</p>
                                         <p class="text-3xl font-bold text-white mt-1">${inventario.length}</p>
                                     </div>
-                                    <i class="fas fa-layer-group text-purple-400 text-3xl opacity-50"></i>
+                                    <i class="fas fa-layer-group text-[#C0A76B] text-3xl opacity-50"></i>
                                 </div>
                             </div>
-                            <div class="bg-gradient-to-br from-green-900 to-green-800 p-4 rounded-lg border border-green-400 border-opacity-30">
+                            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-lg border border-[#C0A76B] border-opacity-30">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-green-300 text-sm font-semibold">Stock Total</p>
+                                        <p class="text-gray-300 text-sm font-semibold">Stock Total</p>
                                         <p class="text-3xl font-bold text-white mt-1">${inventario.reduce((sum, v) => sum + v.stock, 0)}</p>
                                     </div>
-                                    <i class="fas fa-warehouse text-green-400 text-3xl opacity-50"></i>
+                                    <i class="fas fa-warehouse text-[#C0A76B] text-3xl opacity-50"></i>
                                 </div>
                             </div>
-                            <div class="bg-gradient-to-br from-yellow-900 to-yellow-800 p-4 rounded-lg border border-yellow-400 border-opacity-30">
+                            <div class="bg-gradient-to-br from-[#C0A76B] to-[#8a7548] p-4 rounded-lg border border-[#C0A76B] border-opacity-50">
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-yellow-300 text-sm font-semibold">Valor Total</p>
-                                        <p class="text-2xl font-bold text-white mt-1">$${inventario.reduce((sum, v) => sum + (v.stock * v.precio), 0).toLocaleString()}</p>
+                                        <p class="text-black text-sm font-semibold">Valor Total</p>
+                                        <p class="text-2xl font-bold text-black mt-1">$${inventario.reduce((sum, v) => sum + (v.stock * v.precio), 0).toLocaleString()}</p>
                                     </div>
-                                    <i class="fas fa-dollar-sign text-yellow-400 text-3xl opacity-50"></i>
+                                    <i class="fas fa-dollar-sign text-black text-3xl opacity-70"></i>
                                 </div>
                             </div>
                         </div>
