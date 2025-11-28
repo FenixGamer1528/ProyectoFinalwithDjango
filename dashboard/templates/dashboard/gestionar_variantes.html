@@ -40,7 +40,7 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Columna izquierda: Info del producto y formulario -->
+            <!-- COLUMNA IZQUIERDA -->
             <div class="space-y-6">
                 <!-- Información del producto base -->
                 <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
@@ -176,9 +176,10 @@
                         {% if stock_disponible > 0 %}Crear Variante{% else %}Sin stock disponible{% endif %}
                     </button>
                 </form>
+                </div>
             </div>
             
-            <!-- Columna derecha: Lista de variantes y distribución -->
+            <!-- COLUMNA DERECHA -->
             <div class="space-y-6">
                 <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
                 {% if tallas_disponibles or colores_disponibles %}
