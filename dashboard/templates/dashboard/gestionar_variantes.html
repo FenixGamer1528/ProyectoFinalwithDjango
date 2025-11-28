@@ -39,9 +39,9 @@
             {% endif %}
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            <!-- Columna izquierda: Info del producto (más compacta) -->
-            <div class="lg:col-span-2 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Columna izquierda: Info del producto y formulario -->
+            <div class="space-y-6">
                 <!-- Información del producto base -->
                 <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
@@ -177,12 +177,12 @@
                     </button>
                 </form>
             </div>
-
-            <!-- Lista de variantes y distribución -->
-            <div class="lg:col-span-3">
+            
+            <!-- Columna derecha: Lista de variantes y distribución -->
+            <div class="space-y-6">
                 <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
                 {% if tallas_disponibles or colores_disponibles %}
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg mb-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
                         <i class="fas fa-layer-group mr-2"></i> Tallas y Colores Disponibles
                     </h2>
@@ -223,7 +223,7 @@
                 
                 <!-- Miniaturas de variantes disponibles -->
                 {% if variantes %}
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg mb-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <div>
                         <h3 class="text-sm font-medium text-[#C0A76B] mb-3">
                             <i class="fas fa-images mr-2"></i>Disponible en {{ variantes.count }} opción{{ variantes.count|pluralize:"es" }}
@@ -265,7 +265,7 @@
                     <i class="fas fa-list mr-2"></i> Distribución Existente ({{ variantes.count }})
                 </h2>
                 
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4">
                     {% for variante in variantes %}
                         <div class="bg-black border border-[#C0A76B] border-opacity-30 rounded-lg p-4 hover:border-opacity-100 transition-all hover:shadow-lg">
                             <div class="flex justify-between items-start mb-3">
