@@ -1,17 +1,10 @@
 from django import forms
-from carrito.models import Producto, ProductoVariante, Inventario, TipoProducto
+from carrito.models import Producto, ProductoVariante, Inventario
 
 class ProductoForm(forms.ModelForm):
-    # Campo personalizado para tipo de producto
-    tipo_producto = forms.ChoiceField(
-        choices=TipoProducto.choices,
-        initial=TipoProducto.ROPA,
-        widget=forms.Select(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'})
-    )
-    
     class Meta:
         model = Producto
-        fields = ['nombre', 'categoria', 'precio', 'stock', 'descripcion', 'imagen', 'destacado']
+        fields = ['nombre', 'categoria', 'precio', 'stock', 'descripcion', 'imagen', 'destacado', 'en_oferta']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'}),
             'categoria': forms.Select(attrs={'class': 'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'}),
@@ -52,4 +45,6 @@ class InventarioForm(forms.ModelForm):
             'tipo_movimiento': forms.Select(attrs={'class': 'w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white'}),
             'cantidad': forms.NumberInput(attrs={'class': 'w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white', 'min': '1'}),
             'observaciones': forms.Textarea(attrs={'class': 'w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white', 'rows': 3}),
+
+
         }
