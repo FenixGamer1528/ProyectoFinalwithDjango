@@ -4,158 +4,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
     <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
-    <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
     <title>Glamoure - Ofertas</title>
 </head>
-<body class="bg-black text-white font-sans antialiased">
+<body class="flex flex-col min-h-screen bg-black text-white font-sans antialiased">
 
-  <!-- Header -->
-  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
+    <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
     <nav class="container mx-auto flex justify-between items-center px-6 py-4">
-      
-      <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
-        <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
-        <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
-        <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
-        <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
-      </ul>
+  <!-- Menú izquierdo -->
+  <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
+    <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
+    <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
+    <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
+    <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
+  </ul>
 
-      <div class="flex justify-center">
-        <a href="{% url 'index' %}">
-          <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
-        </a>
-      </div>
+  <!-- Logo central -->
+  <div class="flex justify-center">
+    <a href="{% url 'index' %}">
+      <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
+    </a>
+  </div>
 
-      <div class="flex items-center gap-4">
-        <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
-          <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
-        </button>
-        <ul class="hidden md:flex gap-4 text-sm">
-          {% if user.is_authenticated %}
-            <li><span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span></li>
-            <li><a href="{% url 'logout' %}" class="hover:text-[#C0A76B] transition">Cerrar sesión</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a></li>
-            <li><a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a></li>
-          {% endif %}
-        </ul>
-      </div>
-    </nav>
+  <!-- Menú derecho -->
+  <div class="flex items-center gap-4">
+    <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
+      <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
+    </button>
+    <!-- Wishlist counter -->
+    <div class="relative">
+      {% if user.is_authenticated %}
+      <a href="{% url 'mis_deseos' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
+        <i id="wishlist-icon" class="fa-regular fa-heart text-2xl"></i>
+        <span id="wishlist-count" class="ml-1 text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
+      </a>
+      {% else %}
+      <a href="{% url 'login' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
+        <i class="fa-regular fa-heart text-2xl"></i>
+      </a>
+      {% endif %}
+    </div>
+    
+    <div class="hidden md:flex gap-4 text-sm">
+      {% if user.is_authenticated %} 
+        <!-- Menú desplegable del usuario -->
+        <div class="relative">
+          <button id="userMenuButton" class="flex items-center gap-1 hover:text-[#C0A76B] transition cursor-pointer py-2">
+            <span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span>
+            <svg id="userMenuArrow" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Menú desplegable -->
+          <div id="userMenu" class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50 hidden">
+            <!-- Dashboard Cliente -->
+            <a href="{% url 'dashboard_cliente' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span>Mi Dashboard</span>
+              </div>
+            </a>
+            
+            <!-- Panel de Administración (Solo para staff) -->
+            {% if user.is_staff %}
+            <a href="{% url 'dashboard' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #7c3aed;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Panel Admin</span>
+              </div>
+            </a>
+            {% endif %}
+            
+            <!-- Cerrar sesión -->
+            <a href="{% url 'logout' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
+              <div class="flex items-center gap-2">
+                <svg style="width: 16px; height: 16px; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>Cerrar sesión</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a>
+        <a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
   </header>
 
-  <!-- Espaciado para el header fijo -->
-  <div style="margin-top: 100px;"></div>
+    <main class="container mx-auto px-6 py-10 flex-grow pt-28">
+        <h1 class="text-4xl font-bold text-[#C0A76B] mb-8 text-center uppercase tracking-wide">Ofertas Especiales</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for producto in productos %}
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden hover:scale-105 transform transition duration-300 hover:shadow-2xl hover:border-[#d4b96a]">
+                <div class="relative">
+                    {% if producto.imagen_url %}
+                      <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
+                    {% elif producto.imagen %}
+                      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover">
+                    {% else %}
+                      <img src="https://placehold.co/600x400/1a1a1a/C0A76B?text=Sin+imagen" alt="Sin imagen" class="w-full h-64 object-cover">
+                    {% endif %}
+                    
+                    <!-- Botón de favoritos -->
+                    {% if user.is_authenticated %}
+                    <div class="absolute top-3 left-3">
+                        <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                                class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110" 
+                                title="{% if user in producto.favorited_by.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
+                                data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
+                            <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart text-lg" 
+                               style="{% if user in producto.favorited_by.all %}color: #C0A76B;{% else %}color: #6B7280;{% endif %}"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
 
-  <!-- Sección de Ofertas -->
-  <section class="py-20 bg-[#111]">
-    <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
-    
-    <div class="carousel-container">
-      <!-- Botones de navegación -->
-      <button class="carousel-nav prev" aria-label="Anterior">‹</button>
-      <button class="carousel-nav next" aria-label="Siguiente">›</button>
-      
-      <!-- Carrusel -->
-      <div class="carousel-wrapper">
-        <div class="carousel-track">
-          
-          <!-- Producto 1 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Buso negro.webp' %}" alt="Buzo negro">
-            <div class="product-info">
-              <p class="product-name">Buzo Negro Premium</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold text-white">{{ producto.nombre }}</h3>
+                    <p class="text-gray-300 text-sm mb-2">{{ producto.descripcion|truncatewords:12 }}</p>
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-[#C0A76B] font-bold text-lg">${{ producto.precio }}</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{% url 'producto_detalle' producto.id %}" 
+                           class="flex-1 bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] transition duration-300 font-semibold text-center">
+                            <i class="fas fa-eye mr-1"></i> Ver
+                        </a>
+                        <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300 font-semibold">
+                                <i class="fas fa-shopping-cart mr-1"></i> Agregar
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
-          </div>
-          
-          <!-- Producto 2 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Blusa mujer">
-            <div class="product-info">
-              <p class="product-name">Blusa de Vestir Elegante</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
-          <!-- Producto 3 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa de vestir">
-            <div class="product-info">
-              <p class="product-name">Camisa de Vestir</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
-          <!-- Producto 4 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa casual">
-            <div class="product-info">
-              <p class="product-name">Camisa Casual</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
-          <!-- Producto 5 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Conjunto elegante">
-            <div class="product-info">
-              <p class="product-name">Conjunto Elegante</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
-          <!-- Producto 6 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Blusa moderna">
-            <div class="product-info">
-              <p class="product-name">Blusa Moderna</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
-          <!-- Producto 7 -->
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Camisa sport">
-            <div class="product-info">
-              <p class="product-name">Camisa Sport</p>
-              <p class="product-price">$50.00</p>
-              <a href="#" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          
+            {% empty %}
+            <p class="col-span-full text-center text-gray-400 text-lg">No hay productos en oferta en este momento.</p>
+            {% endfor %}
         </div>
-      </div>
-      
-      <!-- Indicadores -->
-      <div class="carousel-indicators">
-        <span class="indicator active"></span>
-        <span class="indicator"></span>
-        <span class="indicator"></span>
-        <span class="indicator"></span>
-        <span class="indicator"></span>
-      </div>
-    </div>
-  </section>
+    </main>
 
-  <!-- Footer -->
-  <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
+    <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
     <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left px-6 gap-4">
       <ul class="flex flex-wrap justify-center md:justify-start gap-6 text-gray-400 text-sm">
         <li><a href="#" class="hover:text-[#C0A76B]">Acerca de nosotros</a></li>
@@ -169,22 +173,69 @@
     </div>
   </footer>
 
-  <!-- Modal Carrito -->
-  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
-      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black text-2xl font-bold">&times;</button>
-      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
-      <div id="carritoContenido"></div>
+       <div id="carritoModal" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
+            <h2 id="carritoTitulo">Carrito de compras</h2>
+            <div id="carritoContenido"></div>
+        </div>
     </div>
-  </div>
-
-  <div id="productoModal" class="modal">
-    <div class="modal-contenido">
-      <div id="productoContenido"></div>
+    <div id="productoModal" class="modal">
+        <div class="modal-contenido">
+            <div id="productoContenido"></div>
+        </div>
     </div>
-  </div>
 
-  <script src="{% static 'js/modal.js' %}"></script>
-  <script src="{% static 'js/carousel-ofertas.js' %}"></script>
+
+    <script src="{% static 'js/modal.js' %}?v=1763070666"></script>
+    <script>
+    function toggleFavorito(productoId, button) {
+        fetch(`/toggle-favorito/${productoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const icon = button.querySelector('i');
+                if (data.is_favorito) {
+                    icon.className = 'fa-solid fa-heart text-lg';
+                    icon.style.color = '#C0A76B';
+                    button.title = 'Eliminar de favoritos';
+                    button.classList.add('animate-bounce');
+                    setTimeout(() => button.classList.remove('animate-bounce'), 500);
+                } else {
+                    icon.className = 'fa-regular fa-heart text-gray-600 text-lg';
+                    icon.style.color = '';
+                    button.title = 'Agregar a favoritos';
+                }
+            } else {
+                alert('Error: ' + (data.error || 'Por favor, intenta de nuevo'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Hubo un error. Por favor, intenta de nuevo.');
+        });
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
 </body>
 </html>
