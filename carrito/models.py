@@ -22,7 +22,7 @@ class Producto(models.Model):
     imagen_url = models.URLField(blank=True, null=True)
     # Talla opcional del producto (ej: S, M, L, 38, 39, etc.)
     talla = models.CharField(max_length=20, blank=True, null=True)
-    # Colores disponibles para el producto (guardados como CSV: "Rojo,Azul")
+    en_oferta = models.BooleanField(default=False)
     colores = models.CharField(max_length=200, blank=True, null=True)
     destacado = models.BooleanField(default=False)  # Índice creado manualmente
     stock = models.IntegerField(default=0)
