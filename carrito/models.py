@@ -2,9 +2,12 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from decimal import Decimal
+from datetime import datetime
+import uuid
 from core.utils.supabase_storage import subir_a_supabase
 from django.utils import timezone
 import random
+
 
 class Producto(models.Model):
     class CategoriaEnum(models.TextChoices):
@@ -103,44 +106,78 @@ class UsuarioPersonalizado(AbstractUser):
     def __str__(self):
         return self.username
 
+
+class EstadoPedido(models.TextChoices):
+    PENDIENTE = 'pendiente', 'Pendiente'
+    PROCESANDO = 'procesando', 'Procesando'
+    COMPLETADO = 'completado', 'Completado'
+    CANCELADO = 'cancelado', 'Cancelado'
+
+
 class Pedido(models.Model):
-    ESTADO_CHOICES = [
-        ('pendiente', 'Pendiente'),
-        ('confirmado', 'Confirmado'),
-        ('en_proceso', 'En Proceso'),
-        ('enviado', 'Enviado'),
-        ('entregado', 'Entregado'),
-        ('cancelado', 'Cancelado'),
-    ]
-    
-    usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE)
-    producto = models.ForeignKey('Producto', on_delete=models.CASCADE)
+    usuario = models.ForeignKey(UsuarioPersonalizado, on_delete=models.CASCADE, related_name='pedidos')
+    numero = models.CharField(max_length=50, unique=True, editable=False)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
-    fecha = models.DateTimeField(auto_now_add=True)
-    
-    # SOLO los campos esenciales que sabemos que funcionan
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estado = models.CharField(
-        max_length=20, 
-        choices=ESTADO_CHOICES, 
-        default='pendiente'
+        max_length=20,
+        choices=EstadoPedido.choices,
+        default=EstadoPedido.PENDIENTE,
+        null=False,
+        blank=False
     )
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     
+    # Información de envío
+    direccion = models.TextField(blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    ciudad = models.CharField(max_length=100, blank=True, null=True)
+    codigo_postal = models.CharField(max_length=10, blank=True, null=True)
+    
+    # Notas adicionales
+    notas = models.TextField(blank=True, null=True)
+    
+    # Fechas
+    fecha = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
+
     class Meta:
         indexes = [
             models.Index(fields=['usuario', '-fecha']),
+            models.Index(fields=['estado', '-fecha']),
+            models.Index(fields=['numero']),
         ]
         ordering = ['-fecha']
-    
-    def __str__(self):
-        return f"Pedido #{self.id} de {self.usuario}"
-    
+        verbose_name = 'Pedido'
+        verbose_name_plural = 'Pedidos'
+
     def save(self, *args, **kwargs):
-        # Calcular automáticamente el total
-        if not self.total and self.producto:
+        # Asegurar que el estado tenga un valor
+        if not self.estado:
+            self.estado = EstadoPedido.PENDIENTE
+        
+        # Generar número de pedido único si no existe
+        if not self.numero:
+            self.numero = f"PED-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+        
+        # Calcular total si no está establecido o es cero
+        if not self.total or self.total == Decimal('0'):
             self.total = self.producto.precio * self.cantidad
+        
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Pedido {self.numero} - {self.usuario.username}"
+    
+    @property
+    def cliente(self):
+        """Retorna el nombre completo del cliente"""
+        return self.usuario.get_full_name() or self.usuario.username
+    
+    @property
+    def email(self):
+        """Retorna el email del cliente"""
+        return self.usuario.email
 
 class Carrito(models.Model):
     usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

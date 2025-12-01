@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionar Variantes - {{ producto.nombre }}</title>
+    <title>Gestionar Distribución - {{ producto.nombre }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -22,7 +22,7 @@
         <header class="mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-[#C0A76B]">Variantes de Producto</h1>
+                    <h1 class="text-3xl font-bold text-[#C0A76B]">Distribución de Producto</h1>
                     <p class="text-gray-400 mt-2">{{ producto.nombre }}</p>
                 </div>
                 <a href="{% url 'gestion_productos' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
@@ -39,11 +39,11 @@
             {% endif %}
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Columna izquierda: Formulario + Info del producto -->
-            <div class="lg:col-span-1 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- COLUMNA IZQUIERDA -->
+            <div class="space-y-6">
                 <!-- Información del producto base -->
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
                         <i class="fas fa-info-circle mr-2"></i> Producto Base
                     </h2>
@@ -109,8 +109,8 @@
                     </div>
                 </div>
                 
-                <!-- Formulario para agregar variante -->
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg">
+                <!-- Formulario para agregar variantes -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                 <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
                     <i class="fas fa-plus-circle mr-2"></i> Agregar Variante
                 </h2>
@@ -176,13 +176,14 @@
                         {% if stock_disponible > 0 %}Crear Variante{% else %}Sin stock disponible{% endif %}
                     </button>
                 </form>
+                </div>
             </div>
-
-            <!-- Lista de variantes -->
-            <div class="lg:col-span-2">
+            
+            <!-- COLUMNA DERECHA -->
+            <div class="space-y-6">
                 <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
                 {% if tallas_disponibles or colores_disponibles %}
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg mb-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
                         <i class="fas fa-layer-group mr-2"></i> Tallas y Colores Disponibles
                     </h2>
@@ -223,10 +224,10 @@
                 
                 <!-- Miniaturas de variantes disponibles -->
                 {% if variantes %}
-                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-6 rounded-lg shadow-lg mb-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                     <div>
                         <h3 class="text-sm font-medium text-[#C0A76B] mb-3">
-                            <i class="fas fa-images mr-2"></i>Disponible en {{ variantes.count }} variante{{ variantes.count|pluralize }}
+                            <i class="fas fa-images mr-2"></i>Disponible en {{ variantes.count }} opción{{ variantes.count|pluralize:"es" }}
                         </h3>
                         <div class="flex flex-wrap gap-3">
                             {% for variante in variantes %}
@@ -260,14 +261,14 @@
                 
                 <!-- Lista detallada de variantes -->
                 {% if variantes %}
-                <div class="mt-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
                 <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
-                    <i class="fas fa-list mr-2"></i> Variantes Existentes ({{ variantes.count }})
+                    <i class="fas fa-list mr-2"></i> Distribución Existente ({{ variantes.count }})
                 </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 gap-4">
                     {% for variante in variantes %}
-                        <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4 hover:border-opacity-100 transition-all">
+                        <div class="bg-black border border-[#C0A76B] border-opacity-30 rounded-lg p-4 hover:border-opacity-100 transition-all hover:shadow-lg">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
                                     <h3 class="font-semibold text-white">{{ variante.talla }} - {{ variante.color }}</h3>
@@ -308,7 +309,7 @@
                         </div>
                     {% empty %}
                         <p class="text-gray-400 col-span-2 text-center py-8">
-                            No hay variantes creadas. Agrega la primera variante usando el formulario.
+                            No hay distribución creada. Agrega la primera distribución usando el formulario.
                         </p>
                     {% endfor %}
                 </div>

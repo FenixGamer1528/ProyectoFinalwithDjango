@@ -162,27 +162,40 @@ def webhook_wompi(request):
                     # 🎉 Crear pedidos si hay detalle
                     if transaccion.detalle_pedido and transaccion.usuario:
                         productos = transaccion.detalle_pedido.get('productos', [])
-                        from core.models import Producto
+                        from carrito.models import Producto
                         
                         for prod_data in productos:
                             try:
                                 producto = Producto.objects.get(id=prod_data['producto_id'])
-                                Pedido.objects.create(
+                                
+                                # Calcular total del pedido
+                                total_pedido = producto.precio * prod_data['cantidad']
+                                
+                                # Crear pedido con todos los campos necesarios
+                                pedido = Pedido.objects.create(
                                     usuario=transaccion.usuario,
                                     producto=producto,
-                                    cantidad=prod_data['cantidad']
+                                    cantidad=prod_data['cantidad'],
+                                    total=total_pedido,
+                                    estado='pendiente',  # Forzar explícitamente
+                                    telefono=transaccion.usuario.telefono or '',
+                                    notas=f'Pedido realizado mediante Wompi - Referencia: {transaccion.referencia}'
                                 )
-                                print(f"✅ Pedido creado: {producto.nombre}")
+                                print(f"✅ Pedido {pedido.numero} creado: {producto.nombre} x{prod_data['cantidad']} - Total: ${total_pedido}")
                             except Producto.DoesNotExist:
                                 print(f"❌ Producto {prod_data['producto_id']} no encontrado")
+                            except Exception as e:
+                                print(f"❌ Error creando pedido: {e}")
                         
                         # Vaciar carrito
                         try:
                             carrito = Carrito.objects.get(usuario=transaccion.usuario)
                             carrito.items.all().delete()
-                            print(f"✅ Carrito vaciado")
+                            print(f"✅ Carrito vaciado para usuario {transaccion.usuario.username}")
                         except Carrito.DoesNotExist:
-                            pass
+                            print(f"⚠️ Carrito no encontrado para usuario {transaccion.usuario.username}")
+                        except Exception as e:
+                            print(f"❌ Error vaciando carrito: {e}")
                     
                 elif datos_transaccion['status'] == 'DECLINED':
                     transaccion.estado = 'DECLINED'
@@ -294,7 +307,9 @@ def checkout_desde_carrito(request):
      # Determinar la URL de redirección según el entorno
     if settings.DEBUG:
         # En desarrollo con cloudflared - CAMBIA ESTA URL POR LA QUE TE DIO CLOUDFLARED
-        redirect_url = "https://app.glamoure.tech/pages/confirmation-carrito/"
+
+        redirect_url = "https://app.glamoure.tech/pagos/confirmacion-carrito/"
+
     else:
         # En producción
         redirect_url = request.build_absolute_uri('/pagos/confirmacion-carrito/')
@@ -354,21 +369,36 @@ def confirmar_pago_carrito(request):
                 # Crear un pedido por cada producto
                 for prod_data in productos:
                     from carrito.models import Producto
+                    import uuid
+                    from datetime import datetime
+                    from decimal import Decimal
+                    
                     try:
                         producto = Producto.objects.get(id=prod_data['producto_id'])
                         
+
+                        # Calcular total del pedido
+                        total_pedido = Decimal(str(prod_data['precio'])) * prod_data['cantidad']
+                        
+                        # Generar número único de pedido
+                        numero_pedido = f"PED-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+                        
+                        # Crear el pedido con todos los campos necesarios
+
                         Pedido.objects.create(
                             usuario=transaccion.usuario,
                             producto=producto,
                             cantidad=prod_data['cantidad'],
-                            estado='confirmado',
-                            fecha_actualizacion=timezone.now(),
-                            total=producto.precio * prod_data['cantidad']
-                            # ✅ YA NO necesitas el campo 'numero' - se genera automáticamente
+
+                            numero=numero_pedido,
+                            total=total_pedido,
+                            estado='pendiente',
+                            telefono=transaccion.usuario.telefono if hasattr(transaccion.usuario, 'telefono') else None
                         )
-                        print(f"✅ Pedido creado: {producto.nombre}")
+                        print(f"✅ Pedido {numero_pedido} creado para {producto.nombre}")
+
                     except Producto.DoesNotExist:
-                        print(f"Producto {prod_data['producto_id']} no encontrado")
+                        print(f"❌ Producto {prod_data['producto_id']} no encontrado")
                 
                 # Vaciar el carrito
                 try:
