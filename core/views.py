@@ -16,6 +16,20 @@ def home(request):
 def about(request):
     return render(request, "about.html",{})
 
+def catalogo_completo(request):
+    """Vista que muestra todos los productos de todas las categorías"""
+    productos = Producto.objects.all().only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
+    return render(request, 'core/catalogo_completo.html', {
+        'productos': productos
+    })
+
 def index(request):
     # Cargar productos destacados (para "Lo Más Vendido")
     productos = Producto.objects.filter(destacado=True).only(

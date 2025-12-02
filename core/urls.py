@@ -22,5 +22,6 @@ urlpatterns = [
     path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
     path('producto/<int:producto_id>/', views.producto_detalle, name='producto_detalle'),
     path('buscar/', views.buscar_productos, name='buscar_productos'),
+    path('catalogo/', views.catalogo_completo, name='catalogo_completo'),
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
