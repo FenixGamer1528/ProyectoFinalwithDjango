@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
   <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+  <!-- FontAwesome para los iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <title>Glamoure</title>
   <style>
     /* Animación del botón Ver Productos */
@@ -130,6 +132,44 @@
         box-shadow: 0 0 40px rgba(192, 167, 107, 0.8), 0 0 60px rgba(192, 167, 107, 0.5);
       }
     }
+    
+    /* Estilos para la sección hero */
+    .hero-section {
+      height: 100vh;
+      background-image: url('{% static "imagenes/Gemini.png" %}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    
+    .hero-overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 2.5rem;
+      border-radius: 1rem;
+      max-width: 800px;
+      margin: 0 1rem;
+    }
+    
+    /* Ajustes para el header */
+    header {
+      margin-bottom: 0 !important;
+    }
+    
+    /* Ajuste para el contenido principal */
+    main {
+      margin-top: 80px; /* Para compensar el header fijo */
+    }
+    
+    /* Ajuste para el icono del corazón */
+    .fa-heart {
+      font-size: 1.5rem;
+    }
   </style>
 </head>
 <body class="bg-black text-white font-sans antialiased">
@@ -155,62 +195,25 @@
       <!-- Menú derecho -->
       <div class="flex items-center gap-4">
         <!-- Barra de búsqueda -->
-        <div class="relative">
-          <button id="userMenuButton" class="flex items-center gap-1 hover:text-[#C0A76B] transition cursor-pointer py-2">
-            <span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span>
-            <svg id="userMenuArrow" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
-          
-          <!-- Menú desplegable -->
-          <div id="userMenu" class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50 hidden">
-            <!-- Dashboard Cliente -->
-            <a href="{% url 'cliente_dashboard' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <span>Mi Dashboard</span>
-              </div>
-            </a>
-            
-            <!-- Panel de Administración (Solo para staff) -->
-            {% if user.is_staff %}
-            <a href="{% url 'dashboard' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #7c3aed;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>Panel Admin</span>
-              </div>
-            </a>
-            {% endif %}
-            
-            <!-- Cerrar sesión -->
-            <a href="{% url 'logout' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                <span>Cerrar sesión</span>
-              </div>
-            </a>
-          </div>
-
+        <div class="relative hidden md:block">
           <form action="{% url 'buscar_productos' %}" method="GET" class="flex items-center">
             <input type="text" name="q" placeholder="Buscar productos..." 
                    class="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-l-md border-r-0 border border-[#C0A76B] focus:outline-none focus:ring-1 focus:ring-[#C0A76B] w-40 h-8">
             <button type="submit" 
-                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-3 py-1.5 rounded-r-md h-8 flex items-center gap-1 transition-colors duration-200">
+                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-3 py-1.5 rounded-r-md h-8 flex items-center justify-center transition-colors duration-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <span>Buscar</span>
             </button>
           </form>
         </div>
+
+        <!-- Botón de búsqueda para móvil -->
+        <button class="md:hidden p-2 hover:text-[#C0A76B] transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
 
         <!-- Botón de carrito -->
         <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
@@ -222,7 +225,7 @@
           {% if user.is_authenticated %}
           <a href="{% url 'mis_deseos' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
             <i id="wishlist-icon" class="fa-regular fa-heart text-2xl"></i>
-            <span id="wishlist-count" class="ml-1 text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
+            <span id="wishlist-count" class="text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
           </a>
           {% else %}
           <a href="{% url 'login' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
@@ -288,243 +291,149 @@
     </nav>
   </header>
 
-  
-  <section class="h-screen bg-cover bg-center flex flex-col justify-center items-center text-center" style="background-image: url('{% static 'imagenes/Gemini.png' %}');">
-    <div class="bg-black bg-opacity-60 p-10 rounded-2xl">
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-[#C0A76B] tracking-wide">¡Bienvenido a Glamoure!</h1>
-      <p class="text-gray-200 text-lg md:text-xl mb-6">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
-      <a href="{% url 'index' %}"
-         class="btn-hero inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition">
-        Ver Productos
-      </a>
-    </div>
-  </section>
-
-  
-  <section class="py-16 bg-gradient-to-b from-black via-[#111] to-black text-center">
-    <h2 class="text-3xl font-bold text-[#C0A76B] mb-10 uppercase">Categorías Destacadas</h2>
-    <div class="flex flex-col md:flex-row justify-center gap-8 px-6">
-      <div class="group relative overflow-hidden rounded-2xl">
-        <a href="{% url 'mujeres' %}">
-          <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Mujer</span>
+  <!-- Contenido principal -->
+  <main>
+    <!-- Sección Hero -->
+    <section class="hero-section">
+      <div class="hero-overlay">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-[#C0A76B] tracking-wide">¡Bienvenido a Glamoure!</h1>
+        <p class="text-gray-200 text-lg md:text-xl mb-6">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
+        <a href="#productos"
+           class="btn-hero inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition">
+          Ver Productos
         </a>
       </div>
-      <div class="group relative overflow-hidden rounded-2xl">
-        <a href="{% url 'zapatos' %}">
-          <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Zapatos</span>
-        </a>
-      </div>
-      <div class="group relative overflow-hidden rounded-2xl">
-        <a href="{% url 'hombres' %}">
-          <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Hombre</span>
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  
-  <section class="py-20 bg-[#111]">
-    <div class="text-center max-w-3xl mx-auto">
-      <h2 class="text-3xl font-bold text-[#C0A76B] mb-4">Comodidad, elegancia y estilo</h2>
-      <p class="text-gray-300 mb-8">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
-      <div class="rounded-2xl overflow-hidden shadow-lg border border-[#C0A76B]/30">
-        <video src="{% static 'Videos/69986-533438262_small.mp4' %}" autoplay muted loop class="w-full h-auto"></video>
+    <!-- Resto del contenido -->
+    <section id="productos" class="py-16 bg-gradient-to-b from-black via-[#111] to-black text-center">
+      <h2 class="text-3xl font-bold text-[#C0A76B] mb-10 uppercase">Categorías Destacadas</h2>
+      <div class="flex flex-col md:flex-row justify-center gap-8 px-6">
+        <div class="group relative overflow-hidden rounded-2xl">
+          <a href="{% url 'mujeres' %}">
+            <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Mujer</span>
+          </a>
+        </div>
+        <div class="group relative overflow-hidden rounded-2xl">
+          <a href="{% url 'zapatos' %}">
+            <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Zapatos</span>
+          </a>
+        </div>
+        <div class="group relative overflow-hidden rounded-2xl">
+          <a href="{% url 'hombres' %}">
+            <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Hombre</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  
-  <section class="py-20 bg-black">
-<<<<<<< HEAD
-    <div class="text-center mb-10">
-      <h2 class="text-4xl font-bold text-[#C0A76B] mb-3">🔥 Lo Más Vendido 🔥</h2>
-      <p class="text-gray-400">Descubre las prendas favoritas de nuestros clientes</p>
-    </div>
-
-    <div class="flex gap-6 overflow-x-auto px-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#C0A76B] scrollbar-track-[#222] pb-4 scrollbar-rounded scrollbar-smooth">
-      {% for producto in productos %}
-      <div class="min-w-[300px] bg-[#1a1a1a] rounded-xl p-4 snap-center shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <div class="relative">
-          {% if producto.imagen_url %}
-            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
-          {% elif producto.imagen %}
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
-          {% else %}
-            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" class="w-full h-64 object-cover rounded-lg mb-3">
-          {% endif %}
-          
-          <!-- Botón de favoritos -->
-          {% if user.is_authenticated %}
-          <div class="absolute top-3 left-3">
-            <button onclick="toggleFavorito({{ producto.id }}, this)" class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110" 
-                    title="{% if user in producto.favorited_by.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
-                    data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
-              <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart text-lg" 
-                 style="{% if user in producto.favorited_by.all %}color: #C0A76B;{% else %}color: #6B7280;{% endif %}"></i>
-            </button>
-=======
-    <h2 class="section-title">🔥 Lo Más Vendido 🔥</h2>
-    <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
     
-    <div class="carousel-container" id="mas-vendido-carousel">
-      <!-- Botones de navegación -->
-      <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
-      <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
+    <section class="py-20 bg-[#111]">
+      <div class="text-center max-w-3xl mx-auto">
+        <h2 class="text-3xl font-bold text-[#C0A76B] mb-4">Comodidad, elegancia y estilo</h2>
+        <p class="text-gray-300 mb-8">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
+        <div class="rounded-2xl overflow-hidden shadow-lg border border-[#C0A76B]/30">
+          <video src="{% static 'Videos/69986-533438262_small.mp4' %}" autoplay muted loop class="w-full h-auto"></video>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="py-20 bg-black">
+      <h2 class="section-title">🔥 Lo Más Vendido 🔥</h2>
+      <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
       
-      <!-- Carrusel -->
-      <div class="carousel-wrapper">
-        <div class="carousel-track" id="mas-vendido-track">
+      <div class="carousel-container" id="mas-vendido-carousel">
+        <!-- Botones de navegación -->
+        <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
+        
+        <!-- Carrusel -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="mas-vendido-track">
+            {% for producto in productos %}
+            <div class="carousel-slide">
+              <div class="offer-badge">⭐ TOP</div>
+              {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+              {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+              {% else %}
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+              {% endif %}
+              <div class="product-info">
+                <p class="product-name">{{ producto.nombre }}</p>
+                <p class="product-price">${{ producto.precio }}</p>
+                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+        <!-- Indicadores -->
+        <div class="carousel-indicators" id="mas-vendido-indicators">
           {% for producto in productos %}
-          <div class="carousel-slide">
-            <div class="offer-badge">⭐ TOP</div>
-            {% if producto.imagen_url %}
-              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-            {% elif producto.imagen %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-            {% endif %}
-            <div class="product-info">
-              <p class="product-name">{{ producto.nombre }}</p>
-              <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
-            </div>
->>>>>>> 3e473db7a33fbee577623c2a605b5aee27ad95b2
-          </div>
+            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
           {% endfor %}
         </div>
       </div>
-      
-      <!-- Indicadores -->
-      <div class="carousel-indicators" id="mas-vendido-indicators">
-        {% for producto in productos %}
-          <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    </section>
 
-  
-<<<<<<< HEAD
-  <section class="py-20 bg-[#111] text-center">
-    <h2 class="text-3xl font-bold text-[#C0A76B] mb-10">🎉 Ofertas Especiales 🎉</h2>
-    <div class="flex gap-6 overflow-x-auto px-6 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-[#C0A76B] scrollbar-track-[#222] pb-4 scrollbar-rounded scrollbar-smooth scrollbar-glow">
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Buso negro.webp' %}" alt="Buzo negro" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Buzo negro</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-      </div>
-      <div class="bg-[#1a1a1a] p-4 rounded-xl shadow-md hover:shadow-[#C0A76B]/50 transition">
-        <img src="{% static 'imagenes/Blusa mujer.webp' %}" alt="Ropa2" class="w-64 h-64 object-cover rounded-md mb-3 hover:scale-105 transition">
-        <p class="text-[#C0A76B] font-semibold">Camisa de vestir</p>
-        <p>$50.00</p>
-        <a href=""
-           class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
-           Ver detalles
-        </a>
-=======
-  <section class="py-20 bg-[#111]">
-    <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
     
-    <div class="carousel-container">
-      <!-- Botones de navegación -->
-      <button class="carousel-nav prev" aria-label="Anterior">‹</button>
-      <button class="carousel-nav next" aria-label="Siguiente">›</button>
+    <section class="py-20 bg-[#111]">
+      <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
       
-      <!-- Carrusel -->
-      <div class="carousel-wrapper">
-        <div class="carousel-track">
-          
-          {% for producto in productos_ofertas %}
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            {% if producto.imagen_url %}
-              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-            {% elif producto.imagen %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-            {% endif %}
-            <div class="product-info">
-              <p class="product-name">{{ producto.nombre }}</p>
-              <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+      <div class="carousel-container">
+        <!-- Botones de navegación -->
+        <button class="carousel-nav prev" aria-label="Anterior">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente">›</button>
+        
+        <!-- Carrusel -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track">
+            
+            {% for producto in productos_ofertas %}
+            <div class="carousel-slide">
+              <div class="offer-badge">🔥 OFERTA</div>
+              {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+              {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+              {% else %}
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+              {% endif %}
+              <div class="product-info">
+                <p class="product-name">{{ producto.nombre }}</p>
+                <p class="product-price">${{ producto.precio }}</p>
+                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              </div>
             </div>
-          </div>
-          {% empty %}
-          <!-- Si no hay ofertas, mostrar mensaje -->
-          <div class="carousel-slide">
-            <div class="product-info">
-              <p class="product-name">No hay ofertas disponibles</p>
-              <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
+            {% empty %}
+            <!-- Si no hay ofertas, mostrar mensaje -->
+            <div class="carousel-slide">
+              <div class="product-info">
+                <p class="product-name">No hay ofertas disponibles</p>
+                <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
+              </div>
             </div>
+            {% endfor %}
+            
           </div>
-          {% endfor %}
-          
         </div>
->>>>>>> 3e473db7a33fbee577623c2a605b5aee27ad95b2
+        
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
+          {% for producto in productos_ofertas %}
+            <span class="indicator {% if forloop.first %}active{% endif %}"></span>
+          {% endfor %}
+        </div>
       </div>
-      
-      <!-- Indicadores -->
-      <div class="carousel-indicators">
-        {% for producto in productos_ofertas %}
-          <span class="indicator {% if forloop.first %}active{% endif %}"></span>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   
   <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
