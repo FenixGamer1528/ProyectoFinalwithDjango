@@ -131,6 +131,12 @@
                 </div>
                 <div class="text-3xl font-bold text-white mb-2">{{ total_usuarios }}</div>
                 <p class="text-gray-400 text-sm mb-4">Usuarios registrados en el sistema</p>
+                <div class="mb-4">
+                    <a href="{% url 'gestion_usuarios' %}" 
+                       class="inline-flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg text-sm transition duration-300">
+                        <i class="fas fa-users-cog"></i> Gestionar Usuarios
+                    </a>
+                </div>
                 <div class="border-t border-gray-700 pt-3">
                     <h4 class="text-[#C0A76B] text-sm font-semibold mb-2">Últimos registros:</h4>
                     <ul class="space-y-1 text-xs text-gray-300">
@@ -192,42 +198,28 @@
         <section class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-6">
             <h3 class="text-xl font-semibold text-[#C0A76B] mb-6 flex items-center gap-2">
                 <i class="fas fa-history"></i> Actividad Reciente
+                <span class="text-xs text-gray-400">({{ actividades_recientes|length }} actividades)</span>
             </h3>
             <div class="space-y-4">
-
-                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
-                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
-                        <i class="fas fa-user-plus"></i>
+                {% if actividades_recientes %}
+                    {% for actividad in actividades_recientes %}
+                    <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
+                        <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
+                            <i class="{{ actividad.get_icono }}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-medium text-white">{{ actividad.titulo }}</div>
+                            <div class="text-gray-400 text-sm">{{ actividad.descripcion|truncatewords:15 }}</div>
+                        </div>
+                        <div class="text-gray-500 text-sm">{{ actividad.tiempo_transcurrido }}</div>
                     </div>
-                    <div class="flex-1">
-                        <div class="font-medium text-white">Nuevo usuario registrado</div>
-                        <div class="text-gray-400 text-sm">Usuario "nuevo_cliente" se registró en el sistema</div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fas fa-info-circle text-4xl mb-3"></i>
+                        <p>No hay actividades recientes para mostrar</p>
                     </div>
-                    <div class="text-gray-500 text-sm">Hace 2 horas</div>
-                </div>
-
-                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
-                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="font-medium text-white">Pedido #1245 completado</div>
-                        <div class="text-gray-400 text-sm">Pedido marcado como entregado exitosamente</div>
-                    </div>
-                    <div class="text-gray-500 text-sm">Hace 5 horas</div>
-                </div>
-
-                <div class="flex items-center gap-4 p-4 bg-black bg-opacity-30 rounded-lg hover:bg-opacity-50 transition duration-300">
-                    <div class="w-12 h-12 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-full flex items-center justify-center">
-                        <i class="fas fa-box"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="font-medium text-white">Producto actualizado</div>
-                        <div class="text-gray-400 text-sm">"Vestido Elegante Negro" - Precio actualizado</div>
-                    </div>
-                    <div class="text-gray-500 text-sm">Ayer, 15:30</div>
-                </div>
-
+                {% endif %}
             </div>
         </section>
 

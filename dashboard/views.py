@@ -3,27 +3,35 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 import json
+from datetime import datetime, timedelta
 
 from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito, ProductoVariante, Inventario
+from core.models import Reporte, Incidencia, SeguimientoReporte
 from .forms import ProductoForm, ProductoVarianteForm, InventarioForm
+from .utils import AnalizadorDatos, ExportadorReportes
 
 User = get_user_model()
 
 def admin_dashboard(request):
+    from dashboard.models import ActividadReciente
+    
     total_usuarios = UsuarioPersonalizado.objects.count()
     total_productos = Producto.objects.count()
     total_pedidos = Pedido.objects.count()
 
     ultimos_usuarios = UsuarioPersonalizado.objects.order_by('-date_joined')[:5]
+    actividades_recientes = ActividadReciente.objects.select_related('usuario').order_by('-fecha')[:10]
 
     context = {
         'total_usuarios': total_usuarios,
         'total_productos': total_productos,
         'total_pedidos': total_pedidos,
         'ultimos_usuarios': ultimos_usuarios,
+        'actividades_recientes': actividades_recientes,
     }
     return render(request, 'dashboard/dashboard.html', context)
 
@@ -135,8 +143,352 @@ def gestion_pedidos(request):
     return render(request, 'dashboard/gestion_pedidos.html', context)
 
 
+@login_required
 def gestion_reportes(request):
-    return render(request, 'dashboard/gestion_reportes.html')
+    """Vista principal de gestión de reportes"""
+    # Filtros
+    buscar = request.GET.get('buscar', '')
+    estado = request.GET.get('estado', '')
+    tipo = request.GET.get('tipo', '')
+    fecha_desde = request.GET.get('fecha_desde', '')
+    fecha_hasta = request.GET.get('fecha_hasta', '')
+    
+    # Query base
+    reportes = Reporte.objects.all()
+    
+    # Aplicar filtros
+    if buscar:
+        reportes = reportes.filter(
+            Q(titulo__icontains=buscar) |
+            Q(descripcion__icontains=buscar) |
+            Q(categoria__icontains=buscar)
+        )
+    
+    if estado:
+        reportes = reportes.filter(estado=estado)
+    
+    if tipo:
+        reportes = reportes.filter(tipo=tipo)
+    
+    if fecha_desde:
+        reportes = reportes.filter(fecha_creacion__gte=fecha_desde)
+    
+    if fecha_hasta:
+        fecha_hasta_dt = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+        fecha_hasta_dt = fecha_hasta_dt.replace(hour=23, minute=59, second=59)
+        reportes = reportes.filter(fecha_creacion__lte=fecha_hasta_dt)
+    
+    # Ordenar
+    reportes = reportes.order_by('-fecha_creacion')
+    
+    # Estadísticas
+    total_reportes = Reporte.objects.count()
+    reportes_pendientes = Reporte.objects.filter(estado='pendiente').count()
+    reportes_en_proceso = Reporte.objects.filter(estado='en_proceso').count()
+    
+    context = {
+        'reportes': reportes,
+        'total_reportes': total_reportes,
+        'reportes_pendientes': reportes_pendientes,
+        'reportes_en_proceso': reportes_en_proceso,
+        'buscar': buscar,
+        'estado_filtro': estado,
+        'tipo_filtro': tipo,
+        'fecha_desde': fecha_desde,
+        'fecha_hasta': fecha_hasta,
+        'estados': Reporte.ESTADOS,
+        'tipos': Reporte.TIPOS,
+    }
+    
+    return render(request, 'dashboard/gestion_reportes.html', context)
+
+
+@login_required
+def crear_reporte(request):
+    """Vista para crear un nuevo reporte"""
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        categoria = request.POST.get('categoria')
+        tipo = request.POST.get('tipo')
+        descripcion = request.POST.get('descripcion')
+        prioridad = request.POST.get('prioridad', 'media')
+        asignado_a_id = request.POST.get('asignado_a')
+        
+        reporte = Reporte.objects.create(
+            titulo=titulo,
+            categoria=categoria,
+            tipo=tipo,
+            descripcion=descripcion,
+            prioridad=prioridad,
+            creado_por=request.user,
+            asignado_a_id=asignado_a_id if asignado_a_id else None
+        )
+        
+        # Registrar seguimiento
+        SeguimientoReporte.objects.create(
+            reporte=reporte,
+            usuario=request.user,
+            accion='Creación',
+            comentario=f'Reporte creado: {titulo}'
+        )
+        
+        messages.success(request, 'Reporte creado exitosamente')
+        return redirect('gestion_reportes')
+    
+    # GET: mostrar formulario
+    usuarios = User.objects.filter(is_active=True)
+    context = {
+        'tipos': Reporte.TIPOS,
+        'prioridades': Reporte.PRIORIDADES,
+        'usuarios': usuarios,
+    }
+    return render(request, 'dashboard/crear_reporte.html', context)
+
+
+@login_required
+def detalle_reporte(request, reporte_id):
+    """Vista de detalle de un reporte"""
+    reporte = get_object_or_404(Reporte, id=reporte_id)
+    incidencias = reporte.incidencias.all()
+    seguimientos = reporte.seguimientos.all()
+    usuarios = User.objects.filter(is_active=True)
+    
+    context = {
+        'reporte': reporte,
+        'incidencias': incidencias,
+        'seguimientos': seguimientos,
+        'usuarios': usuarios,
+        'estados': Reporte.ESTADOS,
+        'prioridades': Reporte.PRIORIDADES,
+    }
+    
+    return render(request, 'dashboard/detalle_reporte.html', context)
+
+
+@login_required
+@require_POST
+def actualizar_estado_reporte(request, reporte_id):
+    """Actualiza el estado de un reporte"""
+    reporte = get_object_or_404(Reporte, id=reporte_id)
+    
+    estado_anterior = reporte.estado
+    nuevo_estado = request.POST.get('estado')
+    comentario = request.POST.get('comentario', '')
+    
+    reporte.estado = nuevo_estado
+    
+    # Si se completa, registrar fecha
+    if nuevo_estado == 'completado' and not reporte.fecha_completado:
+        reporte.fecha_completado = timezone.now()
+    
+    reporte.save()
+    
+    # Registrar seguimiento
+    SeguimientoReporte.objects.create(
+        reporte=reporte,
+        usuario=request.user,
+        accion='Cambio de estado',
+        comentario=comentario,
+        estado_anterior=estado_anterior,
+        estado_nuevo=nuevo_estado
+    )
+    
+    messages.success(request, f'Estado actualizado a {reporte.get_estado_display()}')
+    return redirect('detalle_reporte', reporte_id=reporte_id)
+
+
+@login_required
+@require_POST
+def asignar_responsable_reporte(request, reporte_id):
+    """Asigna un responsable a un reporte"""
+    reporte = get_object_or_404(Reporte, id=reporte_id)
+    
+    usuario_id = request.POST.get('usuario_id')
+    comentario = request.POST.get('comentario', '')
+    
+    usuario_anterior = reporte.asignado_a
+    nuevo_usuario = User.objects.get(id=usuario_id) if usuario_id else None
+    
+    reporte.asignado_a = nuevo_usuario
+    reporte.save()
+    
+    # Registrar seguimiento
+    SeguimientoReporte.objects.create(
+        reporte=reporte,
+        usuario=request.user,
+        accion='Asignación de responsable',
+        comentario=f'Asignado a: {nuevo_usuario.username if nuevo_usuario else "Nadie"}. {comentario}'
+    )
+    
+    messages.success(request, 'Responsable asignado correctamente')
+    return redirect('detalle_reporte', reporte_id=reporte_id)
+
+
+@login_required
+def crear_incidencia(request, reporte_id=None):
+    """Crea una nueva incidencia"""
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        tipo = request.POST.get('tipo')
+        descripcion = request.POST.get('descripcion')
+        severidad = request.POST.get('severidad', 'media')
+        producto_afectado = request.POST.get('producto_afectado', '')
+        cantidad_afectada = request.POST.get('cantidad_afectada')
+        
+        incidencia = Incidencia.objects.create(
+            titulo=titulo,
+            tipo=tipo,
+            descripcion=descripcion,
+            severidad=severidad,
+            producto_afectado=producto_afectado,
+            cantidad_afectada=int(cantidad_afectada) if cantidad_afectada else None,
+            reportado_por=request.user,
+            reporte_id=reporte_id if reporte_id else None
+        )
+        
+        messages.success(request, 'Incidencia registrada exitosamente')
+        
+        if reporte_id:
+            return redirect('detalle_reporte', reporte_id=reporte_id)
+        return redirect('gestion_reportes')
+    
+    context = {
+        'tipos_incidencia': Incidencia.TIPOS_INCIDENCIA,
+        'severidades': Incidencia.SEVERIDADES,
+        'reporte_id': reporte_id,
+    }
+    return render(request, 'dashboard/crear_incidencia.html', context)
+
+
+@login_required
+def analizar_ventas(request):
+    """Genera análisis de ventas"""
+    mes = request.GET.get('mes', timezone.now().month)
+    anio = request.GET.get('anio', timezone.now().year)
+    
+    analisis = AnalizadorDatos.analizar_ventas_mensuales(int(mes), int(anio))
+    
+    # Convertir DataFrames de Polars a listas para el template
+    if analisis:
+        analisis['ventas_por_estado_list'] = analisis['ventas_por_estado'].to_dicts()
+        analisis['ventas_por_ciudad_list'] = analisis['ventas_por_ciudad'].head(10).to_dicts()
+    
+    context = {
+        'analisis': analisis,
+        'mes': mes,
+        'anio': anio,
+    }
+    
+    return render(request, 'dashboard/analizar_ventas.html', context)
+
+
+@login_required
+def exportar_reporte_ventas(request):
+    """Exporta reporte de ventas a Excel usando Polars"""
+    mes = request.GET.get('mes', timezone.now().month)
+    anio = request.GET.get('anio', timezone.now().year)
+    formato = request.GET.get('formato', 'excel')
+    
+    analisis = AnalizadorDatos.analizar_ventas_mensuales(int(mes), int(anio))
+    
+    if not analisis:
+        messages.warning(request, 'No hay datos disponibles para el periodo seleccionado')
+        return redirect('analizar_ventas')
+    
+    if formato == 'excel':
+        buffer = ExportadorReportes.generar_reporte_ventas_excel(analisis)
+        response = HttpResponse(
+            buffer.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = f'attachment; filename=reporte_ventas_{mes}_{anio}.xlsx'
+        return response
+    
+    elif formato == 'csv':
+        buffer = ExportadorReportes.exportar_csv(analisis['dataframe'])
+        response = HttpResponse(buffer.read(), content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename=reporte_ventas_{mes}_{anio}.csv'
+        return response
+
+
+@login_required
+def analizar_inventario(request):
+    """Genera análisis de inventario"""
+    analisis = AnalizadorDatos.analizar_inventario()
+    
+    # Convertir DataFrames de Polars a listas para el template
+    if analisis:
+        analisis['analisis_stock_list'] = analisis['analisis_stock'].to_dicts()
+        analisis['productos_criticos_list'] = analisis['productos_criticos'].to_dicts()
+    
+    # Detectar problemas automáticamente
+    problemas = AnalizadorDatos.detectar_problemas_inventario()
+    
+    context = {
+        'analisis': analisis,
+        'problemas': problemas,
+    }
+    
+    return render(request, 'dashboard/analizar_inventario.html', context)
+
+
+@login_required
+def exportar_reporte_inventario(request):
+    """Exporta reporte de inventario a Excel usando Polars"""
+    formato = request.GET.get('formato', 'excel')
+    
+    analisis = AnalizadorDatos.analizar_inventario()
+    
+    if not analisis:
+        messages.warning(request, 'No hay datos disponibles')
+        return redirect('analizar_inventario')
+    
+    if formato == 'excel':
+        buffer = ExportadorReportes.generar_reporte_inventario_excel(analisis)
+        response = HttpResponse(
+            buffer.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=reporte_inventario.xlsx'
+        return response
+    
+    elif formato == 'csv':
+        buffer = ExportadorReportes.exportar_csv(analisis['dataframe'])
+        response = HttpResponse(buffer.read(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=reporte_inventario.csv'
+        return response
+
+
+@login_required
+def detectar_problemas_automatico(request):
+    """Detecta y registra problemas automáticamente"""
+    problemas_detectados = AnalizadorDatos.detectar_problemas_inventario()
+    
+    for problema in problemas_detectados:
+        # Verificar si ya existe una incidencia similar reciente
+        existe = Incidencia.objects.filter(
+            titulo=problema['titulo'],
+            resuelto=False,
+            fecha_reporte__gte=timezone.now() - timedelta(days=7)
+        ).exists()
+        
+        if not existe:
+            Incidencia.objects.create(
+                titulo=problema['titulo'],
+                tipo=problema['tipo'],
+                descripcion=problema['descripcion'],
+                severidad=problema['severidad'],
+                producto_afectado=problema['producto'],
+                cantidad_afectada=problema['cantidad'],
+                reportado_por=request.user
+            )
+    
+    if problemas_detectados:
+        messages.success(request, f'Se detectaron y registraron {len(problemas_detectados)} problemas')
+    else:
+        messages.info(request, 'No se detectaron problemas en el inventario')
+    
+    return redirect('analizar_inventario')
 
 
 def configuracion(request):
