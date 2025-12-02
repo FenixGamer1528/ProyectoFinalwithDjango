@@ -311,3 +311,93 @@ hr {
         font-size: 13px;
     }
 }
+/* Estilos personalizados para scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+    height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #222;
+    border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #C0A76B;
+    border-radius: 10px;
+    border: 2px solid #222;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #d4b85e;
+}
+
+/* Para scrollbars verticales (si los necesitas) */
+.scrollbar-vertical::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-vertical::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 10px;
+}
+
+.scrollbar-vertical::-webkit-scrollbar-thumb {
+    background: #C0A76B;
+    border-radius: 10px;
+}
+
+.scrollbar-vertical::-webkit-scrollbar-thumb:hover {
+    background: #d4b85e;
+}
+
+/* Scrollbar para el cuerpo de la página */
+body::-webkit-scrollbar {
+    width: 12px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #111;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: #C0A76B;
+    border-radius: 10px;
+    border: 2px solid #111;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #d4b85e;
+}
+/* Clase para scrollbars redondeadas */
+.scrollbar-rounded::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+.scrollbar-rounded::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+}
+
+/* Efecto de sombra para scrollbar */
+.scrollbar-glow::-webkit-scrollbar-thumb {
+    box-shadow: 0 0 10px rgba(192, 167, 107, 0.3);
+}
+
+/* Scrollbar más suave */
+.scrollbar-smooth {
+    scroll-behavior: smooth;
+}
+/* Para Firefox */
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #C0A76B #222;
+}
+
+.scrollbar-vertical {
+    scrollbar-width: thin;
+    scrollbar-color: #C0A76B #1a1a1a;
+}
+
+body {
+    scrollbar-width: thin;
+    scrollbar-color: #C0A76B #111;
+}

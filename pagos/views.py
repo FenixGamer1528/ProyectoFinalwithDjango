@@ -7,7 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Transaccion
 from .utils import WompiUtils
-import json
+from django.utils import timezone
+import json, random
 
 # Importar modelos de tu app core
 from carrito.models import Carrito, ItemCarrito, Pedido
@@ -306,7 +307,9 @@ def checkout_desde_carrito(request):
      # Determinar la URL de redirección según el entorno
     if settings.DEBUG:
         # En desarrollo con cloudflared - CAMBIA ESTA URL POR LA QUE TE DIO CLOUDFLARED
+
         redirect_url = "https://app.glamoure.tech/pagos/confirmacion-carrito/"
+
     else:
         # En producción
         redirect_url = request.build_absolute_uri('/pagos/confirmacion-carrito/')
@@ -373,6 +376,7 @@ def confirmar_pago_carrito(request):
                     try:
                         producto = Producto.objects.get(id=prod_data['producto_id'])
                         
+
                         # Calcular total del pedido
                         total_pedido = Decimal(str(prod_data['precio'])) * prod_data['cantidad']
                         
@@ -380,16 +384,19 @@ def confirmar_pago_carrito(request):
                         numero_pedido = f"PED-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
                         
                         # Crear el pedido con todos los campos necesarios
+
                         Pedido.objects.create(
                             usuario=transaccion.usuario,
                             producto=producto,
                             cantidad=prod_data['cantidad'],
+
                             numero=numero_pedido,
                             total=total_pedido,
                             estado='pendiente',
                             telefono=transaccion.usuario.telefono if hasattr(transaccion.usuario, 'telefono') else None
                         )
                         print(f"✅ Pedido {numero_pedido} creado para {producto.nombre}")
+
                     except Producto.DoesNotExist:
                         print(f"❌ Producto {prod_data['producto_id']} no encontrado")
                 

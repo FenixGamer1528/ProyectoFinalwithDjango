@@ -160,3 +160,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === productoModal) cerrarProductoModal();
     });
 });
+
