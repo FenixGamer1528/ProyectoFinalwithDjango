@@ -1,9 +1,11 @@
 from django.contrib.auth import logout, authenticate, login
-from django.shortcuts import render,HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.db.models import Q
 from .forms import LoginForm, RegistroForm 
-from carrito.models import Producto,Pedido, UsuarioPersonalizado
-from django.shortcuts import render, get_object_or_404
-
+from carrito.models import Producto, Pedido, UsuarioPersonalizado
 
 
 def home(request):
@@ -15,12 +17,25 @@ def about(request):
     return render(request, "about.html",{})
 
 def index(request):
-    productos= Producto.objects.all()
-    print(productos)
+    # Cargar productos destacados (para "Lo Más Vendido")
+    productos = Producto.objects.filter(destacado=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria'
+    )
+    
+    # Cargar productos en oferta (para "Ofertas Especiales")
+    productos_ofertas = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+        productos_ofertas = productos_ofertas.prefetch_related('favorited_by')
+    
     return render(request, 'index.html', {
-        'productos': productos
-  
-})
+        'productos': productos,
+        'productos_ofertas': productos_ofertas
+    })
   
 
 def login_view(request):
@@ -116,8 +131,28 @@ def portfolio(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+def buscar_productos(request):
+    query = request.GET.get('q', '').strip()
+    productos = []
 
+    if query:
+        # Búsqueda más precisa por nombre
+        productos = Producto.objects.filter(nombre__iexact=query)
+        
+        # Si no encuentra resultados exactos, busca coincidencias parciales
+        if not productos:
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(categoria__icontains=query)
+            )
 
+    context = {
+        'productos': productos,
+        'query': query,
+    }
+    
+    return render(request, 'core/resultados_busqueda.html', context)
 
 
 from django.views.generic import ListView
@@ -204,21 +239,120 @@ def exportar_pdf(request):
     return response
 
 def hombres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE)
+    # Optimizado: solo cargar campos necesarios y usar caché
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/hombres.html", {"productos": productos})
 
 
 def mujeres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/mujeres.html", {"productos": productos})
 
 
 def zapatos(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/zapatos.html", {"productos": productos})
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/ofertas.html", {"productos": productos})
+
+
+@login_required
+@require_POST
+def toggle_favorito(request, producto_id):
+    """Alterna el favorito (lista de deseos) del usuario para un producto.
+    
+    Responde JSON: {ok: True, added: True/False, total_favorites: int}
+    """
+    try:
+        producto = get_object_or_404(Producto, id=producto_id)
+        usuario = request.user
+        
+        # Verificar si el producto ya está en favoritos
+        if producto in usuario.favoritos.all():
+            usuario.favoritos.remove(producto)
+            added = False
+        else:
+            usuario.favoritos.add(producto)
+            added = True
+        
+        # Contar favoritos actualizados
+        total_favoritos = usuario.favoritos.count()
+        
+        return JsonResponse({
+            'ok': True,
+            'added': added,
+            'total_favorites': total_favoritos,
+            'producto_id': producto.id
+        })
+    except Exception as e:
+        return JsonResponse({
+            'ok': False,
+            'error': str(e)
+        }, status=400)
+
+
+@login_required
+def mis_deseos(request):
+    productos = request.user.favoritos.all()
+    return render(request, 'core/mis_deseos.html', {'productos': productos})
+
+
+def producto_detalle(request, producto_id):
+    """Vista de detalle del producto con todas sus variantes"""
+    from carrito.models import ProductoVariante
+    
+    producto = get_object_or_404(Producto, id=producto_id)
+    variantes = ProductoVariante.objects.filter(producto=producto).order_by('talla', 'color')
+    
+    # Obtener tallas y colores únicos
+    tallas_disponibles = list(set(v.talla for v in variantes))
+    colores_disponibles = list(set(v.color for v in variantes))
+    
+    # Verificar si es favorito
+    es_favorito = False
+    if request.user.is_authenticated:
+        es_favorito = producto in request.user.favoritos.all()
+    
+    context = {
+        'producto': producto,
+        'variantes': variantes,
+        'tallas_disponibles': sorted(tallas_disponibles),
+        'colores_disponibles': sorted(colores_disponibles),
+        'es_favorito': es_favorito,
+    }
+    
+    # Si se solicita desde AJAX o con parámetro modal=true, devolver solo el contenido
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('modal') == 'true':
+        return render(request, 'core/producto_detalle_modal.html', context)
+    
+    # Vista completa normal
+    return render(request, 'core/producto_detalle.html', context)
 

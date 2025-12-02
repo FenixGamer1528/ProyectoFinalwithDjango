@@ -1,0 +1,7 @@
+tunnel: aded2144-de94-49e4-9292-c193237e0347
+credentials-file: ./credentials/aded2144-de94-49e4-9292-c193237e0347.json
+
+ingress:
+  - hostname: dev.glamoure.com
+    service: http://localhost:8000
+  - service: http_status:404

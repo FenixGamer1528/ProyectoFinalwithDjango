@@ -42,27 +42,6 @@
             height: 1.25rem;
             accent-color: #C0A76B;
         }
-
-        /* Mejora para el input file */
-        .file-input {
-            padding: 0.5rem;
-        }
-
-        .file-input::file-selector-button {
-            background: #C0A76B;
-            color: black;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            margin-right: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .file-input::file-selector-button:hover {
-            background: #A8915C;
-        }
     </style>
 </head>
 <body class="bg-transparent text-white">
@@ -72,13 +51,13 @@
         
         <!-- Campo Nombre -->
         <div>
-            <label for="id_nombre" class="form-label">Nombre *</label>
+            <label for="id_nombre" class="form-label">Nombre</label>
             <input type="text" name="nombre" id="id_nombre" value="{{ form.nombre.value }}" class="form-input" placeholder="Ingresa el nombre del producto" required>
         </div>
 
         <!-- Campo Categoría -->
         <div>
-            <label for="id_categoria" class="form-label">Categoría *</label>
+            <label for="id_categoria" class="form-label">Categoría</label>
             <select name="categoria" id="id_categoria" class="form-input" required>
                 <option value="">Selecciona una categoría</option>
                 {% for value, label in form.categoria.field.choices %}
@@ -89,13 +68,13 @@
 
         <!-- Campo Precio -->
         <div>
-            <label for="id_precio" class="form-label">Precio *</label>
+            <label for="id_precio" class="form-label">Precio</label>
             <input type="number" name="precio" id="id_precio" value="{{ form.precio.value }}" class="form-input" placeholder="0.00" step="0.01" min="0" required>
         </div>
 
         <!-- Campo Stock -->
         <div>
-            <label for="id_stock" class="form-label">Stock *</label>
+            <label for="id_stock" class="form-label">Stock</label>
             <input type="number" name="stock" id="id_stock" value="{{ form.stock.value }}" class="form-input" placeholder="0" min="0" required>
         </div>
 
@@ -108,41 +87,29 @@
         <!-- Campo Imagen -->
         <div>
             <label for="id_imagen" class="form-label">Imagen</label>
-            <input type="file" name="imagen" id="id_imagen" class="form-input file-input" accept="image/*">
+            <input type="file" name="imagen" id="id_imagen" class="form-input" accept="image/*">
             {% if producto.imagen %}
-            <div class="mt-3 p-3 bg-gray-900 rounded-lg">
-                <p class="text-gray-400 text-sm mb-2">Imagen actual:</p>
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-32 h-32 object-cover rounded-lg border border-[#C0A76B]">
-                <p class="text-xs text-gray-500 mt-2">Selecciona una nueva imagen para reemplazar</p>
+            <div class="mt-2">
+                <p class="text-gray-400 text-sm">Imagen actual:</p>
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-32 h-32 object-cover rounded-lg mt-1">
             </div>
             {% endif %}
         </div>
 
-        <!-- Campo Destacado -->
-        <div class="flex items-center gap-3 p-3 bg-gray-900 rounded-lg">
-            <input type="checkbox" name="destacado" id="id_destacado" class="checkbox-input" {% if form.destacado.value %}checked{% endif %}>
-            <label for="id_destacado" class="form-label !mb-0 cursor-pointer">Marcar como producto destacado</label>
-        </div>
+        <!-- Campos Destacado y En Oferta -->
+        <div class="flex gap-6">
+            <!-- Campo Destacado -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="destacado" id="id_destacado" class="checkbox-input" {% if form.destacado.value %}checked{% endif %}>
+                <label for="id_destacado" class="form-label !mb-0 cursor-pointer">⭐ Destacado</label>
+            </div>
 
-        <!-- Botones de acción - AÑADIDOS -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-700">
-            <button type="button" onclick="window.parent.document.getElementById('productModal').classList.add('hidden')" 
-                    class="px-6 py-2 border border-[#C0A76B] text-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all duration-300 font-semibold">
-                Cancelar
-            </button>
-            <button type="submit" 
-                    class="px-6 py-2 bg-[#C0A76B] text-black rounded-lg hover:bg-[#A8915C] transition-all duration-300 font-semibold flex items-center gap-2">
-                <i class="fas fa-save"></i>
-                Guardar Cambios
-            </button>
+            <!-- Campo En Oferta -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="en_oferta" id="id_en_oferta" class="checkbox-input" style="accent-color: #ff4757;" {% if form.en_oferta.value %}checked{% endif %}>
+                <label for="id_en_oferta" class="form-label !mb-0 cursor-pointer">🔥 En oferta</label>
+            </div>
         </div>
-
-        <!-- Mensajes de error -->
-        {% if form.errors %}
-        <div class="p-3 bg-red-900 bg-opacity-20 border border-red-500 rounded-lg">
-            <p class="text-red-400 text-sm">Por favor, corrige los errores en el formulario.</p>
-        </div>
-        {% endif %}
     </form>
 
     <script>
@@ -151,16 +118,10 @@
             // Asegurar que todos los inputs tengan la clase form-input
             const inputs = document.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                if (!input.classList.contains('form-input') && input.type !== 'checkbox' && input.type !== 'file') {
+                if (!input.classList.contains('form-input') && input.type !== 'checkbox') {
                     input.classList.add('form-input');
                 }
             });
-
-            // Mejorar la experiencia del input file
-            const fileInput = document.getElementById('id_imagen');
-            if (fileInput) {
-                fileInput.classList.add('file-input');
-            }
         });
     </script>
 </body>

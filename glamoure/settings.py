@@ -25,6 +25,13 @@ load_dotenv(os.path.join(BASE_DIR, ".env"))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 DEBUG = True
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+
+# CSRF Settings for development
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +47,7 @@ INSTALLED_APPS = [
     'tailwind',
     'frontend',
     'django_browser_reload',
+    'pagos',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +69,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -83,9 +92,10 @@ DATABASES = {
         'PASSWORD': 'Glamoure123*',
         'HOST': 'aws-1-us-east-2.pooler.supabase.com',
         'PORT': 6543,
-         'OPTIONS': {
+        'OPTIONS': {
             'sslmode': 'require',
         },
+        'CONN_MAX_AGE': 600,  # Reutilizar conexiones por 10 minutos
     }
 }
 # AUTH_USER_MODEL = 'core.UsuarioPersonalizado'
@@ -115,11 +125,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'es-co'
-
-TIME_ZONE = 'UTC'
-
+TIME_ZONE = 'America/Bogota'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -149,5 +157,73 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_BUCKET = os.getenv("SUPABASE_BUCKET", "media")
 
+# Configuración de caché (mejora rendimiento significativamente)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,  # 5 minutos
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
+    }
+}
 
-# Cargar variables de entorno
+# Configuración de sesiones (usa caché en lugar de DB)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+SESSION_CACHE_ALIAS = 'default'
+
+# Configuración de templates para producción
+if not DEBUG:
+    TEMPLATES[0]['OPTIONS']['loaders'] = [
+        ('django.template.loaders.cached.Loader', [
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        ]),
+    ]
+
+
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1', 
+     'app.glamoure.tech',
+    '*.trycloudflare.com',
+]
+
+WOMPI_PUBLIC_KEY_TEST = 'pub_test_lAKUj3fWSMRl1jGXcT4pgdhhkBfr8ftP'
+WOMPI_PRIVATE_KEY_TEST = 'prv_test_XefgTCdlErJRoEZfnVGtq6UhonaNlTk2'
+WOMPI_EVENTS_SECRET_TEST = 'test_events_y0W4ySwZjHC1Wv0jheDOC7MIaIGkqqbC'
+WOMPI_INTEGRITY_SECRET_TEST = 'test_integrity_nslqVWZD7wlccQ8AjxLYITkIgpqgFmjv'
+
+# Claves de producción (cuando las tengas)
+WOMPI_PUBLIC_KEY_PROD = ''
+WOMPI_PRIVATE_KEY_PROD = ''
+WOMPI_EVENTS_SECRET_PROD = ''
+WOMPI_INTEGRITY_SECRET_PROD = ''
+
+# Ambiente actual
+WOMPI_ENV = 'TEST'  # Cambiar a 'PROD' en producción
+
+# Claves activas
+WOMPI_PUBLIC_KEY = WOMPI_PUBLIC_KEY_TEST if WOMPI_ENV == 'TEST' else WOMPI_PUBLIC_KEY_PROD
+WOMPI_PRIVATE_KEY = WOMPI_PRIVATE_KEY_TEST if WOMPI_ENV == 'TEST' else WOMPI_PRIVATE_KEY_PROD
+WOMPI_EVENTS_SECRET = WOMPI_EVENTS_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI_EVENTS_SECRET_PROD
+WOMPI_INTEGRITY_SECRET = WOMPI_INTEGRITY_SECRET_TEST if WOMPI_ENV == 'TEST' else WOMPI_INTEGRITY_SECRET_PROD
+
+# Para webhooks
+cloudflare_domains = [
+    'https://app.glamoure.tech',
+    'https://*.trycloudflare.com',
+]
+
+CSRF_TRUSTED_ORIGINS = ['https://checkout.wompi.co'] + cloudflare_domains + [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    # Agrega tu dominio de producción
+]
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
