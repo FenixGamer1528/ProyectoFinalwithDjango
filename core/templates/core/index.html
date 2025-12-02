@@ -170,13 +170,38 @@
     .fa-heart {
       font-size: 1.5rem;
     }
+    
+    /* Estilo para la barra de búsqueda */
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Mejorar contraste en focus */
+    input:focus {
+      background-color: rgba(30, 30, 30, 0.9);
+      border-color: #C0A76B;
+      box-shadow: 0 0 0 2px rgba(192, 167, 107, 0.3);
+    }
+    
+    /* Estilos adicionales para mejor visibilidad */
+    .search-container {
+      position: relative;
+    }
+    
+    .search-input {
+      transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+      width: 280px !important;
+    }
   </style>
 </head>
 <body class="bg-black text-white font-sans antialiased">
 
   
-  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
-    <nav class="container mx-auto flex justify-between items-center px-6 py-4">
+  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B] py-3">
+    <nav class="container mx-auto flex justify-between items-center px-6 py-2">
       <!-- Menú izquierdo -->
       <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
         <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
@@ -195,12 +220,12 @@
       <!-- Menú derecho -->
       <div class="flex items-center gap-4">
         <!-- Barra de búsqueda -->
-        <div class="relative hidden md:block">
+        <div class="search-container relative hidden md:block">
           <form action="{% url 'buscar_productos' %}" method="GET" class="flex items-center">
             <input type="text" name="q" placeholder="Buscar productos..." 
-                   class="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-l-md border-r-0 border border-[#C0A76B] focus:outline-none focus:ring-1 focus:ring-[#C0A76B] w-40 h-8">
+                   class="search-input bg-gray-800 text-white text-sm px-4 py-2 rounded-l-md border-r-0 border border-[#C0A76B] focus:outline-none focus:ring-2 focus:ring-[#C0A76B] w-48 md:w-56 transition-all duration-200">
             <button type="submit" 
-                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-3 py-1.5 rounded-r-md h-8 flex items-center justify-center transition-colors duration-200">
+                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-4 py-2 rounded-r-md flex items-center justify-center transition-colors duration-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
