@@ -7,8 +7,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 import json
 
-from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito  # ProductoVariante, Inventario
-from .forms import ProductoForm  # ProductoVarianteForm, InventarioForm
+from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito, ProductoVariante, Inventario
+from .forms import ProductoForm, ProductoVarianteForm, InventarioForm
 
 User = get_user_model()
 

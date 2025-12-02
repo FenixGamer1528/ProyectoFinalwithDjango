@@ -4,13 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
   <link href="{% static 'css/output.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
   <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
-  <!-- FontAwesome para los iconos -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <title>Glamoure</title>
   <style>
     /* Animación del botón Ver Productos */
@@ -132,76 +131,13 @@
         box-shadow: 0 0 40px rgba(192, 167, 107, 0.8), 0 0 60px rgba(192, 167, 107, 0.5);
       }
     }
-    
-    /* Estilos para la sección hero */
-    .hero-section {
-      height: 100vh;
-      background-image: url('{% static "imagenes/Gemini.png" %}');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      position: relative;
-    }
-    
-    .hero-overlay {
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 2.5rem;
-      border-radius: 1rem;
-      max-width: 800px;
-      margin: 0 1rem;
-    }
-    
-    /* Ajustes para el header */
-    header {
-      margin-bottom: 0 !important;
-    }
-    
-    /* Ajuste para el contenido principal */
-    main {
-      margin-top: 80px; /* Para compensar el header fijo */
-    }
-    
-    /* Ajuste para el icono del corazón */
-    .fa-heart {
-      font-size: 1.5rem;
-    }
-    
-    /* Estilo para la barra de búsqueda */
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-    
-    /* Mejorar contraste en focus */
-    input:focus {
-      background-color: rgba(30, 30, 30, 0.9);
-      border-color: #C0A76B;
-      box-shadow: 0 0 0 2px rgba(192, 167, 107, 0.3);
-    }
-    
-    /* Estilos adicionales para mejor visibilidad */
-    .search-container {
-      position: relative;
-    }
-    
-    .search-input {
-      transition: all 0.3s ease;
-    }
-    
-    .search-input:focus {
-      width: 280px !important;
-    }
   </style>
 </head>
 <body class="bg-black text-white font-sans antialiased">
 
   
-  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B] py-3">
-    <nav class="container mx-auto flex justify-between items-center px-6 py-2">
+  <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
+    <nav class="container mx-auto flex justify-between items-center px-6 py-4">
       <!-- Menú izquierdo -->
       <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
         <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
@@ -220,25 +156,19 @@
       <!-- Menú derecho -->
       <div class="flex items-center gap-4">
         <!-- Barra de búsqueda -->
-        <div class="search-container relative hidden md:block">
+        <div class="relative">
           <form action="{% url 'buscar_productos' %}" method="GET" class="flex items-center">
             <input type="text" name="q" placeholder="Buscar productos..." 
-                   class="search-input bg-gray-800 text-white text-sm px-4 py-2 rounded-l-md border-r-0 border border-[#C0A76B] focus:outline-none focus:ring-2 focus:ring-[#C0A76B] w-48 md:w-56 transition-all duration-200">
+                   class="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-l-md border-r-0 border border-[#C0A76B] focus:outline-none focus:ring-1 focus:ring-[#C0A76B] w-40 h-8">
             <button type="submit" 
-                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-4 py-2 rounded-r-md flex items-center justify-center transition-colors duration-200">
+                    class="bg-[#C0A76B] hover:bg-[#A88F5C] text-white text-sm px-3 py-1.5 rounded-r-md h-8 flex items-center gap-1 transition-colors duration-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              <span>Buscar</span>
             </button>
           </form>
         </div>
-
-        <!-- Botón de búsqueda para móvil -->
-        <button class="md:hidden p-2 hover:text-[#C0A76B] transition">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </button>
 
         <!-- Botón de carrito -->
         <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
@@ -250,7 +180,7 @@
           {% if user.is_authenticated %}
           <a href="{% url 'mis_deseos' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
             <i id="wishlist-icon" class="fa-regular fa-heart text-2xl"></i>
-            <span id="wishlist-count" class="text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
+            <span id="wishlist-count" class="ml-1 text-sm text-[#C0A76B]">{{ user.favoritos.count }}</span>
           </a>
           {% else %}
           <a href="{% url 'login' %}" class="p-2 rounded-lg hover:text-[#C0A76B] transition flex items-center gap-2">
@@ -316,149 +246,146 @@
     </nav>
   </header>
 
-  <!-- Contenido principal -->
-  <main>
-    <!-- Sección Hero -->
-    <section class="hero-section">
-      <div class="hero-overlay">
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-[#C0A76B] tracking-wide">¡Bienvenido a Glamoure!</h1>
-        <p class="text-gray-200 text-lg md:text-xl mb-6">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
-        <a href="#productos"
-           class="btn-hero inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition">
-          Ver Productos
+  
+  <section class="h-screen bg-cover bg-center flex flex-col justify-center items-center text-center" style="background-image: url('{% static 'imagenes/Gemini.png' %}');">
+    <div class="bg-black bg-opacity-60 p-10 rounded-2xl">
+      <h1 class="text-5xl md:text-6xl font-extrabold mb-4 text-[#C0A76B] tracking-wide">¡Bienvenido a Glamoure!</h1>
+      <p class="text-gray-200 text-lg md:text-xl mb-6">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
+      <a href="{% url 'index' %}"
+         class="btn-hero inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition">
+        Ver Productos
+      </a>
+    </div>
+  </section>
+
+  
+  <section class="py-16 bg-gradient-to-b from-black via-[#111] to-black text-center">
+    <h2 class="text-3xl font-bold text-[#C0A76B] mb-10 uppercase">Categorías Destacadas</h2>
+    <div class="flex flex-col md:flex-row justify-center gap-8 px-6">
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'mujeres' %}">
+          <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Mujer</span>
         </a>
       </div>
-    </section>
-
-    <!-- Resto del contenido -->
-    <section id="productos" class="py-16 bg-gradient-to-b from-black via-[#111] to-black text-center">
-      <h2 class="text-3xl font-bold text-[#C0A76B] mb-10 uppercase">Categorías Destacadas</h2>
-      <div class="flex flex-col md:flex-row justify-center gap-8 px-6">
-        <div class="group relative overflow-hidden rounded-2xl">
-          <a href="{% url 'mujeres' %}">
-            <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Mujer</span>
-          </a>
-        </div>
-        <div class="group relative overflow-hidden rounded-2xl">
-          <a href="{% url 'zapatos' %}">
-            <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Zapatos</span>
-          </a>
-        </div>
-        <div class="group relative overflow-hidden rounded-2xl">
-          <a href="{% url 'hombres' %}">
-            <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
-            <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Hombre</span>
-          </a>
-        </div>
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'zapatos' %}">
+          <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Zapatos</span>
+        </a>
       </div>
-    </section>
-
-    
-    <section class="py-20 bg-[#111]">
-      <div class="text-center max-w-3xl mx-auto">
-        <h2 class="text-3xl font-bold text-[#C0A76B] mb-4">Comodidad, elegancia y estilo</h2>
-        <p class="text-gray-300 mb-8">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
-        <div class="rounded-2xl overflow-hidden shadow-lg border border-[#C0A76B]/30">
-          <video src="{% static 'Videos/69986-533438262_small.mp4' %}" autoplay muted loop class="w-full h-auto"></video>
-        </div>
+      <div class="group relative overflow-hidden rounded-2xl">
+        <a href="{% url 'hombres' %}">
+          <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre" class="w-full h-80 object-cover transform group-hover:scale-110 transition duration-700">
+          <span class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 py-3 text-[#C0A76B] font-semibold">Ropa Hombre</span>
+        </a>
       </div>
-    </section>
+    </div>
+  </section>
 
+  
+  <section class="py-20 bg-[#111]">
+    <div class="text-center max-w-3xl mx-auto">
+      <h2 class="text-3xl font-bold text-[#C0A76B] mb-4">Comodidad, elegancia y estilo</h2>
+      <p class="text-gray-300 mb-8">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
+      <div class="rounded-2xl overflow-hidden shadow-lg border border-[#C0A76B]/30">
+        <video src="{% static 'Videos/Jhim Kenny - VERSACE.mp4' %}" autoplay muted loop class="w-full h-auto"></video>
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="py-20 bg-black">
+    <h2 class="section-title">🔥 Lo Más Vendido 🔥</h2>
+    <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
     
-    <section class="py-20 bg-black">
-      <h2 class="section-title">🔥 Lo Más Vendido 🔥</h2>
-      <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
+    <div class="carousel-container" id="mas-vendido-carousel">
+      <!-- Botones de navegación -->
+      <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
+      <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
       
-      <div class="carousel-container" id="mas-vendido-carousel">
-        <!-- Botones de navegación -->
-        <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
-        <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
-        
-        <!-- Carrusel -->
-        <div class="carousel-wrapper">
-          <div class="carousel-track" id="mas-vendido-track">
-            {% for producto in productos %}
-            <div class="carousel-slide">
-              <div class="offer-badge">⭐ TOP</div>
-              {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-              {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-              {% else %}
-                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-              {% endif %}
-              <div class="product-info">
-                <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
-                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-        
-        <!-- Indicadores -->
-        <div class="carousel-indicators" id="mas-vendido-indicators">
+      <!-- Carrusel -->
+      <div class="carousel-wrapper">
+        <div class="carousel-track" id="mas-vendido-track">
           {% for producto in productos %}
-            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
-          {% endfor %}
-        </div>
-      </div>
-    </section>
-
-    
-    <section class="py-20 bg-[#111]">
-      <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
-      
-      <div class="carousel-container">
-        <!-- Botones de navegación -->
-        <button class="carousel-nav prev" aria-label="Anterior">‹</button>
-        <button class="carousel-nav next" aria-label="Siguiente">›</button>
-        
-        <!-- Carrusel -->
-        <div class="carousel-wrapper">
-          <div class="carousel-track">
-            
-            {% for producto in productos_ofertas %}
-            <div class="carousel-slide">
-              <div class="offer-badge">🔥 OFERTA</div>
-              {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-              {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-              {% else %}
-                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-              {% endif %}
-              <div class="product-info">
-                <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
-                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
-              </div>
+          <div class="carousel-slide">
+            <div class="offer-badge">⭐ TOP</div>
+            {% if producto.imagen_url %}
+              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+            {% elif producto.imagen %}
+              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            {% else %}
+              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+            {% endif %}
+            <div class="product-info">
+              <p class="product-name">{{ producto.nombre }}</p>
+              <p class="product-price">${{ producto.precio }}</p>
+              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
             </div>
-            {% empty %}
-            <!-- Si no hay ofertas, mostrar mensaje -->
-            <div class="carousel-slide">
-              <div class="product-info">
-                <p class="product-name">No hay ofertas disponibles</p>
-                <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
-              </div>
-            </div>
-            {% endfor %}
-            
           </div>
-        </div>
-        
-        <!-- Indicadores -->
-        <div class="carousel-indicators">
-          {% for producto in productos_ofertas %}
-            <span class="indicator {% if forloop.first %}active{% endif %}"></span>
           {% endfor %}
         </div>
       </div>
-    </section>
-  </main>
+      
+      <!-- Indicadores -->
+      <div class="carousel-indicators" id="mas-vendido-indicators">
+        {% for producto in productos %}
+          <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  
+  <section class="py-20 bg-[#111]">
+    <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
+    
+    <div class="carousel-container">
+      <!-- Botones de navegación -->
+      <button class="carousel-nav prev" aria-label="Anterior">‹</button>
+      <button class="carousel-nav next" aria-label="Siguiente">›</button>
+      
+      <!-- Carrusel -->
+      <div class="carousel-wrapper">
+        <div class="carousel-track">
+          
+          {% for producto in productos_ofertas %}
+          <div class="carousel-slide">
+            <div class="offer-badge">🔥 OFERTA</div>
+            {% if producto.imagen_url %}
+              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+            {% elif producto.imagen %}
+              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+            {% else %}
+              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+            {% endif %}
+            <div class="product-info">
+              <p class="product-name">{{ producto.nombre }}</p>
+              <p class="product-price">${{ producto.precio }}</p>
+              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+            </div>
+          </div>
+          {% empty %}
+          <!-- Si no hay ofertas, mostrar mensaje -->
+          <div class="carousel-slide">
+            <div class="product-info">
+              <p class="product-name">No hay ofertas disponibles</p>
+              <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
+            </div>
+          </div>
+          {% endfor %}
+          
+        </div>
+      </div>
+      
+      <!-- Indicadores -->
+      <div class="carousel-indicators">
+        {% for producto in productos_ofertas %}
+          <span class="indicator {% if forloop.first %}active{% endif %}"></span>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
 
   
   <footer class="bg-black border-t border-[#C0A76B]/50 py-10">
