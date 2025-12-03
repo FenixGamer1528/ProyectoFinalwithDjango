@@ -10,7 +10,6 @@
     <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
     
     <style>
-        /* Scrollbar personalizado */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -43,6 +42,15 @@
             <a href="{% url 'dashboard' %}" class="flex items-center gap-3 text-gray-300 hover:text-[#C0A76B] font-semibold transition duration-300">
                 <i class="fas fa-chart-bar"></i> Dashboard
             </a>
+            <a href="{% url 'analizar_ventas' %}" class="flex items-center gap-3 text-gray-300 hover:text-[#C0A76B] font-semibold transition duration-300">
+                <i class="fas fa-chart-line"></i> Análisis Ventas
+            </a>
+            <a href="{% url 'analizar_inventario' %}" class="flex items-center gap-3 text-gray-300 hover:text-[#C0A76B] font-semibold transition duration-300">
+                <i class="fas fa-boxes"></i> Análisis Inventario
+            </a>
+            <a href="{% url 'crear_incidencia' %}" class="flex items-center gap-3 text-gray-300 hover:text-[#C0A76B] font-semibold transition duration-300">
+                <i class="fas fa-exclamation-triangle"></i> Nueva Incidencia
+            </a>
         </nav>
     </aside>
 
@@ -65,32 +73,90 @@
             </a>
         </div>
 
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-900 bg-opacity-20 border border-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-400 text-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-400 px-4 py-3 rounded-lg">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Estadísticas rápidas -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Reportes</p>
+                        <p class="text-3xl font-bold text-[#C0A76B]">{{ total_reportes }}</p>
+                    </div>
+                    <i class="fas fa-file-alt text-4xl text-[#C0A76B] opacity-50"></i>
+                </div>
+            </div>
+            <div class="bg-[#1a1a1a] border border-yellow-400 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">Pendientes</p>
+                        <p class="text-3xl font-bold text-yellow-400">{{ reportes_pendientes }}</p>
+                    </div>
+                    <i class="fas fa-clock text-4xl text-yellow-400 opacity-50"></i>
+                </div>
+            </div>
+            <div class="bg-[#1a1a1a] border border-blue-400 rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-400 text-sm">En Proceso</p>
+                        <p class="text-3xl font-bold text-blue-400">{{ reportes_en_proceso }}</p>
+                    </div>
+                    <i class="fas fa-spinner text-4xl text-blue-400 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón crear reporte -->
+        <div class="mb-6">
+            <a href="{% url 'crear_reporte' %}" class="inline-flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg transition duration-300">
+                <i class="fas fa-plus"></i> Nuevo Reporte
+            </a>
+        </div>
+
         <!-- Filtros y búsqueda -->
         <form method="get" class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6 mb-6">
             <div class="flex flex-wrap gap-4 items-end">
                 <div>
-                    <label for="q" class="block text-sm font-medium text-[#C0A76B] mb-2">Buscar</label>
-                    <input type="text" name="q" id="q" value="{{ request.GET.q }}" placeholder="Título o Categoría"
+                    <label for="buscar" class="block text-sm font-medium text-[#C0A76B] mb-2">Buscar</label>
+                    <input type="text" name="buscar" id="buscar" value="{{ buscar }}" placeholder="Título o descripción"
                         class="w-64 px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
+                </div>
+                <div>
+                    <label for="tipo" class="block text-sm font-medium text-[#C0A76B] mb-2">Tipo</label>
+                    <select name="tipo" id="tipo"
+                        class="w-48 px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                        <option value="" class="bg-[#1a1a1a]">Todos</option>
+                        {% for value, label in tipos %}
+                        <option value="{{ value }}" {% if tipo_filtro == value %}selected{% endif %} class="bg-[#1a1a1a]">{{ label }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div>
                     <label for="estado" class="block text-sm font-medium text-[#C0A76B] mb-2">Estado</label>
                     <select name="estado" id="estado"
                         class="w-48 px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
                         <option value="" class="bg-[#1a1a1a]">Todos</option>
-                        <option value="pendiente" {% if request.GET.estado == 'pendiente' %}selected{% endif %} class="bg-[#1a1a1a]">Pendiente</option>
-                        <option value="en_proceso" {% if request.GET.estado == 'en_proceso' %}selected{% endif %} class="bg-[#1a1a1a]">En proceso</option>
-                        <option value="completado" {% if request.GET.estado == 'completado' %}selected{% endif %} class="bg-[#1a1a1a]">Completado</option>
+                        {% for value, label in estados %}
+                        <option value="{{ value }}" {% if estado_filtro == value %}selected{% endif %} class="bg-[#1a1a1a]">{{ label }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div>
                     <label for="fecha_desde" class="block text-sm font-medium text-[#C0A76B] mb-2">Desde</label>
-                    <input type="date" name="fecha_desde" id="fecha_desde" value="{{ request.GET.fecha_desde }}"
+                    <input type="date" name="fecha_desde" id="fecha_desde" value="{{ fecha_desde }}"
                         class="px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
                 </div>
                 <div>
                     <label for="fecha_hasta" class="block text-sm font-medium text-[#C0A76B] mb-2">Hasta</label>
-                    <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ request.GET.fecha_hasta }}"
+                    <input type="date" name="fecha_hasta" id="fecha_hasta" value="{{ fecha_hasta }}"
                         class="px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" />
                 </div>
                 <div>
@@ -98,14 +164,6 @@
                         class="px-6 py-3 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition duration-300 flex items-center gap-2">
                         <i class="fas fa-filter"></i> Filtrar
                     </button>
-                </div>
-                <div class="ml-auto flex gap-3">
-                    <a href="{% url 'exportar_excel' %}" class="px-4 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition duration-300 flex items-center gap-2">
-                        <i class="fas fa-file-excel"></i> Excel
-                    </a>
-                    <a href="{% url 'exportar_pdf' %}" class="px-4 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg transition duration-300 flex items-center gap-2">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </a>
                 </div>
             </div>
         </form>
@@ -118,8 +176,11 @@
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">ID</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Título</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Tipo</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Categoría</th>
-                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Fecha de creación</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Prioridad</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Asignado a</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Fecha</th>
                             <th class="px-6 py-4 text-left text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Estado</th>
                             <th class="px-6 py-4 text-center text-xs font-semibold text-[#C0A76B] uppercase tracking-wider">Acciones</th>
                         </tr>
@@ -128,42 +189,52 @@
                         {% for reporte in reportes %}
                         <tr class="hover:bg-black hover:bg-opacity-30 transition duration-300 fade-in">
                             <td class="px-6 py-4 whitespace-nowrap text-white font-semibold">#{{ reporte.id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-white">{{ reporte.titulo }}</td>
+                            <td class="px-6 py-4 text-white">{{ reporte.titulo }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                <span class="text-xs">{{ reporte.get_tipo_display }}</span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ reporte.categoria }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-300">{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded
+                                    {% if reporte.prioridad == 'urgente' %}bg-red-900 bg-opacity-20 text-red-400
+                                    {% elif reporte.prioridad == 'alta' %}bg-orange-900 bg-opacity-20 text-orange-400
+                                    {% elif reporte.prioridad == 'media' %}bg-yellow-900 bg-opacity-20 text-yellow-400
+                                    {% else %}bg-gray-900 bg-opacity-20 text-gray-400
+                                    {% endif %}">
+                                    {{ reporte.get_prioridad_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-300">
+                                {% if reporte.asignado_a %}
+                                    {{ reporte.asignado_a.username }}
+                                {% else %}
+                                    <span class="text-gray-500">Sin asignar</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-300 text-sm">{{ reporte.fecha_creacion|date:"d/m/Y" }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full border
                                     {% if reporte.estado == 'pendiente' %}bg-yellow-900 bg-opacity-20 text-yellow-400 border-yellow-400 border-opacity-30
                                     {% elif reporte.estado == 'en_proceso' %}bg-blue-900 bg-opacity-20 text-blue-400 border-blue-400 border-opacity-30
+                                    {% elif reporte.estado == 'revisando' %}bg-purple-900 bg-opacity-20 text-purple-400 border-purple-400 border-opacity-30
                                     {% elif reporte.estado == 'completado' %}bg-green-900 bg-opacity-20 text-green-400 border-green-400 border-opacity-30
+                                    {% else %}bg-gray-900 bg-opacity-20 text-gray-400 border-gray-400 border-opacity-30
                                     {% endif %}">
                                     {{ reporte.get_estado_display }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <div class="flex justify-center gap-3">
-                                    <a href="#" title="Editar" 
+                                <div class="flex justify-center gap-2">
+                                    <a href="{% url 'detalle_reporte' reporte.id %}" title="Ver detalles" 
                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-900 bg-opacity-20 text-blue-400 rounded-lg hover:bg-blue-400 hover:text-white transition duration-300">
-                                        <i class="fas fa-edit text-sm"></i>
-                                    </a>
-                                    <a href="#" title="Eliminar" 
-                                       class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300">
-                                        <i class="fas fa-trash-alt text-sm"></i>
-                                    </a>
-                                    <a href="#" title="Descargar PDF" 
-                                       class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300">
-                                        <i class="fas fa-file-pdf text-sm"></i>
-                                    </a>
-                                    <a href="#" title="Descargar Excel" 
-                                       class="inline-flex items-center justify-center w-8 h-8 bg-green-900 bg-opacity-20 text-green-400 rounded-lg hover:bg-green-400 hover:text-white transition duration-300">
-                                        <i class="fas fa-file-excel text-sm"></i>
+                                        <i class="fas fa-eye text-sm"></i>
                                     </a>
                                 </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center">
+                            <td colspan="9" class="px-6 py-8 text-center">
                                 <div class="flex flex-col items-center justify-center text-gray-400">
                                     <i class="fas fa-file-alt text-4xl mb-3 opacity-50"></i>
                                     <p class="text-lg">No hay reportes para mostrar</p>
@@ -176,55 +247,6 @@
                 </table>
             </div>
         </div>
-
-        <!-- Paginación -->
-        <div class="mt-6">
-            {% if is_paginated %}
-            <nav class="inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                {% if page_obj.has_previous %}
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.previous_page_number }}" 
-                   class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">
-                    <span class="sr-only">Anterior</span>
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                {% else %}
-                <span class="relative inline-flex items-center px-3 py-2 rounded-l-md border border-[#C0A76B] bg-gray-800 text-gray-500">
-                    <span class="sr-only">Anterior</span>
-                    <i class="fas fa-chevron-left"></i>
-                </span>
-                {% endif %}
-                
-                {% for num in paginator.page_range %}
-                    {% if page_obj.number == num %}
-                        <span aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] bg-[#C0A76B] text-black font-semibold">{{ num }}</span>
-                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                        <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ num }}" 
-                           class="relative inline-flex items-center px-4 py-2 border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.fecha_desde %}fecha_desde={{ request.GET.fecha_desde }}&{% endif %}{% if request.GET.fecha_hasta %}fecha_hasta={{ request.GET.fecha_hasta }}&{% endif %}page={{ page_obj.next_page_number }}" 
-                   class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#C0A76B] bg-black text-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition duration-300">
-                    <span class="sr-only">Siguiente</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                {% else %}
-                <span class="relative inline-flex items-center px-3 py-2 rounded-r-md border border-[#C0A76B] bg-gray-800 text-gray-500">
-                    <span class="sr-only">Siguiente</span>
-                    <i class="fas fa-chevron-right"></i>
-                </span>
-                {% endif %}
-            </nav>
-            {% endif %}
-        </div>
     </main>
-
-    <!-- Botón Volver al Dashboard -->
-    <a href="{% url 'dashboard' %}" 
-       class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
-        <i class="fas fa-arrow-left"></i>
-        <span class="group-hover:underline">Volver al Dashboard</span>
-    </a>
 </body>
 </html>
