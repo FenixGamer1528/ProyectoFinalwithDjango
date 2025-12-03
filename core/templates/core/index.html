@@ -9,7 +9,7 @@
   <link href="{% static 'css/output.css' %}" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
   <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
-  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}?v=4">
   <title>Glamoure</title>
   <style>
     /* Animación del botón Ver Productos */
@@ -296,7 +296,7 @@
 
   
   <section class="py-20 bg-black">
-    <h2 class="section-title">🔥 Lo Más Vendido 🔥</h2>
+    <h2 class="section-title"> Lo Más Vendido </h2>
     <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
     
     <div class="carousel-container" id="mas-vendido-carousel">
@@ -309,7 +309,19 @@
         <div class="carousel-track" id="mas-vendido-track">
           {% for producto in productos %}
           <div class="carousel-slide">
-            <div class="offer-badge">⭐ TOP</div>
+            {% if producto.destacado %}
+            <div class="top-badge">⭐ TOP</div>
+            {% endif %}
+            
+            {% if user.is_authenticated %}
+            <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                    class="favorite-btn" 
+                    title="{% if user in producto.favorited_by.all %}Eliminar de mis deseos{% else %}Agregar a mis deseos{% endif %}"
+                    data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
+                <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+            </button>
+            {% endif %}
+            
             {% if producto.imagen_url %}
               <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
             {% elif producto.imagen %}
@@ -320,7 +332,7 @@
             <div class="product-info">
               <p class="product-name">{{ producto.nombre }}</p>
               <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
             </div>
           </div>
           {% endfor %}
@@ -338,7 +350,7 @@
 
   
   <section class="py-20 bg-[#111]">
-    <h2 class="section-title">🎉 Ofertas Especiales 🎉</h2>
+    <h2 class="section-title"> Ofertas Especiales </h2>
     
     <div class="carousel-container">
       <!-- Botones de navegación -->
@@ -351,7 +363,7 @@
           
           {% for producto in productos_ofertas %}
           <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
+            <div class="offer-badge"> OFERTA</div>
             {% if producto.imagen_url %}
               <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
             {% elif producto.imagen %}
@@ -362,7 +374,7 @@
             <div class="product-info">
               <p class="product-name">{{ producto.nombre }}</p>
               <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
             </div>
           </div>
           {% empty %}

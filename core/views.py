@@ -289,7 +289,7 @@ def ofertas(request):
 def toggle_favorito(request, producto_id):
     """Alterna el favorito (lista de deseos) del usuario para un producto.
     
-    Responde JSON: {ok: True, added: True/False, total_favorites: int}
+    Responde JSON: {success: True, is_favorito: True/False, total_favorites: int}
     """
     try:
         producto = get_object_or_404(Producto, id=producto_id)
@@ -298,23 +298,23 @@ def toggle_favorito(request, producto_id):
         # Verificar si el producto ya está en favoritos
         if producto in usuario.favoritos.all():
             usuario.favoritos.remove(producto)
-            added = False
+            is_favorito = False
         else:
             usuario.favoritos.add(producto)
-            added = True
+            is_favorito = True
         
         # Contar favoritos actualizados
         total_favoritos = usuario.favoritos.count()
         
         return JsonResponse({
-            'ok': True,
-            'added': added,
+            'success': True,
+            'is_favorito': is_favorito,
             'total_favorites': total_favoritos,
             'producto_id': producto.id
         })
     except Exception as e:
         return JsonResponse({
-            'ok': False,
+            'success': False,
             'error': str(e)
         }, status=400)
 

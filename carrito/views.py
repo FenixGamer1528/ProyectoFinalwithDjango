@@ -88,6 +88,72 @@ def agregar_al_carrito(request, producto_id):
     return redirect('index')
 
 
+# Agregar variante específica al carrito (para productos con variantes de talla/color)
+@login_required
+@require_POST
+def agregar_al_carrito_variante(request):
+    """Agrega una variante específica (con talla y color) al carrito"""
+    from .models import ProductoVariante
+    
+    variante_id = request.POST.get('variante_id')
+    cantidad = int(request.POST.get('cantidad', 1))
+    
+    if not variante_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'Debes seleccionar una talla y color'
+        }, status=400)
+    
+    # Obtener la variante
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    producto = variante.producto
+    
+    # Verificar stock
+    if variante.stock < cantidad:
+        return JsonResponse({
+            'success': False,
+            'error': f'Solo hay {variante.stock} unidades disponibles'
+        }, status=400)
+    
+    # Obtener o crear el carrito
+    carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    
+    # Buscar si ya existe un item con esta variante exacta
+    item, creado = ItemCarrito.objects.get_or_create(
+        carrito=carrito,
+        producto=producto,
+        talla=variante.talla,
+        defaults={'cantidad': cantidad}
+    )
+    
+    if not creado:
+        # Si ya existe, incrementar cantidad
+        nueva_cantidad = item.cantidad + cantidad
+        if nueva_cantidad > variante.stock:
+            return JsonResponse({
+                'success': False,
+                'error': f'Stock insuficiente. Solo hay {variante.stock} unidades disponibles'
+            }, status=400)
+        item.cantidad = nueva_cantidad
+        item.save()
+    
+    # Responder con éxito
+    return JsonResponse({
+        'success': True,
+        'message': f'Agregado al carrito: {producto.nombre} - {variante.color} - Talla {variante.talla}',
+        'item': {
+            'id': item.id,
+            'producto': producto.nombre,
+            'talla': variante.talla,
+            'color': variante.color,
+            'cantidad': item.cantidad,
+            'precio': float(producto.precio),
+            'subtotal': float(item.subtotal())
+        },
+        'carrito_total': carrito.items.count()
+    })
+
+
 # Eliminar producto del carrito
 @login_required
 def eliminar_item(request, item_id):
