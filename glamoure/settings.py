@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'core',
     'carrito',
-    'dashboard',
+    'dashboard.apps.DashboardConfig',
     'tailwind',
     'frontend',
     'django_browser_reload',

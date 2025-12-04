@@ -40,10 +40,10 @@
             <span class="text-[#C0A76B] font-bold text-lg">${{ producto.precio }}</span>
           </div>
           <div class="flex gap-2">
-            <a href="{% url 'producto_detalle' producto.id %}" 
+            <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" 
               class="flex-1 bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] transition duration-300 font-semibold text-center">
               <i class="fas fa-eye mr-1"></i> Ver
-            </a>
+            </button>
             <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
               {% csrf_token %}
               <button type="submit" class="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300 font-semibold">
@@ -58,6 +58,13 @@
       {% endfor %}
     </div>
   </main>
+
+  <!-- Modal de producto -->
+  <div id="productoModal" class="modal">
+    <div class="modal-contenido">
+      <div id="productoContenido"></div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -111,5 +118,6 @@
       }
       return cookieValue;
     }
+
   </script>
 {% endblock %}

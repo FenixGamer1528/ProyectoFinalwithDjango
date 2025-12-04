@@ -15,6 +15,15 @@
     transform: translateY(-2px);
 }
 
+.modal-color-btn.selected .checkmark {
+    opacity: 1 !important;
+}
+
+.modal-color-btn.selected > div {
+    border-color: #C0A76B !important;
+    box-shadow: 0 0 0 3px rgba(192, 167, 107, 0.3) !important;
+}
+
 .modal-color-btn .checkmark {
     transition: all 0.3s ease;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
@@ -39,6 +48,19 @@
     transform: scale(0.95);
 }
 
+.modal-talla-btn.selected {
+    background-color: #C0A76B !important;
+    color: #000 !important;
+    border-color: #C0A76B !important;
+    box-shadow: 0 0 20px rgba(192, 167, 107, 0.5) !important;
+}
+
+.modal-talla-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 /* Animación para stock info */
 #modal-stock-info {
     animation: slideIn 0.4s ease-out;
@@ -53,6 +75,34 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Animación suave para el botón de agregar al carrito */
+@keyframes pulse-slow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(192, 167, 107, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(192, 167, 107, 0.8);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Mejorar hover de botones de color */
+.modal-color-btn > div {
+    transition: all 0.3s ease;
+}
+
+.modal-color-btn:hover > div {
+    box-shadow: 0 0 20px rgba(192, 167, 107, 0.5);
+}
+
+.modal-color-btn.selected > div {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px rgba(192, 167, 107, 0.8) !important;
 }
 
 /* Responsive para botones de colores */
@@ -87,9 +137,9 @@
     padding: 30px;
     border-radius: 12px;
     border: 1px solid #C0A76B; /* Borde dorado */
-    width: 90%;
-    max-width: 800px; 
-    max-height: 80vh;
+    width: 95%;
+    max-width: 1200px; 
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 4px 20px rgba(192, 167, 107, 0.2); /* Sombra dorada suave */
     position: relative;
