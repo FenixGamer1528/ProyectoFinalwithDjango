@@ -209,6 +209,13 @@
             <div class="space-y-4">
                 {% if variantes %}
                 <!-- Con variantes: necesita selección de talla y color -->
+                <div class="bg-yellow-900/20 border-2 border-yellow-600 rounded-lg p-4 mb-4">
+                    <p class="text-yellow-400 text-sm flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Importante:</strong> Debes seleccionar una talla y color para poder comprar este producto.
+                    </p>
+                </div>
+                
                 <form id="modal-form-carrito" action="{% url 'agregar_al_carrito_variante' %}" method="POST" class="space-y-4">
                     {% csrf_token %}
                     <input type="hidden" name="variante_id" id="modal-variante-id-input" value="">
@@ -231,7 +238,7 @@
                             disabled
                             class="w-full bg-gradient-to-r from-[#C0A76B] via-[#d4b876] to-[#C0A76B] text-black font-bold py-5 px-6 rounded-xl hover:from-[#d4b876] hover:via-[#e6c98a] hover:to-[#d4b876] transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(192,167,107,0.6)] animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:animate-none flex items-center justify-center gap-3 text-xl shadow-lg">
                         <i class="fas fa-shopping-cart text-2xl"></i>
-                        <span>Agregar al Carrito</span>
+                        <span id="btn-agregar-texto">Selecciona Talla y Color</span>
                     </button>
                 </form>
                 

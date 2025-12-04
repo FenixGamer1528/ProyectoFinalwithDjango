@@ -53,18 +53,46 @@ def ver_carrito(request):
 @login_required
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
+    
+    # ⚠️ VALIDACIÓN: Verificar si el producto tiene variantes
+    from .models import ProductoVariante
+    tiene_variantes = ProductoVariante.objects.filter(producto=producto).exists()
+    
+    if tiene_variantes:
+        # Si tiene variantes, DEBE usar agregar_al_carrito_variante
+        mensaje = 'Este producto requiere seleccionar talla y color. Por favor, usa el modal de detalles.'
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "ok": False,
+                "error": mensaje
+            }, status=400)
+        else:
+            messages.warning(request, mensaje)
+            return redirect('index')
+    
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
 
     cantidad = int(request.POST.get('cantidad', 1))
-    # Permitimos que el usuario envíe una talla opcional al agregar al carrito
+    # Permitimos que el usuario envíe una talla y color opcional al agregar al carrito
     talla = request.POST.get('talla')
     if talla:
         talla = talla.strip()
     else:
         talla = None
+    
+    color = request.POST.get('color')
+    if color:
+        color = color.strip()
+    else:
+        color = None
 
-    # Buscamos el item teniendo en cuenta la talla seleccionada (puede ser None)
-    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto, talla=talla)
+    # Buscamos el item teniendo en cuenta la talla y color seleccionados (pueden ser None)
+    item, creado = ItemCarrito.objects.get_or_create(
+        carrito=carrito, 
+        producto=producto, 
+        talla=talla,
+        color=color
+    )
     if not creado:
         item.cantidad += cantidad
     else:
@@ -80,11 +108,13 @@ def agregar_al_carrito(request, producto_id):
                 "producto": producto.nombre,
                 "cantidad": item.cantidad,
                 "talla": item.talla,
+                "color": item.color,
                 "subtotal": float(item.subtotal())
             }
         })
 
     # ✅ Si no es AJAX, redirige normalmente
+    messages.success(request, f'{producto.nombre} agregado al carrito')
     return redirect('index')
 
 
@@ -118,11 +148,12 @@ def agregar_al_carrito_variante(request):
     # Obtener o crear el carrito
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
     
-    # Buscar si ya existe un item con esta variante exacta
+    # Buscar si ya existe un item con esta variante exacta (talla + color)
     item, creado = ItemCarrito.objects.get_or_create(
         carrito=carrito,
         producto=producto,
         talla=variante.talla,
+        color=variante.color,
         defaults={'cantidad': cantidad}
     )
     

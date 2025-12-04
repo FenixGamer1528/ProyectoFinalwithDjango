@@ -58,12 +58,10 @@
                       class="flex-1 bg-[#C0A76B] text-black px-4 py-2 rounded-lg hover:bg-[#d4b96a] transition duration-300 font-semibold text-center">
                 <i class="fas fa-eye mr-1"></i> Ver detalles
               </button>
-              <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
-                {% csrf_token %}
-                <button type="submit" class="w-full bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300 font-semibold">
-                  <i class="fas fa-shopping-cart mr-1"></i> Agregar
-                </button>
-              </form>
+              <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" 
+                class="flex-1 bg-white text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300 font-semibold text-sm">
+                <i class="fas fa-shopping-cart mr-1"></i> Comprar
+              </button>
             </div>
           </div>
         </div>
