@@ -13,9 +13,13 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <!-- CSS de correcciones urgentes -->
   <link rel="stylesheet" href="{% static 'css/correcciones.css' %}">
-  <title>Glamoure</title>
+  
+  {% block extra_css %}{% endblock %}
+  
+  <title>{% block title %}Glamoure{% endblock %}</title>
 </head>
 <body class="bg-black text-white font-sans antialiased">
+  <div class="min-h-screen flex flex-col">
   <!-- NAVBAR FIXED -->
   <header class="navbar-fixed">
     
@@ -275,146 +279,150 @@
   <!-- Espacio para el navbar fijo -->
   <div class="navbar-spacer"></div>
 
-  <!-- HERO SECTION -->
-  <section class="hero-section">
-    <div class="hero-overlay">
-      <h1 class="hero-title">¡Bienvenido a Glamoure!</h1>
-      <p class="hero-subtitle">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
-      <a href="{% url 'catalogo_completo' %}" class="hero-btn">
-        Ver Productos
-      </a>
-    </div>
-  </section>
-
-  <!-- CATEGORÍAS DESTACADAS -->
-  <section class="categories-section">
-    <h2 class="section-title">Categorías Destacadas</h2>
-    <div class="categories-container">
-      <div class="category-item">
-        <a href="{% url 'mujeres' %}">
-          <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer">
-          <span class="category-label">Ropa Mujer</span>
+  <!-- CONTENIDO PRINCIPAL (esto es específico del index) -->
+   <main class="flex-grow">
+  {% block content %}
+    <!-- HERO SECTION -->
+    <section class="hero-section">
+      <div class="hero-overlay">
+        <h1 class="hero-title">¡Bienvenido a Glamoure!</h1>
+        <p class="hero-subtitle">Moda exclusiva. Estilo eterno. Inspirado en ti.</p>
+        <a href="{% url 'catalogo_completo' %}" class="hero-btn">
+          Ver Productos
         </a>
       </div>
-      <div class="category-item">
-        <a href="{% url 'zapatos' %}">
-          <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos">
-          <span class="category-label">Zapatos</span>
-        </a>
-      </div>
-      <div class="category-item">
-        <a href="{% url 'hombres' %}">
-          <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre">
-          <span class="category-label">Ropa Hombre</span>
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- VIDEO SECTION -->
-  <section class="video-section">
-    <div class="video-container">
-      <h2 class="video-title">Comodidad, elegancia y estilo</h2>
-      <p class="video-description">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
-      <div class="video-wrapper">
-        <video src="{% static 'Videos/Jhim Kenny - VERSACE.mp4' %}" autoplay muted loop></video>
+    <!-- CATEGORÍAS DESTACADAS -->
+    <section class="categories-section">
+      <h2 class="section-title">Categorías Destacadas</h2>
+      <div class="categories-container">
+        <div class="category-item">
+          <a href="{% url 'mujeres' %}">
+            <img src="{% static 'imagenes/señora.png' %}" alt="Ropa Mujer">
+            <span class="category-label">Ropa Mujer</span>
+          </a>
+        </div>
+        <div class="category-item">
+          <a href="{% url 'zapatos' %}">
+            <img src="{% static 'imagenes/zapatos.avif' %}" alt="Zapatos">
+            <span class="category-label">Zapatos</span>
+          </a>
+        </div>
+        <div class="category-item">
+          <a href="{% url 'hombres' %}">
+            <img src="{% static 'imagenes/principalhombre.png' %}" alt="Ropa Hombre">
+            <span class="category-label">Ropa Hombre</span>
+          </a>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-<!-- LO MÁS VENDIDO -->
-  <section class="py-20 bg-black">
-    <h2 class="section-title">Lo Más Vendido</h2>
-    <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
-    
-    <div class="carousel-container" id="mas-vendido-carousel">
-      <!-- Botones de navegación -->
-      <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
-      <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
+    <!-- VIDEO SECTION -->
+    <section class="video-section">
+      <div class="video-container">
+        <h2 class="video-title">Comodidad, elegancia y estilo</h2>
+        <p class="video-description">Nuestra marca ofrece la mejor variedad de productos del mercado, combinando diseño y calidad para ti.</p>
+        <div class="video-wrapper">
+          <video src="{% static 'Videos/Jhim Kenny - VERSACE.mp4' %}" autoplay muted loop></video>
+        </div>
+      </div>
+    </section>
+
+    <!-- LO MÁS VENDIDO -->
+    <section class="py-20 bg-black">
+      <h2 class="section-title">Lo Más Vendido</h2>
+      <p class="text-center text-gray-400 mb-8">Descubre las prendas favoritas de nuestros clientes</p>
       
-      <!-- Carrusel -->
-      <div class="carousel-wrapper">
-        <div class="carousel-track" id="mas-vendido-track">
+      <div class="carousel-container" id="mas-vendido-carousel">
+        <!-- Botones de navegación -->
+        <button class="carousel-nav prev" aria-label="Anterior" onclick="masVendidoCarousel.prevSlide()">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente" onclick="masVendidoCarousel.nextSlide()">›</button>
+        
+        <!-- Carrusel -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="mas-vendido-track">
+            {% for producto in productos %}
+            <div class="carousel-slide">
+              <div class="offer-badge">⭐ TOP</div>
+              {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+              {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+              {% else %}
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+              {% endif %}
+              <div class="product-info">
+                <p class="product-name">{{ producto.nombre }}</p>
+                <p class="product-price">${{ producto.precio }}</p>
+                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        
+        <!-- Indicadores -->
+        <div class="carousel-indicators" id="mas-vendido-indicators">
           {% for producto in productos %}
-          <div class="carousel-slide">
-            <div class="offer-badge">⭐ TOP</div>
-            {% if producto.imagen_url %}
-              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-            {% elif producto.imagen %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-            {% endif %}
-            <div class="product-info">
-              <p class="product-name">{{ producto.nombre }}</p>
-              <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
+            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
           {% endfor %}
         </div>
       </div>
-      
-      <!-- Indicadores -->
-      <div class="carousel-indicators" id="mas-vendido-indicators">
-        {% for producto in productos %}
-          <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- OFERTAS ESPECIALES -->
-  <section class="py-20 bg-[#111]">
-    <h2 class="section-title">Ofertas Especiales</h2>
-    
-    <div class="carousel-container">
-      <!-- Botones de navegación -->
-      <button class="carousel-nav prev" aria-label="Anterior">‹</button>
-      <button class="carousel-nav next" aria-label="Siguiente">›</button>
+    <!-- OFERTAS ESPECIALES -->
+    <section class="py-20 bg-[#111]">
+      <h2 class="section-title">Ofertas Especiales</h2>
       
-      <!-- Carrusel -->
-      <div class="carousel-wrapper">
-        <div class="carousel-track">
-          
+      <div class="carousel-container">
+        <!-- Botones de navegación -->
+        <button class="carousel-nav prev" aria-label="Anterior">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente">›</button>
+        
+        <!-- Carrusel -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track">
+            
+            {% for producto in productos_ofertas %}
+            <div class="carousel-slide">
+              <div class="offer-badge">🔥 OFERTA</div>
+              {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+              {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+              {% else %}
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+              {% endif %}
+              <div class="product-info">
+                <p class="product-name">{{ producto.nombre }}</p>
+                <p class="product-price">${{ producto.precio }}</p>
+                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+              </div>
+            </div>
+            {% empty %}
+            <!-- Si no hay ofertas, mostrar mensaje -->
+            <div class="carousel-slide">
+              <div class="product-info">
+                <p class="product-name">No hay ofertas disponibles</p>
+                <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
+              </div>
+            </div>
+            {% endfor %}
+            
+          </div>
+        </div>
+        
+        <!-- Indicadores -->
+        <div class="carousel-indicators">
           {% for producto in productos_ofertas %}
-          <div class="carousel-slide">
-            <div class="offer-badge">🔥 OFERTA</div>
-            {% if producto.imagen_url %}
-              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-            {% elif producto.imagen %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-            {% else %}
-              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-            {% endif %}
-            <div class="product-info">
-              <p class="product-name">{{ producto.nombre }}</p>
-              <p class="product-price">${{ producto.precio }}</p>
-              <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
-            </div>
-          </div>
-          {% empty %}
-          <!-- Si no hay ofertas, mostrar mensaje -->
-          <div class="carousel-slide">
-            <div class="product-info">
-              <p class="product-name">No hay ofertas disponibles</p>
-              <p class="text-gray-400">Próximamente tendremos ofertas increíbles para ti</p>
-            </div>
-          </div>
+            <span class="indicator {% if forloop.first %}active{% endif %}"></span>
           {% endfor %}
-          
         </div>
       </div>
-      
-      <!-- Indicadores -->
-      <div class="carousel-indicators">
-        {% for producto in productos_ofertas %}
-          <span class="indicator {% if forloop.first %}active{% endif %}"></span>
-        {% endfor %}
-      </div>
-    </div>
-</section>
-
+    </section>
+  {% endblock %}
+    </main>
   <!-- FOOTER -->
   <footer class="main-footer">
     <div class="footer-content">
@@ -505,7 +513,7 @@
     </div>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- SCRIPTS BASE -->
   <script src="{% static 'js/modal.js' %}"></script>
   <script src="{% static 'js/carousel-ofertas.js' %}"></script>
   <script src="{% static 'js/carousel-mas-vendido.js' %}"></script>
@@ -584,50 +592,53 @@
     }
     
     // Menú de usuario desktop - VERSIÓN CORREGIDA
-const userMenuButton = document.getElementById('userMenuButton');
-const userMenu = document.getElementById('userMenu');
-const userMenuArrow = document.getElementById('userMenuArrow');
-let isMenuOpen = false;
+    const userMenuButton = document.getElementById('userMenuButton');
+    const userMenu = document.getElementById('userMenu');
+    const userMenuArrow = document.getElementById('userMenuArrow');
+    let isMenuOpen = false;
 
-if (userMenuButton && userMenu) {
-    // Asegurar que empiece oculto
-    userMenu.classList.add('hidden');
-    
-    userMenuButton.addEventListener('click', function(e) {
-        e.stopPropagation();
+    if (userMenuButton && userMenu) {
+        // Asegurar que empiece oculto
+        userMenu.classList.add('hidden');
         
-        if (!isMenuOpen) {
-            // Abrir menú
-            userMenu.classList.remove('hidden');
-            userMenuArrow.style.transform = 'rotate(180deg)';
-            isMenuOpen = true;
-        } else {
-            // Cerrar menú
+        userMenuButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (!isMenuOpen) {
+                // Abrir menú
+                userMenu.classList.remove('hidden');
+                userMenuArrow.style.transform = 'rotate(180deg)';
+                isMenuOpen = true;
+            } else {
+                // Cerrar menú
+                userMenu.classList.add('hidden');
+                userMenuArrow.style.transform = 'rotate(0deg)';
+                isMenuOpen = false;
+            }
+        });
+        
+        function closeUserMenu() {
             userMenu.classList.add('hidden');
             userMenuArrow.style.transform = 'rotate(0deg)';
             isMenuOpen = false;
         }
-    });
-    
-    function closeUserMenu() {
-        userMenu.classList.add('hidden');
-        userMenuArrow.style.transform = 'rotate(0deg)';
-        isMenuOpen = false;
-    }
-    
-    document.addEventListener('click', function(e) {
-        if (isMenuOpen && !userMenu.contains(e.target) && e.target !== userMenuButton) {
-            closeUserMenu();
-        }
-    });
-    
-    userMenu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', function() {
-            closeUserMenu();
+        
+        document.addEventListener('click', function(e) {
+            if (isMenuOpen && !userMenu.contains(e.target) && e.target !== userMenuButton) {
+                closeUserMenu();
+            }
         });
-    });
-  }
+        
+        userMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function() {
+                closeUserMenu();
+            });
+        });
+    }
   });
   </script>
+  
+  {% block extra_js %}{% endblock %}
+  </div>
 </body>
 </html>
