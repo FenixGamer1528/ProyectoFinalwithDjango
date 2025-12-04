@@ -121,6 +121,7 @@
                 
                 <!-- Panel de Administración (Solo para staff) -->
                 {% if user.is_staff %}
+
                 <div class="dropdown-divider"></div>
                 <a href="{% url 'dashboard' %}" class="dropdown-item">
                   <div class="dropdown-icon">
@@ -365,6 +366,7 @@
         <!-- Indicadores -->
         <div class="carousel-indicators" id="mas-vendido-indicators">
           {% for producto in productos %}
+
             <span class="indicator {% if forloop.first %}active{% endif %}" onclick="masVendidoCarousel.goToSlide({{ forloop.counter0 }})"></span>
           {% endfor %}
         </div>
@@ -443,20 +445,16 @@
   </footer>
 
   <!-- 🛒 MODAL CARRITO -->
-  <div id="carritoModal" class="modal hidden">
-    <div class="modal-contenido">
-      <div class="carrito-header">
-        <button onclick="cerrarModal()" class="cerrar">&times;</button>
-        <h2>Carrito de Compras</h2>
-        <p class="carrito-subtitle">Glamoure Collection</p>
-      </div>
-      <div class="carrito-body">
-        <div id="carritoContenido"></div>
-      </div>
+  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
+      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black">&times;</button>
+      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
+      <div id="carritoContenido"></div>
     </div>
   </div>
 
   <!-- 📞 MODAL CONTACTO CON REDES SOCIALES -->
+
   <div id="contactModal" class="contact-modal hidden">
     <div class="contact-modal-content">
       <!-- Botón cerrar -->
@@ -465,6 +463,7 @@
       <!-- Contenido del modal -->
       <div class="contact-content">
         <!-- Título -->
+
         <h2 class="contact-title">Contáctanos</h2>
         <p class="contact-subtitle">Síguenos en nuestras redes sociales</p>
         
@@ -485,6 +484,7 @@
             </svg>
             <span class="social-name">Facebook</span>
           </a>
+
 
           <!-- Instagram -->
           <a href="https://instagram.com/tupagina" target="_blank" class="social-link instagram">

@@ -82,14 +82,14 @@
             
             {% if variantes %}
             <!-- Colores Disponibles (PRIMERO, con botones circulares de colores) -->
-            <div>
-                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
-                    <i class="fas fa-palette"></i>Colores Disponibles
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-[#C0A76B] mb-4 flex items-center gap-2 border-b-2 border-[#C0A76B] pb-2">
+                    <i class="fas fa-palette text-2xl"></i>Colores Disponibles
                 </h3>
-                <div class="flex flex-wrap gap-3" id="modal-colores-container">
+                <div class="flex flex-wrap gap-4" id="modal-colores-container">
                     {% for color in colores_disponibles|slice:":3" %}
                     <button class="modal-color-btn relative group" data-color="{{ color }}" onclick="seleccionarColor('{{ color }}')">
-                        <div class="w-12 h-12 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B]" 
+                        <div class="w-16 h-16 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
                              style="background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
                         </div>
                         <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
@@ -106,9 +106,9 @@
             </div>
             
             <!-- Tallas Disponibles (SEGUNDO) -->
-            <div>
-                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
-                    <i class="fas fa-ruler"></i>Tallas Disponibles
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-[#C0A76B] mb-4 flex items-center gap-2 border-b-2 border-[#C0A76B] pb-2">
+                    <i class="fas fa-ruler text-2xl"></i>Tallas Disponibles
                 </h3>
                 <div class="flex flex-wrap gap-3" id="modal-tallas-container">
                     {% for talla in tallas_disponibles %}
@@ -164,30 +164,139 @@
             </div>
             
             {% else %}
-            <!-- Sin variantes -->
-            <div class="bg-yellow-900/20 border-2 border-yellow-600 rounded-lg p-4">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-info-circle text-yellow-400 text-xl mt-1"></i>
-                    <div class="flex-1">
-                        <p class="text-yellow-400 font-semibold text-sm mb-2">
-                            <i class="fas fa-box-open mr-1"></i>Producto sin variantes configuradas
+            <!-- Sin variantes - Mostrar stock disponible -->
+            <div class="bg-gradient-to-r from-[#C0A76B]/10 to-yellow-900/10 border-2 border-[#C0A76B] rounded-xl p-4">
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
+                    <i class="fas fa-box"></i>Disponibilidad
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Stock Disponible</p>
+                        <p class="text-3xl font-bold {% if producto.stock > 10 %}text-green-400{% elif producto.stock > 0 %}text-yellow-400{% else %}text-red-400{% endif %}">
+                            {{ producto.stock|default:0 }}
                         </p>
-                        <p class="text-gray-300 text-xs mb-3">
-                            Este producto aún no tiene tallas ni colores configurados. 
-                            <strong class="text-white">El administrador debe crear las variantes primero.</strong>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {% if producto.stock > 10 %}
+                                <i class="fas fa-check-circle text-green-400"></i> Disponible
+                            {% elif producto.stock > 0 %}
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i> Pocas unidades
+                            {% else %}
+                                <i class="fas fa-times-circle text-red-400"></i> Agotado
+                            {% endif %}
                         </p>
-                        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3">
-                            <p class="text-xs text-gray-400 uppercase tracking-wide">Stock Base General</p>
-                            <p class="text-xl font-bold text-white">{{ producto.stock|default:0 }} unidades</p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                <i class="fas fa-arrow-right mr-1"></i>
-                                Ve al Dashboard → Productos → "Variantes" para distribuir el stock en tallas y colores
-                            </p>
-                        </div>
+                    </div>
+                    <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4">
+                        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Talla/Color</p>
+                        <p class="text-lg font-bold text-white">Talla única</p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            <i class="fas fa-info-circle"></i> Sin variantes
+                        </p>
                     </div>
                 </div>
+                
+                {% if user.is_staff %}
+                <div class="mt-3 bg-blue-900/20 border border-blue-600 rounded-lg p-3">
+                    <p class="text-xs text-blue-400">
+                        <i class="fas fa-user-shield mr-1"></i>
+                        <strong>Administrador:</strong> Puedes crear variantes en Dashboard → Productos → "Variantes"
+                    </p>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
+            
+            <!-- Formulario de Agregar al Carrito -->
+            <div class="space-y-4">
+                {% if variantes %}
+                <!-- Con variantes: necesita selección de talla y color -->
+                <form id="modal-form-carrito" action="{% url 'agregar_al_carrito_variante' %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="variante_id" id="modal-variante-id-input" value="">
+                    
+                    <div class="space-y-2">
+                        <label for="modal-cantidad" class="block text-[#C0A76B] font-semibold text-lg mb-2">
+                            <i class="fas fa-sort-numeric-up mr-2"></i>Cantidad:
+                        </label>
+                        <input type="number" 
+                               id="modal-cantidad" 
+                               name="cantidad" 
+                               value="1" 
+                               min="1" 
+                               max="100"
+                               class="w-32 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-6 py-3 text-white text-center font-bold text-2xl focus:outline-none focus:ring-2 focus:ring-[#C0A76B] focus:border-yellow-500">
+                    </div>
+                    
+                    <button type="submit" 
+                            id="modal-btn-agregar"
+                            disabled
+                            class="w-full bg-gradient-to-r from-[#C0A76B] via-[#d4b876] to-[#C0A76B] text-black font-bold py-5 px-6 rounded-xl hover:from-[#d4b876] hover:via-[#e6c98a] hover:to-[#d4b876] transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(192,167,107,0.6)] animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:animate-none flex items-center justify-center gap-3 text-xl shadow-lg">
+                        <i class="fas fa-shopping-cart text-2xl"></i>
+                        <span>Agregar al Carrito</span>
+                    </button>
+                </form>
+                
+                {% else %}
+                <!-- Sin variantes: agregar directamente el producto base -->
+                <div class="bg-[#1a1a1a] border-2 border-[#C0A76B] rounded-xl p-6 space-y-5">
+                    <h3 class="text-2xl font-bold text-[#C0A76B] mb-4 flex items-center gap-3 border-b-2 border-[#C0A76B] pb-3">
+                        <i class="fas fa-shopping-bag text-2xl"></i>Agregar al Carrito
+                    </h3>
+                    
+                    <form action="{% url 'agregar_al_carrito' producto.id %}" method="POST" class="space-y-5">
+                        {% csrf_token %}
+                        
+                        <!-- Selector de Cantidad con controles más grandes -->
+                        <div class="space-y-2">
+                            <label for="cantidad-base" class="block text-[#C0A76B] font-semibold text-lg mb-2">
+                                <i class="fas fa-sort-numeric-up mr-2"></i>Cantidad de unidades:
+                            </label>
+                            <div class="flex items-center gap-4">
+                                <button type="button" 
+                                        onclick="cambiarCantidadBase(-1)"
+                                        class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-12 h-12 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        {% if producto.stock == 0 %}disabled{% endif %}>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                
+                                <input type="number" 
+                                       id="cantidad-base" 
+                                       name="cantidad" 
+                                       value="1" 
+                                       min="1" 
+                                       max="{{ producto.stock }}"
+                                       readonly
+                                       class="w-32 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-6 py-3 text-white text-center font-bold text-2xl focus:outline-none focus:ring-2 focus:ring-[#C0A76B]">
+                                
+                                <button type="button" 
+                                        onclick="cambiarCantidadBase(1)"
+                                        class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-12 h-12 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        {% if producto.stock == 0 %}disabled{% endif %}>
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-2">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Stock disponible: <span class="font-bold text-white">{{ producto.stock }}</span> unidades
+                            </p>
+                        </div>
+                        
+                        <!-- Botón de Agregar -->
+                        <button type="submit" 
+                                id="btn-agregar-sin-variantes"
+                                class="w-full bg-gradient-to-r from-[#C0A76B] via-[#d4b876] to-[#C0A76B] text-black font-bold py-5 px-6 rounded-xl hover:from-[#d4b876] hover:via-[#e6c98a] hover:to-[#d4b876] transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(192,167,107,0.6)] animate-pulse-slow flex items-center justify-center gap-3 text-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:animate-none"
+                                {% if producto.stock == 0 %}disabled{% endif %}>
+                            {% if producto.stock > 0 %}
+                                <i class="fas fa-shopping-cart text-2xl"></i>
+                                <span>Agregar al Carrito</span>
+                            {% else %}
+                                <i class="fas fa-times-circle text-2xl"></i>
+                                <span>Sin Stock Disponible</span>
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
             
             <!-- Mensaje de Selección -->
             <div id="modal-mensaje-seleccion" class="text-center py-3 px-4 bg-gray-800/50 rounded-lg border border-gray-700">
@@ -395,6 +504,42 @@ function actualizarVarianteModal() {
             modalVarianteTexto.textContent = `${modalColorSeleccionado} - Talla ${modalTallaSeleccionada}`;
         }
         
+        // ACTUALIZAR BOTÓN DE AGREGAR AL CARRITO
+        const btnAgregar = document.getElementById('modal-btn-agregar');
+        const varianteIdInput = document.getElementById('modal-variante-id-input');
+        const cantidadInput = document.getElementById('modal-cantidad');
+        
+        if (btnAgregar && varianteIdInput) {
+            // Actualizar el campo hidden con el ID de la variante
+            varianteIdInput.value = variante.id;
+            
+            if (variante.stock > 0) {
+                // Habilitar botón
+                btnAgregar.disabled = false;
+                btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnAgregar.innerHTML = `
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span class="text-lg">Agregar al Carrito</span>
+                `;
+                
+                // Actualizar máximo de cantidad
+                if (cantidadInput) {
+                    cantidadInput.max = variante.stock;
+                    if (parseInt(cantidadInput.value) > variante.stock) {
+                        cantidadInput.value = variante.stock;
+                    }
+                }
+            } else {
+                // Deshabilitar botón
+                btnAgregar.disabled = true;
+                btnAgregar.classList.add('opacity-50', 'cursor-not-allowed');
+                btnAgregar.innerHTML = `
+                    <i class="fas fa-times-circle text-xl"></i>
+                    <span class="text-lg">Sin Stock</span>
+                `;
+            }
+        }
+        
         // Actualizar mensaje
         if (variante.stock > 0) {
             modalMensaje.innerHTML = `
@@ -436,6 +581,149 @@ function actualizarVarianteModal() {
     }
 }
 
+// Manejar el envío del formulario con AJAX
+const modalFormCarrito = document.getElementById('modal-form-carrito');
+if (modalFormCarrito) {
+    modalFormCarrito.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const btnAgregar = document.getElementById('modal-btn-agregar');
+        
+        // Deshabilitar botón temporalmente
+        const btnTextoOriginal = btnAgregar.innerHTML;
+        btnAgregar.disabled = true;
+        btnAgregar.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i><span class="text-lg">Agregando...</span>';
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar notificación de éxito
+                mostrarNotificacion(data.message || 'Producto agregado al carrito ✓', 'success');
+                
+                // Cerrar modal después de 1 segundo
+                setTimeout(() => {
+                    cerrarProductoModal();
+                }, 1000);
+                
+                // Actualizar contador del carrito si existe
+                const carritoContador = document.querySelector('.carrito-contador');
+                if (carritoContador && data.carrito_total) {
+                    carritoContador.textContent = data.carrito_total;
+                }
+            } else {
+                // Mostrar error
+                mostrarNotificacion(data.error || 'Error al agregar al carrito', 'error');
+                btnAgregar.disabled = false;
+                btnAgregar.innerHTML = btnTextoOriginal;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al agregar al carrito', 'error');
+            btnAgregar.disabled = false;
+            btnAgregar.innerHTML = btnTextoOriginal;
+        });
+    });
+}
+
 console.log('✅ Variantes del modal inicializadas correctamente');
+</script>
+{% else %}
+<!-- Script para productos SIN variantes -->
+<script>
+console.log('🛍️ Producto sin variantes - Inicializando controles');
+
+// Función para cambiar cantidad en productos sin variantes
+window.cambiarCantidadBase = function(cambio) {
+    const input = document.getElementById('cantidad-base');
+    if (!input) return;
+    
+    const valorActual = parseInt(input.value) || 1;
+    const max = parseInt(input.max) || 100;
+    const min = parseInt(input.min) || 1;
+    
+    let nuevoValor = valorActual + cambio;
+    
+    // Validar límites
+    if (nuevoValor < min) nuevoValor = min;
+    if (nuevoValor > max) {
+        nuevoValor = max;
+        mostrarNotificacion(`Stock máximo disponible: ${max} unidades`, 'info');
+    }
+    
+    input.value = nuevoValor;
+    
+    // Feedback visual
+    input.style.transform = 'scale(1.1)';
+    setTimeout(() => {
+        input.style.transform = 'scale(1)';
+    }, 200);
+};
+
+// Manejar envío del formulario para productos sin variantes
+const formSinVariantes = document.querySelector('form[action*="agregar_al_carrito"]');
+const btnAgregarSinVariantes = document.getElementById('btn-agregar-sin-variantes');
+
+if (formSinVariantes && btnAgregarSinVariantes) {
+    formSinVariantes.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const btnTextoOriginal = btnAgregarSinVariantes.innerHTML;
+        
+        // Deshabilitar botón temporalmente
+        btnAgregarSinVariantes.disabled = true;
+        btnAgregarSinVariantes.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i><span>Agregando...</span>';
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                // Éxito
+                mostrarNotificacion('✓ Producto agregado al carrito', 'success');
+                
+                // Cerrar modal después de 1 segundo
+                setTimeout(() => {
+                    cerrarProductoModal();
+                }, 1000);
+                
+                // Actualizar contador del carrito si existe
+                const carritoContador = document.querySelector('.carrito-contador');
+                if (carritoContador) {
+                    const itemsCount = parseInt(carritoContador.textContent || '0');
+                    carritoContador.textContent = itemsCount + 1;
+                }
+            } else {
+                // Error
+                mostrarNotificacion(data.error || 'Error al agregar al carrito', 'error');
+                btnAgregarSinVariantes.disabled = false;
+                btnAgregarSinVariantes.innerHTML = btnTextoOriginal;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarNotificacion('Error al agregar al carrito', 'error');
+            btnAgregarSinVariantes.disabled = false;
+            btnAgregarSinVariantes.innerHTML = btnTextoOriginal;
+        });
+    });
+}
+
+console.log('✅ Controles de producto sin variantes inicializados');
 </script>
 {% endif %}

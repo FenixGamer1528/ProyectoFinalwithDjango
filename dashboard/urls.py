@@ -18,7 +18,24 @@ urlpatterns = [
     
     path('usuarios/crear/', views.crear_usuario, name='crear_usuario'),
     
+    # Gestión de reportes
     path('reportes/', views.gestion_reportes, name='gestion_reportes'),
+    path('reportes/crear/', views.crear_reporte, name='crear_reporte'),
+    path('reportes/<int:reporte_id>/', views.detalle_reporte, name='detalle_reporte'),
+    path('reportes/<int:reporte_id>/actualizar-estado/', views.actualizar_estado_reporte, name='actualizar_estado_reporte'),
+    path('reportes/<int:reporte_id>/asignar-responsable/', views.asignar_responsable_reporte, name='asignar_responsable_reporte'),
+    
+    # Gestión de incidencias
+    path('incidencias/crear/', views.crear_incidencia, name='crear_incidencia'),
+    path('incidencias/crear/<int:reporte_id>/', views.crear_incidencia, name='crear_incidencia_reporte'),
+    
+    # Análisis de datos
+    path('analisis/ventas/', views.analizar_ventas, name='analizar_ventas'),
+    path('analisis/ventas/exportar/', views.exportar_reporte_ventas, name='exportar_reporte_ventas'),
+    path('analisis/inventario/', views.analizar_inventario, name='analizar_inventario'),
+    path('analisis/inventario/exportar/', views.exportar_reporte_inventario, name='exportar_reporte_inventario'),
+    path('analisis/detectar-problemas/', views.detectar_problemas_automatico, name='detectar_problemas_automatico'),
+    
     path('gestion/', views.gestion_productos, name='gestion_productos'),
     path('editar/<int:pk>/', views.editar_producto, name='editar_producto'),
     path('cliente/', views.dashboardCliente, name='dashboard_cliente'),

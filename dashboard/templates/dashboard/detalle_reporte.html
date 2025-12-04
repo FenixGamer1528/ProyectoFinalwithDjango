@@ -1,0 +1,182 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle Reporte #{{ reporte.id }} - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+</head>
+<body class="bg-black text-white min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'gestion_reportes' %}" class="text-[#C0A76B] hover:text-yellow-400 flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="bg-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-900 bg-opacity-20 border border-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-400 text-{% if message.tags == 'success' %}green{% elif message.tags == 'error' %}red{% else %}blue{% endif %}-400 px-4 py-3 rounded-lg">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Información principal -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-8">
+                    <h1 class="text-3xl font-bold text-[#C0A76B] mb-4">{{ reporte.titulo }}</h1>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-gray-400 text-sm">Tipo</p>
+                            <p class="text-white">{{ reporte.get_tipo_display }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Categoría</p>
+                            <p class="text-white">{{ reporte.categoria }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Prioridad</p>
+                            <span class="px-3 py-1 text-xs font-semibold rounded
+                                {% if reporte.prioridad == 'urgente' %}bg-red-900 bg-opacity-20 text-red-400
+                                {% elif reporte.prioridad == 'alta' %}bg-orange-900 bg-opacity-20 text-orange-400
+                                {% elif reporte.prioridad == 'media' %}bg-yellow-900 bg-opacity-20 text-yellow-400
+                                {% else %}bg-gray-900 bg-opacity-20 text-gray-400
+                                {% endif %}">
+                                {{ reporte.get_prioridad_display }}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Estado</p>
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full border
+                                {% if reporte.estado == 'pendiente' %}bg-yellow-900 bg-opacity-20 text-yellow-400 border-yellow-400
+                                {% elif reporte.estado == 'en_proceso' %}bg-blue-900 bg-opacity-20 text-blue-400 border-blue-400
+                                {% elif reporte.estado == 'completado' %}bg-green-900 bg-opacity-20 text-green-400 border-green-400
+                                {% endif %}">
+                                {{ reporte.get_estado_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="text-gray-400 text-sm mb-2">Descripción</p>
+                        <p class="text-white">{{ reporte.descripcion }}</p>
+                    </div>
+
+                    {% if reporte.solucion %}
+                    <div class="mb-6 bg-green-900 bg-opacity-10 border border-green-400 border-opacity-30 rounded-lg p-4">
+                        <p class="text-green-400 text-sm mb-2 font-semibold">Solución Aplicada</p>
+                        <p class="text-white">{{ reporte.solucion }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Incidencias relacionadas -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6">
+                    <h2 class="text-xl font-bold text-[#C0A76B] mb-4">
+                        <i class="fas fa-exclamation-triangle"></i> Incidencias Relacionadas ({{ incidencias.count }})
+                    </h2>
+                    
+                    {% for incidencia in incidencias %}
+                    <div class="bg-black bg-opacity-40 border border-gray-700 rounded-lg p-4 mb-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-white font-semibold">{{ incidencia.titulo }}</h3>
+                            <span class="px-2 py-1 text-xs font-semibold rounded
+                                {% if incidencia.severidad == 'critica' %}bg-red-900 bg-opacity-20 text-red-400
+                                {% elif incidencia.severidad == 'alta' %}bg-orange-900 bg-opacity-20 text-orange-400
+                                {% else %}bg-yellow-900 bg-opacity-20 text-yellow-400
+                                {% endif %}">
+                                {{ incidencia.get_severidad_display }}
+                            </span>
+                        </div>
+                        <p class="text-gray-400 text-sm">{{ incidencia.descripcion }}</p>
+                        <div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                            <span><i class="fas fa-tag"></i> {{ incidencia.get_tipo_display }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ incidencia.fecha_reporte|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-400">No hay incidencias registradas</p>
+                    {% endfor %}
+                    
+                    <a href="{% url 'crear_incidencia_reporte' reporte.id %}" class="mt-4 inline-block text-[#C0A76B] hover:text-yellow-400">
+                        <i class="fas fa-plus"></i> Agregar Incidencia
+                    </a>
+                </div>
+            </div>
+
+            <!-- Panel lateral -->
+            <div class="space-y-6">
+                <!-- Cambiar estado -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-[#C0A76B] mb-4">Cambiar Estado</h3>
+                    <form method="post" action="{% url 'actualizar_estado_reporte' reporte.id %}">
+                        {% csrf_token %}
+                        <select name="estado" class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-lg text-white mb-3">
+                            {% for value, label in estados %}
+                            <option value="{{ value }}" {% if reporte.estado == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <textarea name="comentario" placeholder="Comentario opcional" rows="3"
+                            class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-lg text-white mb-3"></textarea>
+                        <button type="submit" class="w-full px-4 py-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition">
+                            Actualizar Estado
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Asignar responsable -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-[#C0A76B] mb-4">Asignar Responsable</h3>
+                    <p class="text-gray-400 text-sm mb-3">
+                        Actual: <strong class="text-white">{{ reporte.asignado_a.username|default:"Sin asignar" }}</strong>
+                    </p>
+                    <form method="post" action="{% url 'asignar_responsable_reporte' reporte.id %}">
+                        {% csrf_token %}
+                        <select name="usuario_id" class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-lg text-white mb-3">
+                            <option value="">Sin asignar</option>
+                            {% for usuario in usuarios %}
+                            <option value="{{ usuario.id }}" {% if reporte.asignado_a.id == usuario.id %}selected{% endif %}>
+                                {{ usuario.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="w-full px-4 py-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition">
+                            Asignar
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Historial de seguimiento -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-6">
+                    <h3 class="text-lg font-bold text-[#C0A76B] mb-4">
+                        <i class="fas fa-history"></i> Seguimiento
+                    </h3>
+                    <div class="space-y-3 max-h-96 overflow-y-auto">
+                        {% for seguimiento in seguimientos %}
+                        <div class="bg-black bg-opacity-40 border-l-4 border-[#C0A76B] p-3 rounded">
+                            <p class="text-white font-semibold text-sm">{{ seguimiento.accion }}</p>
+                            {% if seguimiento.comentario %}
+                            <p class="text-gray-400 text-xs mt-1">{{ seguimiento.comentario }}</p>
+                            {% endif %}
+                            <p class="text-gray-500 text-xs mt-1">
+                                {{ seguimiento.usuario.username }} - {{ seguimiento.fecha|date:"d/m/Y H:i" }}
+                            </p>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-400 text-sm">No hay seguimiento registrado</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

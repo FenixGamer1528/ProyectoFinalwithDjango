@@ -15,81 +15,59 @@
         <h1 class="text-4xl md:text-5xl font-bold text-[#C0A76B] mb-4 uppercase tracking-wide">
           <i class="fa-solid fa-heart mr-3"></i>Mis Deseos
         </h1>
-        <p class="text-gray-400 text-lg">Tus productos favoritos en un solo lugar</p>
+        <p class="text-gray-400 text-lg">Tus productos deseados en un solo lugar</p>
         <div class="w-32 h-1 bg-[#C0A76B] mx-auto mt-4 rounded-full"></div>
       </div>
 
       {% if productos %}
-      <!-- Grid de productos -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {% for producto in productos %}
-        <div class="bg-[#1a1a1a] rounded-2xl overflow-hidden shadow-lg hover:shadow-[#C0A76B]/30 transition-all duration-300 transform hover:-translate-y-2 group">
-          <!-- Imagen del producto -->
-          <div class="relative h-72 overflow-hidden">
-            {% if producto.imagen_url %}
-              <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            {% elif producto.imagen %}
-              <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-            {% else %}
-              <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" class="w-full h-full object-cover">
-            {% endif %}
-            
-            <!-- Badge destacado -->
-            {% if producto.destacado %}
-            <span class="absolute top-4 right-4 bg-[#C0A76B] text-black text-xs font-bold px-3 py-1 rounded-full">
-              ⭐ Destacado
-            </span>
-            {% endif %}
-          </div>
-
-          <!-- Información del producto -->
-          <div class="p-6">
-            <h3 class="text-xl font-bold text-[#C0A76B] mb-2 line-clamp-1">{{ producto.nombre }}</h3>
-            <p class="text-2xl font-bold text-white mb-3">${{ producto.precio }}</p>
-            
-            {% if producto.descripcion %}
-            <p class="text-sm text-gray-400 mb-4 line-clamp-2">{{ producto.descripcion }}</p>
-            {% endif %}
-
-            <!-- Stock info -->
-            {% if producto.stock > 0 %}
-              <p class="text-xs text-green-400 mb-4">
-                <i class="fa-solid fa-check-circle"></i> Stock disponible: {{ producto.stock }}
-              </p>
-            {% else %}
-              <p class="text-xs text-red-400 mb-4">
-                <i class="fa-solid fa-times-circle"></i> Sin stock
-              </p>
-            {% endif %}
-
-            <!-- Botones de acción -->
-            <div class="flex flex-col gap-3">
-              <!-- Ver detalles -->
-              <a href="{% url 'producto' producto.id %}" class="w-full text-center bg-[#C0A76B] text-black font-semibold px-4 py-3 rounded-lg hover:bg-yellow-400 transition-colors">
-                <i class="fa-solid fa-eye mr-2"></i>Ver Detalles
-              </a>
-
-              <!-- Agregar al carrito y eliminar de favoritos -->
-              <div class="flex gap-2">
-                <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
-                  {% csrf_token %}
-                  <input type="hidden" name="cantidad" value="1">
-                  <button type="submit" class="w-full bg-[#111] border border-[#C0A76B] text-[#C0A76B] font-semibold px-4 py-3 rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all">
-                    <i class="fa-solid fa-cart-plus mr-1"></i>Carrito
-                  </button>
-                </form>
-
-                <form action="{% url 'toggle_favorito' producto.id %}" method="post" class="flex-shrink-0">
-                  {% csrf_token %}
-                  <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg transition-colors" title="Eliminar de favoritos">
-                    <i class="fa-solid fa-heart-crack text-lg"></i>
-                  </button>
-                </form>
+      <!-- Carrusel de productos deseados -->
+      <div class="carousel-container" id="deseos-carousel">
+        <!-- Botones de navegación -->
+        <button class="carousel-nav prev" aria-label="Anterior" onclick="deseosCarousel.prevSlide()">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente" onclick="deseosCarousel.nextSlide()">›</button>
+        
+        <!-- Carrusel -->
+        <div class="carousel-wrapper">
+          <div class="carousel-track" id="deseos-track">
+            {% for producto in productos %}
+            <div class="carousel-slide" id="deseo-{{ producto.id }}">
+              {% if producto.destacado %}
+              <div class="top-badge">⭐ TOP</div>
+              {% endif %}
+              
+              <!-- Botón de eliminar deseo -->
+              <button onclick="eliminarFavorito({{ producto.id }}, this)" 
+                      class="favorite-btn" 
+                      style="background: rgba(220, 38, 38, 0.95);"
+                      title="Eliminar de mis deseos"
+                      data-favorito="true">
+                  <i class="fa-solid fa-heart-crack" style="color: #fff;"></i>
+              </button>
+              
+              {% if producto.imagen_url %}
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+              {% elif producto.imagen %}
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+              {% else %}
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+              {% endif %}
+              
+              <div class="product-info">
+                <p class="product-name">{{ producto.nombre }}</p>
+                <p class="product-price">${{ producto.precio }}</p>
+                <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
+            {% endfor %}
           </div>
         </div>
-        {% endfor %}
+        
+        <!-- Indicadores -->
+        <div class="carousel-indicators" id="deseos-indicators">
+          {% for producto in productos %}
+            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="deseosCarousel.goToSlide({{ forloop.counter0 }})"></span>
+          {% endfor %}
+        </div>
       </div>
 
       <!-- Botón volver -->
@@ -106,7 +84,7 @@
           <i class="fa-regular fa-heart text-8xl text-gray-600"></i>
         </div>
         <h2 class="text-3xl font-bold text-gray-400 mb-4">Tu lista de deseos está vacía</h2>
-        <p class="text-gray-500 mb-8">¡Explora nuestra colección y encuentra tus productos favoritos!</p>
+        <p class="text-gray-500 mb-8">¡Explora nuestra colección y agrega productos a tus deseos!</p>
         <a href="{% url 'index' %}" class="inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition-all transform hover:scale-105">
           <i class="fa-solid fa-shopping-bag mr-2"></i>Explorar Productos
         </a>
@@ -117,7 +95,6 @@
 {% endblock %}
 
 {% block extra_js %}
-  <!-- Script específico para mis deseos -->
   <script>
     // Menú desplegable del usuario
     function initUserMenu() {
