@@ -356,7 +356,7 @@
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
                 <p class="product-price">${{ producto.precio }}</p>
-                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+                <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
             {% endfor %}
@@ -399,7 +399,7 @@
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
                 <p class="product-price">${{ producto.precio }}</p>
-                <a href="{% url 'producto' producto.id %}" class="product-btn">Ver detalles</a>
+                <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
             {% empty %}
