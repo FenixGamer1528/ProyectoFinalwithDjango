@@ -96,3 +96,109 @@ class WompiUtils:
         except requests.exceptions.RequestException as e:
             print(f"Error consultando transacción: {e}")
             return None
+
+
+def actualizar_stock_productos(detalle_pedido, usuario=None):
+    """
+    Actualiza el stock de las variantes de productos después de un pago exitoso.
+    
+    Args:
+        detalle_pedido (dict): Diccionario con los productos del pedido
+        usuario: Usuario que realizó la compra (opcional)
+    
+    Returns:
+        tuple: (exitoso: bool, mensajes: list)
+    """
+    from carrito.models import ProductoVariante, Inventario, Producto
+    from django.db import transaction
+    
+    mensajes = []
+    exitoso = True
+    
+    if not detalle_pedido or 'productos' not in detalle_pedido:
+        return False, ["No hay productos en el detalle del pedido"]
+    
+    productos = detalle_pedido.get('productos', [])
+    
+    # Usar transacción atómica para garantizar consistencia
+    try:
+        with transaction.atomic():
+            for prod_data in productos:
+                producto_id = prod_data.get('producto_id')
+                cantidad = prod_data.get('cantidad', 0)
+                talla = prod_data.get('talla')
+                color = prod_data.get('color')
+                nombre = prod_data.get('nombre', 'Producto')
+                
+                if not producto_id or cantidad <= 0:
+                    mensajes.append(f"❌ Datos inválidos para producto {nombre}")
+                    continue
+                
+                # Verificar si el producto existe
+                try:
+                    producto = Producto.objects.get(id=producto_id)
+                except Producto.DoesNotExist:
+                    mensajes.append(f"❌ Producto {nombre} (ID: {producto_id}) no encontrado")
+                    exitoso = False
+                    continue
+                
+                # Si tiene talla y color, buscar la variante
+                if talla and color:
+                    try:
+                        variante = ProductoVariante.objects.select_for_update().get(
+                            producto_id=producto_id,
+                            talla=talla,
+                            color=color
+                        )
+                        
+                        # Verificar stock disponible
+                        if variante.stock < cantidad:
+                            mensajes.append(
+                                f"⚠️ Stock insuficiente para {nombre} ({talla}/{color}). "
+                                f"Disponible: {variante.stock}, Solicitado: {cantidad}"
+                            )
+                            exitoso = False
+                            continue
+                        
+                        # Guardar stock anterior
+                        stock_anterior = variante.stock
+                        
+                        # Actualizar stock
+                        variante.stock -= cantidad
+                        variante.save()
+                        
+                        # Registrar movimiento de inventario
+                        Inventario.objects.create(
+                            variante=variante,
+                            tipo_movimiento='salida',
+                            cantidad=cantidad,
+                            stock_anterior=stock_anterior,
+                            stock_nuevo=variante.stock,
+                            usuario=usuario,
+                            observaciones=f'Venta realizada - Pago Wompi'
+                        )
+                        
+                        mensajes.append(
+                            f"✅ Stock actualizado: {nombre} ({talla}/{color}) - "
+                            f"Descontado: {cantidad}, Nuevo stock: {variante.stock}"
+                        )
+                        
+                    except ProductoVariante.DoesNotExist:
+                        mensajes.append(
+                            f"⚠️ Variante no encontrada para {nombre} "
+                            f"(Talla: {talla}, Color: {color}). Se omitirá la actualización de stock."
+                        )
+                        # No marcamos como error crítico ya que el pedido se creó
+                        
+                else:
+                    # Si no tiene talla/color especificados, podríamos actualizar el stock general del producto
+                    # o simplemente registrar que no se puede actualizar
+                    mensajes.append(
+                        f"ℹ️ Producto {nombre} sin talla/color especificados. "
+                        f"No se actualizó stock de variantes."
+                    )
+        
+        return exitoso, mensajes
+        
+    except Exception as e:
+        return False, [f"❌ Error al actualizar stock: {str(e)}"]

@@ -178,7 +178,8 @@ def carrito_modal(request):
             'imagen': item.producto.imagen_url if item.producto.imagen_url else (item.producto.imagen.url if item.producto.imagen else ''),
             'precio': float(item.producto.precio),
             'cantidad': item.cantidad,
-            'talla': item.talla,
+            'talla': item.talla or 'N/A',
+            'color': item.color or 'N/A',
             'subtotal': float(item.subtotal())
         })
     

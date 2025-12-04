@@ -39,22 +39,35 @@ function mostrarCarrito() {
                         <hr>
                     `;
                 });
-                
-                // 🆕 AGREGAR TOTAL Y BOTÓN DE PAGO
-                contenido += `
-                    <div class="carrito-footer">
-                        <div class="carrito-total">
-                            <strong>Total:</strong> 
-                            <span style="color: #667eea; font-size: 1.3em;">$${data.total.toLocaleString('es-CO')}</span>
-                        </div>
-                        <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
-                            Proceder al Pago
-                        </a>
-                    </div>
-                `;
             }
 
             document.getElementById('carritoContenido').innerHTML = contenido;
+            
+            // Agregar footer con total y botón fuera del body
+            const modalContenido = document.querySelector('#carritoModal .modal-contenido');
+            let footer = modalContenido.querySelector('.carrito-footer');
+            
+            // Remover footer existente si hay
+            if (footer) {
+                footer.remove();
+            }
+            
+            // Crear nuevo footer solo si hay items
+            if (data.items.length > 0) {
+                footer = document.createElement('div');
+                footer.className = 'carrito-footer';
+                footer.innerHTML = `
+                    <div class="carrito-total">
+                        <strong>Total:</strong> 
+                        <span>$${data.total.toLocaleString('es-CO')}</span>
+                    </div>
+                    <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
+                        💳 Procesar la Compra
+                    </a>
+                `;
+                modalContenido.appendChild(footer);
+            }
+            
             document.getElementById('carritoModal').style.display = 'flex';
         });
 }

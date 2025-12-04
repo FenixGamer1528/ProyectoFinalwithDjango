@@ -445,11 +445,14 @@
   </footer>
 
   <!-- 🛒 MODAL CARRITO -->
-  <div id="carritoModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white text-black p-6 rounded-xl shadow-xl w-96 relative">
-      <button onclick="cerrarModal()" class="absolute top-3 right-3 text-gray-600 hover:text-black">&times;</button>
-      <h2 class="text-xl font-bold mb-4">Carrito de Compras</h2>
-      <div id="carritoContenido"></div>
+  <div id="carritoModal" class="modal" style="display: none;">
+    <div class="modal-contenido">
+      <div class="carrito-header">
+        <span class="cerrar" onclick="cerrarModal()">&times;</span>
+        <h2>🛒 Carrito de Compras</h2>
+        <p class="carrito-subtitle">Revisa tus productos antes de pagar</p>
+      </div>
+      <div class="carrito-body" id="carritoContenido"></div>
     </div>
   </div>
 

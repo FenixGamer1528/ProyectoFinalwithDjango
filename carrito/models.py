@@ -188,8 +188,9 @@ class Carrito(models.Model):
 class ItemCarrito(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE, related_name='items')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    # Guardamos la talla seleccionada por el usuario cuando agrega al carrito
+    # Guardamos la talla y color seleccionados por el usuario cuando agrega al carrito
     talla = models.CharField(max_length=20, blank=True, null=True)
+    color = models.CharField(max_length=50, blank=True, null=True)
     cantidad = models.PositiveIntegerField(default=1)
 
     class Meta:
