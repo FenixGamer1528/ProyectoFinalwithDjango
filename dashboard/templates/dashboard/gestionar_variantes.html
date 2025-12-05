@@ -292,6 +292,24 @@
                                 </span>
                             {% endif %}
 
+                            <!-- Selector de Color con IA -->
+                            <div class="mt-3 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="color" 
+                                           id="color-picker-{{ variante.id }}" 
+                                           value="#{{ variante.color|default:'ff0000' }}"
+                                           class="w-10 h-10 rounded border-2 border-[#C0A76B] cursor-pointer">
+                                    <button onclick="recolorizarConIA({{ variante.id }})" 
+                                            class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-3 py-2 rounded-md text-sm font-semibold transition-all shadow-lg">
+                                        <i class="fas fa-wand-magic-sparkles mr-1"></i> Cambiar Color con IA
+                                    </button>
+                                </div>
+                                <div id="loader-{{ variante.id }}" class="hidden text-center py-2">
+                                    <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400"></div>
+                                    <span class="ml-2 text-xs text-purple-400">Procesando con IA...</span>
+                                </div>
+                            </div>
+
                             <div class="flex gap-2 mt-3">
                                 <a href="{% url 'historial_inventario' variante.id %}" class="flex-1 text-center bg-blue-900 hover:bg-blue-800 text-blue-400 px-3 py-2 rounded-md text-sm transition-all">
                                     <i class="fas fa-history mr-1"></i> Historial
@@ -460,6 +478,124 @@
 
         tipoSelect.addEventListener('change', updateOptions);
         updateOptions(); // Inicializar
+
+        // ============ RECOLORIZACIÓN CON IA ============
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function recolorizarConIA(varianteId) {
+            const colorPicker = document.getElementById(`color-picker-${varianteId}`);
+            const loader = document.getElementById(`loader-${varianteId}`);
+            
+            // Buscar la tarjeta de la variante y su imagen
+            const varianteCard = colorPicker.closest('.bg-black');
+            const imagenElement = varianteCard ? varianteCard.querySelector('img') : null;
+            
+            const colorHex = colorPicker.value;
+            
+            // Mostrar loader
+            loader.classList.remove('hidden');
+            if (imagenElement) {
+                imagenElement.style.opacity = '0.5';
+            }
+            
+            // Crear FormData
+            const formData = new FormData();
+            formData.append('color', colorHex);
+            
+            try {
+                const response = await fetch(`/dashboard/api/variante/${varianteId}/generar-color/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar imagen con el resultado
+                    if (imagenElement && data.image_base64) {
+                        imagenElement.src = data.image_base64;
+                        imagenElement.style.opacity = '1';
+                        imagenElement.classList.remove('opacity-50'); // Quitar opacidad de "producto base"
+                        
+                        // Ocultar texto "Imagen del producto base"
+                        const textoBase = varianteCard.querySelector('.text-gray-500');
+                        if (textoBase && textoBase.textContent.includes('producto base')) {
+                            textoBase.remove();
+                        }
+                    }
+                    
+                    // Notificación de éxito
+                    mostrarNotificacion('success', `✅ ¡Color cambiado a ${data.color_aplicado}!`, 
+                                       'La imagen ha sido procesada con IA y guardada.');
+                    
+                    // Recargar página después de 2 segundos para ver la imagen en Supabase
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    mostrarNotificacion('error', '❌ Error al procesar', data.mensaje);
+                    if (imagenElement) imagenElement.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', '❌ Error de conexión', 
+                                   'No se pudo conectar con el servidor. Verifica que SAM esté configurado.');
+                if (imagenElement) imagenElement.style.opacity = '1';
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function mostrarNotificacion(tipo, titulo, mensaje) {
+            const colores = {
+                success: 'bg-green-900 border-green-400 text-green-400',
+                error: 'bg-red-900 border-red-400 text-red-400',
+                info: 'bg-blue-900 border-blue-400 text-blue-400'
+            };
+            
+            const notif = document.createElement('div');
+            notif.className = `fixed top-4 right-4 ${colores[tipo]} border-2 rounded-lg p-4 shadow-2xl z-50 max-w-md animate-fade-in`;
+            notif.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-2xl"></i>
+                    <div class="flex-1">
+                        <h4 class="font-bold mb-1">${titulo}</h4>
+                        <p class="text-sm opacity-90">${mensaje}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-xl opacity-50 hover:opacity-100">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+        }
+
+        // CSS para animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fade-in {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            .animate-fade-in {
+                animation: fade-in 0.3s ease-out;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

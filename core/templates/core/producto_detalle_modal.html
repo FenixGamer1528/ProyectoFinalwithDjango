@@ -1,5 +1,5 @@
 {% load static %}
-<!-- CONTENIDO SOLO PARA MODAL (sin layout completo) -->
+
 <button class="cerrar text-white hover:text-[#C0A76B] text-4xl font-bold cursor-pointer absolute top-4 right-6 z-20 transition-all hover:scale-110" 
         onclick="cerrarProductoModal()" 
         title="Cerrar">
@@ -15,204 +15,183 @@
                      src="{{ producto.imagen_url|default:'/static/imagenes/placeholder.png' }}" 
                      alt="{{ producto.nombre }}" 
                      class="w-full rounded-xl border-4 border-[#C0A76B] shadow-2xl hover:scale-105 transition-transform duration-300">
-                
-                <!-- Badge IA -->
-                <div id="modal-ia-badge" class="hidden absolute top-4 left-4 bg-purple-900 bg-opacity-95 text-purple-200 px-4 py-2 rounded-lg border-2 border-purple-400 shadow-lg">
-                    <i class="fas fa-robot mr-2"></i>
-                    <span class="font-semibold">Generado con IA</span>
-                </div>
             </div>
         </div>
         
-        <!-- Columna Derecha - Información completa del producto -->
+        <!-- Columna Derecha - Información del producto -->
         <div class="text-white space-y-4">
-            <!-- Nombre y Categoría -->
+            <!-- Nombre y Precio -->
             <div class="border-b border-[#C0A76B] pb-4">
                 <h1 class="text-4xl font-bold text-[#C0A76B] mb-2">
                     {{ producto.nombre }}
                 </h1>
-                <p class="text-gray-400 text-sm flex items-center gap-2">
-                    <i class="fas fa-tag"></i>
-                    <span>{{ producto.get_categoria_display }}</span>
-                </p>
-            </div>
-            
-            <!-- Precio -->
-            <div class="bg-gradient-to-r from-[#C0A76B]/10 to-yellow-900/10 border-2 border-[#C0A76B] rounded-xl p-4">
-                <p class="text-sm text-gray-400 uppercase tracking-wide mb-1">Precio</p>
-                <p class="text-3xl font-bold text-white">
-                    ${{ producto.precio|floatformat:2 }}
-                </p>
+                <div class="flex items-center justify-between">
+                    <p class="text-3xl font-bold text-white">
+                        ${{ producto.precio|floatformat:2 }}
+                    </p>
+                    <span class="text-sm text-gray-400 bg-black/30 px-3 py-1 rounded-full">
+                        {{ producto.get_categoria_display }}
+                    </span>
+                </div>
             </div>
             
             <!-- Descripción -->
             <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-xl p-4">
-                <h3 class="text-lg font-semibold text-[#C0A76B] mb-2 flex items-center gap-2">
-                    <i class="fas fa-align-left"></i>Descripción
-                </h3>
+                <h3 class="text-lg font-semibold text-[#C0A76B] mb-2">Descripción</h3>
                 <p class="text-gray-300 text-sm leading-relaxed">
                     {{ producto.descripcion|default:"Sin descripción disponible" }}
                 </p>
             </div>
             
-            <!-- Información General -->
-            <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-xl p-4">
-                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
-                    <i class="fas fa-info-circle"></i>Información General
-                </h3>
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                        <p class="text-gray-400 text-xs uppercase">Categoría</p>
-                        <p class="text-white font-semibold">{{ producto.get_categoria_display }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400 text-xs uppercase">Stock Base</p>
-                        <p class="text-white font-semibold">{{ producto.stock|default:0 }} unidades</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400 text-xs uppercase">Destacado</p>
-                        <p class="text-white font-semibold">{% if producto.destacado %}Sí{% else %}No{% endif %}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-400 text-xs uppercase">ID</p>
-                        <p class="text-white font-semibold">#{{ producto.id }}</p>
-                    </div>
-                </div>
-            </div>
-            
             {% if variantes %}
-            <!-- Colores Disponibles (PRIMERO, con botones circulares de colores) -->
+            <!-- Colores Disponibles -->
             <div class="space-y-4">
-                <h3 class="text-xl font-bold text-[#C0A76B] mb-4 flex items-center gap-2 border-b-2 border-[#C0A76B] pb-2">
-                    <i class="fas fa-palette text-2xl"></i>Colores Disponibles
-                </h3>
+                <h3 class="text-lg font-bold text-[#C0A76B] mb-2">Color</h3>
                 <div class="flex flex-wrap gap-4" id="modal-colores-container">
-                    {% for color in colores_disponibles|slice:":3" %}
+                    {% for color in colores_disponibles %}
                     <button class="modal-color-btn relative group" data-color="{{ color }}" onclick="seleccionarColor('{{ color }}')">
-                        <div class="w-16 h-16 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
-                             style="background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
+
+                        <div class="w-14 h-14 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
+                             style="display: block !important; width: 3.5rem !important; height: 3.5rem !important; background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% elif color == 'Verde Oliva' %}#556B2F{% elif color == 'Caqui' %}#C3B091{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
+
                         </div>
                         <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                             {{ color }}
                         </span>
-                        <i class="checkmark fas fa-check absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-xl opacity-0 transition-opacity pointer-events-none" 
-                           style="text-shadow: 0 0 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6);"></i>
                     </button>
                     {% endfor %}
                 </div>
+            </div>
+            
+            <!-- Tallas Disponibles - Dinámicas según categoría -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-bold text-[#C0A76B] mb-2">Talla</h3>
+                
+                {% if tallas_disponibles %}
+                <!-- Usar tallas disponibles del backend -->
+                <div class="flex flex-wrap gap-3" id="modal-tallas-container">
+                    {% for talla in tallas_disponibles %}
+                    <button class="modal-talla-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all font-bold text-white" 
+                            data-talla="{{ talla }}" onclick="seleccionarTalla('{{ talla }}')">
+                        {{ talla }}
+                    </button>
+                    {% endfor %}
+                </div>
+                
+                {% else %}
+                <!-- Tallas predeterminadas según categoría -->
+                <div id="modal-tallas-container" class="flex flex-wrap gap-3">
+                    <!-- Se llenará dinámicamente con JavaScript -->
+                </div>
+                
+                <script>
+                // Función para obtener tallas según categoría y género
+                function obtenerTallasSegunCategoria() {
+                    const categoria = "{{ producto.categoria|lower }}";
+                    const esHombre = "{{ producto.nombre|lower }}".includes('hombre') || 
+                                    "{{ producto.descripcion|lower }}".includes('hombre') ||
+                                    "{{ producto.get_categoria_display|lower }}".includes('hombre');
+                    const esMujer = "{{ producto.nombre|lower }}".includes('mujer') || 
+                                   "{{ producto.descripcion|lower }}".includes('mujer') ||
+                                   "{{ producto.get_categoria_display|lower }}".includes('mujer');
+                    
+                    let tallas = [];
+                    
+                    // Definir tallas según categoría
+                    if (categoria.includes('zapatos') || categoria.includes('calzado')) {
+                        if (esHombre) {
+                            tallas = ['38', '39', '40', '41', '42', '43', '44', '45'];
+                        } else if (esMujer) {
+                            tallas = ['34', '35', '36', '37', '38', '39', '40', '41'];
+                        } else {
+                            // Unisex
+                            tallas = ['35', '36', '37', '38', '39', '40', '41', '42', '43'];
+                        }
+                    } 
+                    else if (categoria.includes('ropa')) {
+                        if (esHombre) {
+                            tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+                        } else if (esMujer) {
+                            tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+                        } else {
+                            // Unisex
+                            tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+                        }
+                    } 
+                    else if (categoria.includes('camiseta') || categoria.includes('playera')) {
+                        tallas = ['XS', 'S', 'M', 'L', 'XL'];
+                    }
+                    else if (categoria.includes('pantalon') || categoria.includes('jeans')) {
+                        if (esHombre) {
+                            tallas = ['28', '30', '32', '34', '36', '38', '40'];
+                        } else if (esMujer) {
+                            tallas = ['24', '26', '28', '30', '32', '34', '36'];
+                        } else {
+                            tallas = ['28', '30', '32', '34', '36'];
+                        }
+                    }
+                    else {
+                        // Tallas por defecto
+                        tallas = ['Única', 'XS', 'S', 'M', 'L', 'XL'];
+                    }
+                    
+                    return tallas;
+                }
+                
+                // Cargar tallas cuando se abra el modal
+                document.addEventListener('DOMContentLoaded', function() {
+                    const tallas = obtenerTallasSegunCategoria();
+                    const container = document.getElementById('modal-tallas-container');
+                    
+                    if (container) {
+                        container.innerHTML = '';
+                        tallas.forEach(talla => {
+                            const btn = document.createElement('button');
+                            btn.className = 'modal-talla-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all font-bold text-white';
+                            btn.dataset.talla = talla;
+                            btn.textContent = talla;
+                            btn.onclick = function() { seleccionarTalla(talla); };
+                            container.appendChild(btn);
+                        });
+                    }
+                });
+                </script>
+                {% endif %}
+                
+                <!-- Indicador de tipo de talla -->
                 <p class="text-xs text-gray-400 mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>Máximo 3 colores por producto
+
+                    <i class="fas fa-info-circle mr-1"></i>{{ colores_disponibles|length }} color{{ colores_disponibles|length|pluralize:"es" }} disponible{{ colores_disponibles|length|pluralize:"s" }}
+
                 </p>
             </div>
             
-            <!-- Tallas Disponibles (SEGUNDO) -->
-            <div class="space-y-4">
-                <h3 class="text-xl font-bold text-[#C0A76B] mb-4 flex items-center gap-2 border-b-2 border-[#C0A76B] pb-2">
-                    <i class="fas fa-ruler text-2xl"></i>Tallas Disponibles
-                </h3>
-                <div class="flex flex-wrap gap-3" id="modal-tallas-container">
-                    {% for talla in tallas_disponibles %}
-                    <button class="modal-talla-btn px-5 py-3 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all font-bold text-white relative overflow-hidden" 
-                            data-talla="{{ talla }}" onclick="seleccionarTalla('{{ talla }}')">
-                        <span class="relative z-10">{{ talla }}</span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-[#C0A76B] to-yellow-500 transform -translate-x-full transition-transform duration-300"></div>
-                    </button>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <!-- Info de Stock Detallado por Talla -->
+            <!-- Información de Stock -->
             <div id="modal-stock-info" class="hidden bg-gradient-to-r from-green-900/20 to-blue-900/20 border-2 border-[#C0A76B] rounded-lg p-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs text-gray-400 uppercase tracking-wide">Variante Seleccionada</p>
+                        <p class="text-xs text-gray-400 uppercase">Variante Seleccionada</p>
                         <p id="modal-stock-variante" class="text-lg font-bold text-white"></p>
                     </div>
-                    <i class="fas fa-box text-3xl text-[#C0A76B] opacity-50"></i>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/30 rounded-lg p-3 border border-[#C0A76B]/30">
+                <div class="flex justify-between items-center">
+                    <div>
                         <p class="text-xs text-gray-400 uppercase">Stock Disponible</p>
                         <p id="modal-stock-cantidad" class="text-2xl font-bold text-green-400"></p>
                     </div>
-                    <div class="bg-black/30 rounded-lg p-3 border border-[#C0A76B]/30">
-                        <p class="text-xs text-gray-400 uppercase">ID Variante</p>
-                        <p id="modal-variante-id" class="text-xl font-bold text-[#C0A76B]">#-</p>
-                    </div>
-                </div>
-                
-                <!-- Botón para gestionar inventario -->
-                <a id="modal-btn-gestionar" href="#" class="hidden w-full text-center bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-blue-500/50 hover:scale-105">
-                    <i class="fas fa-cog mr-2"></i>Gestionar Inventario
-                </a>
-            </div>
-            
-            <!-- Tabla de Stock por Tallas (cuando se selecciona un color) -->
-            <div id="modal-stock-tabla" class="hidden bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-xl p-4">
-                <h4 class="text-sm font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
-                    <i class="fas fa-table"></i>Stock por Talla
-                </h4>
-                <div id="modal-tabla-contenido" class="space-y-2">
-                    <!-- Se llenará dinámicamente -->
                 </div>
             </div>
             
-            <div id="modal-variante-seleccionada" class="hidden bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3">
-                <p class="text-sm text-gray-400">Variante seleccionada:</p>
-                <p id="modal-variante-texto" class="text-white font-semibold"></p>
-            </div>
-            
-            {% else %}
-            <!-- Sin variantes - Mostrar stock disponible -->
-            <div class="bg-gradient-to-r from-[#C0A76B]/10 to-yellow-900/10 border-2 border-[#C0A76B] rounded-xl p-4">
-                <h3 class="text-lg font-semibold text-[#C0A76B] mb-3 flex items-center gap-2">
-                    <i class="fas fa-box"></i>Disponibilidad
-                </h3>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4">
-                        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Stock Disponible</p>
-                        <p class="text-3xl font-bold {% if producto.stock > 10 %}text-green-400{% elif producto.stock > 0 %}text-yellow-400{% else %}text-red-400{% endif %}">
-                            {{ producto.stock|default:0 }}
-                        </p>
-                        <p class="text-xs text-gray-400 mt-1">
-                            {% if producto.stock > 10 %}
-                                <i class="fas fa-check-circle text-green-400"></i> Disponible
-                            {% elif producto.stock > 0 %}
-                                <i class="fas fa-exclamation-triangle text-yellow-400"></i> Pocas unidades
-                            {% else %}
-                                <i class="fas fa-times-circle text-red-400"></i> Agotado
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4">
-                        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Talla/Color</p>
-                        <p class="text-lg font-bold text-white">Talla única</p>
-                        <p class="text-xs text-gray-400 mt-1">
-                            <i class="fas fa-info-circle"></i> Sin variantes
-                        </p>
-                    </div>
-                </div>
-                
-                {% if user.is_staff %}
-                <div class="mt-3 bg-blue-900/20 border border-blue-600 rounded-lg p-3">
-                    <p class="text-xs text-blue-400">
-                        <i class="fas fa-user-shield mr-1"></i>
-                        <strong>Administrador:</strong> Puedes crear variantes en Dashboard → Productos → "Variantes"
-                    </p>
-                </div>
-                {% endif %}
-            </div>
             {% endif %}
             
-            <!-- Formulario de Agregar al Carrito -->
-            <div class="space-y-4">
+            <!-- Formulario para Agregar al Carrito -->
+            <div class="space-y-4 mt-6">
                 {% if variantes %}
-                <!-- Con variantes: necesita selección de talla y color -->
-                <div class="bg-yellow-900/20 border-2 border-yellow-600 rounded-lg p-4 mb-4">
-                    <p class="text-yellow-400 text-sm flex items-center gap-2">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Importante:</strong> Debes seleccionar una talla y color para poder comprar este producto.
+                <!-- Con variantes -->
+                <div id="modal-mensaje-seleccion" class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-3">
+                    <p class="text-yellow-400 text-sm">
+                        Selecciona talla y color para comprar
                     </p>
                 </div>
                 
@@ -221,99 +200,81 @@
                     <input type="hidden" name="variante_id" id="modal-variante-id-input" value="">
                     
                     <div class="space-y-2">
-                        <label for="modal-cantidad" class="block text-[#C0A76B] font-semibold text-lg mb-2">
-                            <i class="fas fa-sort-numeric-up mr-2"></i>Cantidad:
-                        </label>
-                        <input type="number" 
-                               id="modal-cantidad" 
-                               name="cantidad" 
-                               value="1" 
-                               min="1" 
-                               max="100"
-                               class="w-32 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-6 py-3 text-white text-center font-bold text-2xl focus:outline-none focus:ring-2 focus:ring-[#C0A76B] focus:border-yellow-500">
+                        <label for="modal-cantidad" class="block text-[#C0A76B] font-semibold">Cantidad:</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="cambiarCantidad(-1)" 
+                                    class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-10 h-10 rounded-lg">
+                                -
+                            </button>
+                            <input type="number" 
+                                   id="modal-cantidad" 
+                                   name="cantidad" 
+                                   value="1" 
+                                   min="1" 
+                                   max="100"
+                                   class="w-20 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-4 py-2 text-white text-center font-bold">
+                            <button type="button" onclick="cambiarCantidad(1)" 
+                                    class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-10 h-10 rounded-lg">
+                                +
+                            </button>
+                        </div>
                     </div>
                     
                     <button type="submit" 
                             id="modal-btn-agregar"
                             disabled
-                            class="w-full bg-gradient-to-r from-[#C0A76B] via-[#d4b876] to-[#C0A76B] text-black font-bold py-5 px-6 rounded-xl hover:from-[#d4b876] hover:via-[#e6c98a] hover:to-[#d4b876] transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(192,167,107,0.6)] animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:animate-none flex items-center justify-center gap-3 text-xl shadow-lg">
-                        <i class="fas fa-shopping-cart text-2xl"></i>
+                            class="w-full bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <i class="fas fa-shopping-cart"></i>
                         <span id="btn-agregar-texto">Selecciona Talla y Color</span>
                     </button>
                 </form>
                 
                 {% else %}
-                <!-- Sin variantes: agregar directamente el producto base -->
-                <div class="bg-[#1a1a1a] border-2 border-[#C0A76B] rounded-xl p-6 space-y-5">
-                    <h3 class="text-2xl font-bold text-[#C0A76B] mb-4 flex items-center gap-3 border-b-2 border-[#C0A76B] pb-3">
-                        <i class="fas fa-shopping-bag text-2xl"></i>Agregar al Carrito
-                    </h3>
+                <!-- Sin variantes -->
+                <form action="{% url 'agregar_al_carrito' producto.id %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
                     
-                    <form action="{% url 'agregar_al_carrito' producto.id %}" method="POST" class="space-y-5">
-                        {% csrf_token %}
-                        
-                        <!-- Selector de Cantidad con controles más grandes -->
-                        <div class="space-y-2">
-                            <label for="cantidad-base" class="block text-[#C0A76B] font-semibold text-lg mb-2">
-                                <i class="fas fa-sort-numeric-up mr-2"></i>Cantidad de unidades:
-                            </label>
-                            <div class="flex items-center gap-4">
-                                <button type="button" 
-                                        onclick="cambiarCantidadBase(-1)"
-                                        class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-12 h-12 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        {% if producto.stock == 0 %}disabled{% endif %}>
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                
-                                <input type="number" 
-                                       id="cantidad-base" 
-                                       name="cantidad" 
-                                       value="1" 
-                                       min="1" 
-                                       max="{{ producto.stock }}"
-                                       readonly
-                                       class="w-32 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-6 py-3 text-white text-center font-bold text-2xl focus:outline-none focus:ring-2 focus:ring-[#C0A76B]">
-                                
-                                <button type="button" 
-                                        onclick="cambiarCantidadBase(1)"
-                                        class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-12 h-12 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        {% if producto.stock == 0 %}disabled{% endif %}>
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                            <p class="text-sm text-gray-400 mt-2">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Stock disponible: <span class="font-bold text-white">{{ producto.stock }}</span> unidades
-                            </p>
+                    <div class="space-y-2">
+                        <label for="cantidad-base" class="block text-[#C0A76B] font-semibold">Cantidad:</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" 
+                                    onclick="cambiarCantidadBase(-1)"
+                                    class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-10 h-10 rounded-lg"
+                                    {% if producto.stock == 0 %}disabled{% endif %}>
+                                -
+                            </button>
+                            
+                            <input type="number" 
+                                   id="cantidad-base" 
+                                   name="cantidad" 
+                                   value="1" 
+                                   min="1" 
+                                   max="{{ producto.stock }}"
+                                   class="w-20 bg-[#0a0a0a] border-2 border-[#C0A76B] rounded-lg px-4 py-2 text-white text-center font-bold">
+                            
+                            <button type="button" 
+                                    onclick="cambiarCantidadBase(1)"
+                                    class="bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold w-10 h-10 rounded-lg"
+                                    {% if producto.stock == 0 %}disabled{% endif %}>
+                                +
+                            </button>
                         </div>
-                        
-                        <!-- Botón de Agregar -->
-                        <button type="submit" 
-                                id="btn-agregar-sin-variantes"
-                                class="w-full bg-gradient-to-r from-[#C0A76B] via-[#d4b876] to-[#C0A76B] text-black font-bold py-5 px-6 rounded-xl hover:from-[#d4b876] hover:via-[#e6c98a] hover:to-[#d4b876] transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_30px_rgba(192,167,107,0.6)] animate-pulse-slow flex items-center justify-center gap-3 text-xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:animate-none"
-                                {% if producto.stock == 0 %}disabled{% endif %}>
-                            {% if producto.stock > 0 %}
-                                <i class="fas fa-shopping-cart text-2xl"></i>
-                                <span>Agregar al Carrito</span>
-                            {% else %}
-                                <i class="fas fa-times-circle text-2xl"></i>
-                                <span>Sin Stock Disponible</span>
-                            {% endif %}
-                        </button>
-                    </form>
-                </div>
+                        <p class="text-sm text-gray-400">
+                            Stock disponible: <span class="font-bold text-white">{{ producto.stock }}</span> unidades
+                        </p>
+                    </div>
+                    
+                    <button type="submit" 
+                            class="w-full bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 {% if producto.stock == 0 %}opacity-50 cursor-not-allowed{% endif %}"
+                            {% if producto.stock == 0 %}disabled{% endif %}>
+                        {% if producto.stock > 0 %}
+                            <i class="fas fa-shopping-cart mr-2"></i>Agregar al Carrito
+                        {% else %}
+                            <i class="fas fa-times-circle mr-2"></i>Sin Stock
+                        {% endif %}
+                    </button>
+                </form>
                 {% endif %}
-            </div>
-            
-            <!-- Mensaje de Selección -->
-            <div id="modal-mensaje-seleccion" class="text-center py-3 px-4 bg-gray-800/50 rounded-lg border border-gray-700">
-                <p class="text-sm text-gray-400">
-                    {% if variantes %}
-                        👆 Selecciona color y talla para ver stock disponible
-                    {% else %}
-                        ✓ Producto sin variantes
-                    {% endif %}
-                </p>
             </div>
         </div>
     </div>
@@ -321,274 +282,146 @@
 
 {% if variantes %}
 <script>
-console.log('🚀 Script de variantes cargado');
-
-// Datos de variantes (solo una vez)
+// Datos de variantes
 const modalVariantesData = [
     {% for v in variantes %}
     {
         id: {{ v.id }},
         talla: '{{ v.talla }}',
         color: '{{ v.color }}',
-        stock: {{ v.stock }},
-        imagen_url: '{% if v.imagen_url %}{{ v.imagen_url }}{% else %}{{ producto.imagen_url|default:"/static/imagenes/placeholder.png" }}{% endif %}',
-        imagen_ia: {% if v.imagen_generada_ia %}true{% else %}false{% endif %}
+        stock: {{ v.stock }}
     },
     {% endfor %}
 ];
 
-console.log('📦 VARIANTES CARGADAS:', modalVariantesData.length, modalVariantesData);
-
 // Variables globales
 let modalTallaSeleccionada = null;
 let modalColorSeleccionado = null;
-let modalVarianteActual = null;
-
-// Referencias a elementos del DOM
-const modalImagen = document.getElementById('modal-producto-imagen');
-const modalIaBadge = document.getElementById('modal-ia-badge');
-const modalStockInfo = document.getElementById('modal-stock-info');
-const modalStockCantidad = document.getElementById('modal-stock-cantidad');
-const modalStockVariante = document.getElementById('modal-stock-variante');
-const modalVarianteId = document.getElementById('modal-variante-id');
-const modalMensaje = document.getElementById('modal-mensaje-seleccion');
-const modalVarianteSeleccionada = document.getElementById('modal-variante-seleccionada');
-const modalVarianteTexto = document.getElementById('modal-variante-texto');
-const modalBtnGestionar = document.getElementById('modal-btn-gestionar');
-const modalStockTabla = document.getElementById('modal-stock-tabla');
-const modalTablaContenido = document.getElementById('modal-tabla-contenido');
 
 // Función para seleccionar color
 window.seleccionarColor = function(color) {
-    console.log('🎨 Color seleccionado:', color);
-    
-    // Deseleccionar otros colores
-    document.querySelectorAll('.modal-color-btn').forEach(btn => {
-        btn.querySelector('div').classList.remove('border-[#C0A76B]', 'scale-110', 'shadow-lg', 'shadow-[#C0A76B]/50');
-        btn.querySelector('.checkmark').style.opacity = '0';
-    });
-    
-    // Seleccionar este color
-    const btnSeleccionado = document.querySelector(`.modal-color-btn[data-color="${color}"]`);
-    if (btnSeleccionado) {
-        const circulo = btnSeleccionado.querySelector('div');
-        const check = btnSeleccionado.querySelector('.checkmark');
-        circulo.classList.add('border-[#C0A76B]', 'scale-110', 'shadow-lg', 'shadow-[#C0A76B]/50');
-        check.style.opacity = '1';
-    }
-    
     modalColorSeleccionado = color;
     modalTallaSeleccionada = null;
     
-    // Deseleccionar todas las tallas
-    document.querySelectorAll('.modal-talla-btn').forEach(btn => {
-        btn.classList.remove('bg-[#C0A76B]', 'text-black', 'scale-110', 'shadow-lg', 'shadow-[#C0A76B]/50');
-        btn.classList.add('text-white');
+    // Actualizar UI
+    document.querySelectorAll('.modal-color-btn').forEach(btn => {
         const div = btn.querySelector('div');
-        if (div) div.style.transform = 'translateX(-100%)';
+        if (btn.dataset.color === color) {
+            div.classList.add('border-[#C0A76B]', 'scale-110');
+        } else {
+            div.classList.remove('border-[#C0A76B]', 'scale-110');
+        }
     });
     
-    mostrarStockPorTallas();
+    document.querySelectorAll('.modal-talla-btn').forEach(btn => {
+        btn.classList.remove('bg-[#C0A76B]', 'text-black');
+        btn.classList.add('text-white');
+    });
+    
     actualizarVarianteModal();
+    
+    // ✨ NUEVO: Generar imagen con IA SIEMPRE al seleccionar color
+    const varianteConColor = modalVariantesData.find(v => v.color === color);
+    if (varianteConColor) {
+        console.log('🤖 Generando imagen con IA para variante', varianteConColor.id, 'color:', color);
+        generarImagenConIA(varianteConColor.id, color);
+    } else {
+        console.warn('⚠️ No se encontró variante con color:', color);
+    }
 };
 
 // Función para seleccionar talla
 window.seleccionarTalla = function(talla) {
-    console.log('👕 Talla seleccionada:', talla);
+    modalTallaSeleccionada = talla;
     
-    // Deseleccionar otras tallas
+    // Actualizar UI
     document.querySelectorAll('.modal-talla-btn').forEach(btn => {
-        btn.classList.remove('bg-[#C0A76B]', 'text-black', 'scale-110', 'shadow-lg', 'shadow-[#C0A76B]/50');
-        btn.classList.add('text-white');
-        const div = btn.querySelector('div');
-        if (div) div.style.transform = 'translateX(-100%)';
+        if (btn.dataset.talla === talla) {
+            btn.classList.add('bg-[#C0A76B]', 'text-black');
+            btn.classList.remove('text-white');
+        } else {
+            btn.classList.remove('bg-[#C0A76B]', 'text-black');
+            btn.classList.add('text-white');
+        }
     });
     
-    // Seleccionar esta talla
-    const btnSeleccionado = document.querySelector(`.modal-talla-btn[data-talla="${talla}"]`);
-    if (btnSeleccionado) {
-        btnSeleccionado.classList.add('bg-[#C0A76B]', 'text-black', 'scale-110', 'shadow-lg', 'shadow-[#C0A76B]/50');
-        btnSeleccionado.classList.remove('text-white');
-        const div = btnSeleccionado.querySelector('div');
-        if (div) div.style.transform = 'translateX(0)';
-    }
-    
-    modalTallaSeleccionada = talla;
     actualizarVarianteModal();
 };
 
-// Función para mostrar stock por tallas
-function mostrarStockPorTallas() {
-    if (!modalColorSeleccionado) {
-        modalStockTabla.classList.add('hidden');
-        return;
-    }
-    
-    // Filtrar variantes por el color seleccionado
-    const variantesPorColor = modalVariantesData.filter(v => v.color === modalColorSeleccionado);
-    
-    if (variantesPorColor.length === 0) {
-        modalStockTabla.classList.add('hidden');
-        return;
-    }
-    
-    // Mostrar tabla
-    modalStockTabla.classList.remove('hidden');
-    
-    // Generar filas de la tabla
-    let tablaHTML = '';
-    variantesPorColor.forEach(v => {
-        const stockClass = v.stock > 10 ? 'text-green-400' : v.stock > 0 ? 'text-yellow-400' : 'text-red-400';
-        const stockIcon = v.stock > 10 ? 'fa-check-circle' : v.stock > 0 ? 'fa-exclamation-circle' : 'fa-times-circle';
-        
-        tablaHTML += `
-            <div class="flex items-center justify-between p-3 bg-black/30 rounded-lg border border-[#C0A76B]/20 hover:border-[#C0A76B]/50 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-[#C0A76B] rounded-lg flex items-center justify-center font-bold text-black">
-                        ${v.talla}
-                    </div>
-                    <div>
-                        <p class="text-sm text-white font-semibold">Talla ${v.talla}</p>
-                        <p class="text-xs text-gray-400">ID: #${v.id}</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <p class="text-lg font-bold ${stockClass}">
-                        <i class="fas ${stockIcon} mr-1"></i>${v.stock}
-                    </p>
-                    <p class="text-xs text-gray-400">unidades</p>
-                </div>
-            </div>
-        `;
-    });
-    
-    modalTablaContenido.innerHTML = tablaHTML;
-}
-
+// Función para actualizar la variante seleccionada
 function actualizarVarianteModal() {
     const variante = modalVariantesData.find(v => 
         v.talla === modalTallaSeleccionada && v.color === modalColorSeleccionado
     );
     
+    const stockInfo = document.getElementById('modal-stock-info');
+    const btnAgregar = document.getElementById('modal-btn-agregar');
+    const varianteIdInput = document.getElementById('modal-variante-id-input');
+    const cantidadInput = document.getElementById('modal-cantidad');
+    const mensaje = document.getElementById('modal-mensaje-seleccion');
+    
     if (variante && modalTallaSeleccionada && modalColorSeleccionado) {
-        modalVarianteActual = variante;
+        // Mostrar información de stock
+        stockInfo.classList.remove('hidden');
+        document.getElementById('modal-stock-variante').textContent = `${modalColorSeleccionado} - Talla ${modalTallaSeleccionada}`;
         
-        // Actualizar imagen
-        if (variante.imagen_url) {
-            modalImagen.src = variante.imagen_url;
-        }
+        const stockCantidad = document.getElementById('modal-stock-cantidad');
+        stockCantidad.textContent = `${variante.stock} unidades`;
+        stockCantidad.className = variante.stock > 0 ? 'text-2xl font-bold text-green-400' : 'text-2xl font-bold text-red-400';
         
-        // Mostrar/ocultar badge IA
-        if (variante.imagen_ia) {
-            modalIaBadge.classList.remove('hidden');
-        } else {
-            modalIaBadge.classList.add('hidden');
-        }
+        // Actualizar formulario
+        varianteIdInput.value = variante.id;
         
-        // Mostrar stock
-        modalStockInfo.classList.remove('hidden');
-        modalStockVariante.textContent = `${modalColorSeleccionado} - Talla ${modalTallaSeleccionada}`;
-        modalStockCantidad.textContent = `${variante.stock} unidades`;
-        modalVarianteId.textContent = `#${variante.id}`;
-        
-        // Color del stock
-        if (variante.stock > 10) {
-            modalStockCantidad.className = 'text-2xl font-bold text-green-400';
-        } else if (variante.stock > 0) {
-            modalStockCantidad.className = 'text-2xl font-bold text-yellow-400';
-        } else {
-            modalStockCantidad.className = 'text-2xl font-bold text-red-400';
-        }
-        
-        // Mostrar botón de gestionar inventario
-        modalBtnGestionar.classList.remove('hidden');
-        modalBtnGestionar.classList.add('block');
-        modalBtnGestionar.href = `/dashboard/variantes/ajustar/${variante.id}/`;
-        
-        // Mostrar variante seleccionada
-        if (modalVarianteSeleccionada) {
-            modalVarianteSeleccionada.classList.remove('hidden');
-            modalVarianteTexto.textContent = `${modalColorSeleccionado} - Talla ${modalTallaSeleccionada}`;
-        }
-        
-        // ACTUALIZAR BOTÓN DE AGREGAR AL CARRITO
-        const btnAgregar = document.getElementById('modal-btn-agregar');
-        const varianteIdInput = document.getElementById('modal-variante-id-input');
-        const cantidadInput = document.getElementById('modal-cantidad');
-        
-        if (btnAgregar && varianteIdInput) {
-            // Actualizar el campo hidden con el ID de la variante
-            varianteIdInput.value = variante.id;
-            
-            if (variante.stock > 0) {
-                // Habilitar botón
-                btnAgregar.disabled = false;
-                btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed');
-                btnAgregar.innerHTML = `
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span class="text-lg">Agregar al Carrito</span>
-                `;
-                
-                // Actualizar máximo de cantidad
-                if (cantidadInput) {
-                    cantidadInput.max = variante.stock;
-                    if (parseInt(cantidadInput.value) > variante.stock) {
-                        cantidadInput.value = variante.stock;
-                    }
-                }
-            } else {
-                // Deshabilitar botón
-                btnAgregar.disabled = true;
-                btnAgregar.classList.add('opacity-50', 'cursor-not-allowed');
-                btnAgregar.innerHTML = `
-                    <i class="fas fa-times-circle text-xl"></i>
-                    <span class="text-lg">Sin Stock</span>
-                `;
+        if (cantidadInput) {
+            cantidadInput.max = variante.stock;
+            if (parseInt(cantidadInput.value) > variante.stock) {
+                cantidadInput.value = variante.stock;
             }
         }
         
-        // Actualizar mensaje
+        // Habilitar/deshabilitar botón
         if (variante.stock > 0) {
-            modalMensaje.innerHTML = `
-                <p class="text-sm text-green-400 font-semibold">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    ✓ Disponible - Color: ${modalColorSeleccionado} | Talla: ${modalTallaSeleccionada} | Stock: ${variante.stock}
-                </p>
-            `;
-            modalMensaje.className = 'text-center py-3 px-4 bg-green-900/20 rounded-lg border-2 border-green-600';
+            btnAgregar.disabled = false;
+            btnAgregar.classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-agregar-texto').textContent = 'Agregar al Carrito';
+            mensaje.innerHTML = `<p class="text-green-400 text-sm">✓ Disponible - Stock: ${variante.stock}</p>`;
         } else {
-            modalMensaje.innerHTML = `
-                <p class="text-sm text-red-400 font-semibold">
-                    <i class="fas fa-times-circle mr-1"></i>
-                    ✗ Sin stock en esta combinación
-                </p>
-            `;
-            modalMensaje.className = 'text-center py-3 px-4 bg-red-900/20 rounded-lg border-2 border-red-600';
+            btnAgregar.disabled = true;
+            btnAgregar.classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-agregar-texto').textContent = 'Sin Stock';
+            mensaje.innerHTML = `<p class="text-red-400 text-sm">✗ Sin stock disponible</p>`;
         }
     } else if (modalColorSeleccionado) {
-        // Solo color seleccionado, mostrar tabla
-        modalStockInfo.classList.add('hidden');
-        modalBtnGestionar.classList.add('hidden');
-        modalBtnGestionar.classList.remove('block');
-        if (modalVarianteSeleccionada) modalVarianteSeleccionada.classList.add('hidden');
-        
-        modalMensaje.innerHTML = `
-            <p class="text-sm text-blue-400 font-semibold">
-                <i class="fas fa-hand-pointer mr-1"></i>
-                Selecciona una talla para ver el stock disponible
-            </p>
-        `;
-        modalMensaje.className = 'text-center py-3 px-4 bg-blue-900/20 rounded-lg border-2 border-blue-600';
+        // Solo color seleccionado
+        stockInfo.classList.add('hidden');
+        btnAgregar.disabled = true;
+        mensaje.innerHTML = `<p class="text-yellow-400 text-sm">Selecciona una talla</p>`;
     } else {
-        modalStockInfo.classList.add('hidden');
-        modalStockTabla.classList.add('hidden');
-        modalBtnGestionar.classList.add('hidden');
-        modalBtnGestionar.classList.remove('block');
-        if (modalVarianteSeleccionada) modalVarianteSeleccionada.classList.add('hidden');
+        // Nada seleccionado
+        stockInfo.classList.add('hidden');
+        btnAgregar.disabled = true;
+        mensaje.innerHTML = `<p class="text-yellow-400 text-sm">Selecciona color y talla</p>`;
     }
 }
 
-// Manejar el envío del formulario con AJAX
+// Función para cambiar cantidad
+window.cambiarCantidad = function(cambio) {
+    const input = document.getElementById('modal-cantidad');
+    if (!input) return;
+    
+    const valorActual = parseInt(input.value) || 1;
+    const max = parseInt(input.max) || 100;
+    const min = parseInt(input.min) || 1;
+    
+    let nuevoValor = valorActual + cambio;
+    
+    if (nuevoValor < min) nuevoValor = min;
+    if (nuevoValor > max) nuevoValor = max;
+    
+    input.value = nuevoValor;
+};
+
+// Manejar envío del formulario
 const modalFormCarrito = document.getElementById('modal-form-carrito');
 if (modalFormCarrito) {
     modalFormCarrito.addEventListener('submit', function(e) {
@@ -600,7 +433,7 @@ if (modalFormCarrito) {
         // Deshabilitar botón temporalmente
         const btnTextoOriginal = btnAgregar.innerHTML;
         btnAgregar.disabled = true;
-        btnAgregar.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i><span class="text-lg">Agregando...</span>';
+        btnAgregar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Agregando...';
         
         fetch(this.action, {
             method: 'POST',
@@ -612,21 +445,11 @@ if (modalFormCarrito) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Mostrar notificación de éxito
-                mostrarNotificacion(data.message || 'Producto agregado al carrito ✓', 'success');
-                
-                // Cerrar modal después de 1 segundo
+                mostrarNotificacion('Producto agregado al carrito ✓', 'success');
                 setTimeout(() => {
                     cerrarProductoModal();
                 }, 1000);
-                
-                // Actualizar contador del carrito si existe
-                const carritoContador = document.querySelector('.carrito-contador');
-                if (carritoContador && data.carrito_total) {
-                    carritoContador.textContent = data.carrito_total;
-                }
             } else {
-                // Mostrar error
                 mostrarNotificacion(data.error || 'Error al agregar al carrito', 'error');
                 btnAgregar.disabled = false;
                 btnAgregar.innerHTML = btnTextoOriginal;
@@ -641,14 +464,142 @@ if (modalFormCarrito) {
     });
 }
 
+
+// 🤖 Función para generar imagen con IA
+async function generarImagenConIA(varianteId, colorNombre) {
+    // Mapeo de nombres de colores a códigos hex
+    const coloresHex = {
+        'Negro': '#000000',
+        'Blanco': '#FFFFFF',
+        'Rojo': '#DC2626',
+        'Azul': '#2563EB',
+        'Verde': '#16A34A',
+        'Amarillo': '#EAB308',
+        'Gris': '#6B7280',
+        'Marrón': '#92400E',
+        'Rosa': '#EC4899',
+        'Morado': '#9333EA',
+        'Beige': '#D4A574',
+        'Naranja': '#EA580C',
+        'Verde Oliva': '#556B2F',
+        'Caqui': '#C3B091'
+    };
+    
+    const colorHex = coloresHex[colorNombre] || '#C0A76B';
+    
+    // Mostrar indicador de carga en la imagen
+    if (modalImagen) {
+        modalImagen.style.opacity = '0.5';
+        const loader = document.createElement('div');
+        loader.id = 'ia-loader';
+        loader.className = 'absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg';
+        loader.innerHTML = `
+            <div class="text-center text-white">
+                <i class="fas fa-wand-magic-sparkles fa-spin text-4xl text-purple-400 mb-2"></i>
+                <p class="text-sm">Generando con IA...</p>
+                <p class="text-xs text-gray-400 mt-1">${colorNombre}</p>
+            </div>
+        `;
+        modalImagen.parentElement.style.position = 'relative';
+        modalImagen.parentElement.appendChild(loader);
+    }
+    
+    const formData = new FormData();
+    formData.append('color', colorHex);
+    
+    try {
+        const response = await fetch(`/dashboard/api/variante/${varianteId}/generar-color/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        // Quitar loader
+        const loader = document.getElementById('ia-loader');
+        if (loader) loader.remove();
+        
+        if (data.success && modalImagen) {
+            // Actualizar imagen con el resultado
+            modalImagen.src = data.image_base64;
+            modalImagen.style.opacity = '1';
+            
+            // Mostrar badge de IA
+            if (modalIaBadge) {
+                modalIaBadge.classList.remove('hidden');
+            }
+            
+            // Actualizar datos de la variante
+            const variante = modalVariantesData.find(v => v.id === varianteId);
+            if (variante) {
+                variante.imagen_url = data.imagen_url;
+                variante.imagen_ia = true;
+            }
+            
+            console.log('✅ Imagen generada con IA:', data.imagen_url);
+            mostrarNotificacion(`✨ Color ${colorNombre} generado con IA`, 'success');
+        } else {
+            if (modalImagen) modalImagen.style.opacity = '1';
+            console.error('Error:', data.mensaje);
+            mostrarNotificacion('Error al generar imagen con IA', 'error');
+        }
+    } catch (error) {
+        const loader = document.getElementById('ia-loader');
+        if (loader) loader.remove();
+        if (modalImagen) modalImagen.style.opacity = '1';
+        console.error('Error:', error);
+        mostrarNotificacion('Error de conexión con el servidor', 'error');
+    }
+}
+
+// Función auxiliar para obtener cookie CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo = 'success') {
+    const colores = {
+        success: 'bg-green-900 border-green-400 text-green-400',
+        error: 'bg-red-900 border-red-400 text-red-400',
+        info: 'bg-blue-900 border-blue-400 text-blue-400'
+    };
+    
+    const notif = document.createElement('div');
+    notif.className = `fixed top-4 right-4 ${colores[tipo]} border-2 rounded-lg p-4 shadow-2xl z-[9999] max-w-md`;
+    notif.innerHTML = `
+        <div class="flex items-start gap-3">
+            <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-2xl"></i>
+            <div class="flex-1">
+                <p class="font-bold">${mensaje}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-xl opacity-50 hover:opacity-100">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 4000);
+}
+
 console.log('✅ Variantes del modal inicializadas correctamente');
+
 </script>
 {% else %}
 <!-- Script para productos SIN variantes -->
 <script>
-console.log('🛍️ Producto sin variantes - Inicializando controles');
-
-// Función para cambiar cantidad en productos sin variantes
+// Función para cambiar cantidad
 window.cambiarCantidadBase = function(cambio) {
     const input = document.getElementById('cantidad-base');
     if (!input) return;
@@ -659,78 +610,53 @@ window.cambiarCantidadBase = function(cambio) {
     
     let nuevoValor = valorActual + cambio;
     
-    // Validar límites
     if (nuevoValor < min) nuevoValor = min;
-    if (nuevoValor > max) {
-        nuevoValor = max;
-        mostrarNotificacion(`Stock máximo disponible: ${max} unidades`, 'info');
-    }
+    if (nuevoValor > max) nuevoValor = max;
     
     input.value = nuevoValor;
-    
-    // Feedback visual
-    input.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-        input.style.transform = 'scale(1)';
-    }, 200);
 };
 
-// Manejar envío del formulario para productos sin variantes
+// Manejar envío del formulario
 const formSinVariantes = document.querySelector('form[action*="agregar_al_carrito"]');
-const btnAgregarSinVariantes = document.getElementById('btn-agregar-sin-variantes');
-
-if (formSinVariantes && btnAgregarSinVariantes) {
+if (formSinVariantes) {
     formSinVariantes.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const formData = new FormData(this);
-        const btnTextoOriginal = btnAgregarSinVariantes.innerHTML;
+        const btnAgregar = this.querySelector('button[type="submit"]');
+        const btnTextoOriginal = btnAgregar.innerHTML;
         
         // Deshabilitar botón temporalmente
-        btnAgregarSinVariantes.disabled = true;
-        btnAgregarSinVariantes.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i><span>Agregando...</span>';
+        btnAgregar.disabled = true;
+        btnAgregar.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Agregando...';
         
         fetch(this.action, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.ok) {
-                // Éxito
-                mostrarNotificacion('✓ Producto agregado al carrito', 'success');
-                
-                // Cerrar modal después de 1 segundo
+                mostrarNotificacion('Producto agregado al carrito ✓', 'success');
                 setTimeout(() => {
                     cerrarProductoModal();
                 }, 1000);
-                
-                // Actualizar contador del carrito si existe
-                const carritoContador = document.querySelector('.carrito-contador');
-                if (carritoContador) {
-                    const itemsCount = parseInt(carritoContador.textContent || '0');
-                    carritoContador.textContent = itemsCount + 1;
-                }
             } else {
-                // Error
                 mostrarNotificacion(data.error || 'Error al agregar al carrito', 'error');
-                btnAgregarSinVariantes.disabled = false;
-                btnAgregarSinVariantes.innerHTML = btnTextoOriginal;
+                btnAgregar.disabled = false;
+                btnAgregar.innerHTML = btnTextoOriginal;
             }
         })
         .catch(error => {
             console.error('Error:', error);
             mostrarNotificacion('Error al agregar al carrito', 'error');
-            btnAgregarSinVariantes.disabled = false;
-            btnAgregarSinVariantes.innerHTML = btnTextoOriginal;
+            btnAgregar.disabled = false;
+            btnAgregar.innerHTML = btnTextoOriginal;
         });
     });
 }
-
-console.log('✅ Controles de producto sin variantes inicializados');
 </script>
 {% endif %}

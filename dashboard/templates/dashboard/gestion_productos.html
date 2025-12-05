@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Productos</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .transition-all { transition: all 0.3s ease; }
@@ -31,6 +32,7 @@
             border: 1px solid #C0A76B;
             width: 100%;
             transition: all 0.3s ease;
+            color: #000000 !important;
         }
         
         #productModal input:focus,
@@ -62,7 +64,6 @@
             resize: vertical;
         }
         
-<<<<<<< HEAD
         #productModal input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -188,7 +189,7 @@
                             <option value="{{ value }}" {% if selected_categoria == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
-                    <button id="applyFilter" class="w-full mt-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-md transition-all">Aplicar Filtros</button>
+                    <button id="applyFilter" class="w-full mt-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-md transition-all">Buscar</button>
                     <button id="inventarioCompletoBtn" class="w-full mt-3 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold py-3 px-4 rounded-md transition-all flex items-center justify-center">
                         <i class="fas fa-warehouse mr-2"></i> Ver Inventario Completo
                     </button>
