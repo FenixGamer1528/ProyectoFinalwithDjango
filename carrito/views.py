@@ -10,32 +10,40 @@ from decimal import Decimal
 
 @login_required
 def cliente_dashboard(request):
-    # 1. Obtener los items del carrito del usuario con prefetch
+    # 1. Obtener los items del carrito del usuario
     carrito, _ = Carrito.objects.prefetch_related(
         'items__producto'
     ).get_or_create(usuario=request.user)
     items_carrito = carrito.items.all()
+    
+    # Calcular total de items en carrito
+    total_items_carrito = sum(item.cantidad for item in items_carrito)
 
-    # 2. Obtener el historial de pedidos del usuario con select_related
+    # 2. Obtener SOLO los pedidos del usuario actual (no de otros usuarios)
     pedidos_usuario = Pedido.objects.filter(
         usuario=request.user
-    ).select_related('producto').order_by('-fecha')[:10]  # Limitar a 10 últimos
+    ).select_related('producto').order_by('-fecha')  # Todos los pedidos del usuario
+    
+    # Total de pedidos del usuario
+    total_pedidos = pedidos_usuario.count()
 
-    # 3. Obtener los productos destacados para mostrar
-    productos_destacados = Producto.objects.filter(destacado=True).only(
-        'id', 'nombre', 'precio', 'imagen_url'
-    )[:6]  # Limitar a 6 productos
+    # 3. Obtener productos destacados para explorar (sin botón de compra)
+    productos_destacados = Producto.objects.filter(
+        destacado=True
+    ).only('id', 'nombre', 'precio', 'imagen', 'imagen_url')[:8]  # 8 productos destacados
 
     # 4. Crear el contexto con toda la información
     context = {
         'usuario': request.user,
         'items': items_carrito,
+        'total_items_carrito': total_items_carrito,
         'pedidos': pedidos_usuario,
+        'total_pedidos': total_pedidos,
         'productosDestacados': productos_destacados,
     }
     
-    # 5. Renderizar la plantilla con el contexto
-    return render(request, 'cliente_dashboard.html', context)
+    # 5. Renderizar la plantilla correcta
+    return render(request, 'dashboard/cliente_dashboard.html', context)
 # Lista de productos
 def lista_productos(request):
     productos = Producto.objects.all()

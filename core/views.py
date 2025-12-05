@@ -313,20 +313,28 @@ def toggle_favorito(request, producto_id):
         if producto in usuario.favoritos.all():
             usuario.favoritos.remove(producto)
             is_favorito = False
+            mensaje = 'Producto eliminado de favoritos'
         else:
             usuario.favoritos.add(producto)
             is_favorito = True
+            mensaje = 'Producto agregado a favoritos'
         
         # Contar favoritos actualizados
         total_favoritos = usuario.favoritos.count()
+        
+        print(f"✓ Toggle favorito - Usuario: {usuario.username}, Producto: {producto.nombre}, Is_favorito: {is_favorito}, Total: {total_favoritos}")
         
         return JsonResponse({
             'success': True,
             'is_favorito': is_favorito,
             'total_favorites': total_favoritos,
-            'producto_id': producto.id
+            'producto_id': producto.id,
+            'mensaje': mensaje
         })
     except Exception as e:
+        print(f"✗ Error en toggle_favorito: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

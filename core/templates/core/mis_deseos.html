@@ -3,6 +3,10 @@
 
 {% block title %}Mis Deseos - Glamoure{% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+{% endblock %}
+
 {% block content %}
   <!-- Espaciado para el header fijo -->
   <div class="h-32"></div>
@@ -20,54 +24,39 @@
       </div>
 
       {% if productos %}
-      <!-- Carrusel de productos deseados -->
-      <div class="carousel-container" id="deseos-carousel">
-        <!-- Botones de navegación -->
-        <button class="carousel-nav prev" aria-label="Anterior" onclick="deseosCarousel.prevSlide()">‹</button>
-        <button class="carousel-nav next" aria-label="Siguiente" onclick="deseosCarousel.nextSlide()">›</button>
-        
-        <!-- Carrusel -->
-        <div class="carousel-wrapper">
-          <div class="carousel-track" id="deseos-track">
-            {% for producto in productos %}
-            <div class="carousel-slide" id="deseo-{{ producto.id }}">
-              {% if producto.destacado %}
-              <div class="top-badge">⭐ TOP</div>
-              {% endif %}
-              
-              <!-- Botón de eliminar deseo -->
-              <button onclick="eliminarFavorito({{ producto.id }}, this)" 
-                      class="favorite-btn" 
-                      style="background: rgba(220, 38, 38, 0.95);"
-                      title="Eliminar de mis deseos"
-                      data-favorito="true">
-                  <i class="fa-solid fa-heart-crack" style="color: #fff;"></i>
-              </button>
-              
-              {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-              {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-              {% else %}
-                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
-              {% endif %}
-              
-              <div class="product-info">
-                <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
-                <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
-              </div>
-            </div>
-            {% endfor %}
+      <!-- Grid de productos deseados -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for producto in productos %}
+        <div class="carousel-slide" id="deseo-{{ producto.id }}">
+          <!-- Badge destacado amarillo -->
+          {% if producto.destacado %}
+          <div class="top-badge">⭐ TOP</div>
+          {% endif %}
+          
+          <!-- Botón de eliminar deseo (corazón roto) -->
+          <button onclick="eliminarFavorito({{ producto.id }}, this)" 
+                  class="favorite-btn" 
+                  style="background: rgba(255, 255, 255, 0.95);"
+                  title="Eliminar de mis deseos"
+                  data-favorito="true">
+              <i class="fa-solid fa-heart-crack" style="color: #dc2626;"></i>
+          </button>
+          
+          {% if producto.imagen_url %}
+            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+          {% elif producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+          {% else %}
+            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+          {% endif %}
+          
+          <div class="product-info">
+            <p class="product-name">{{ producto.nombre }}</p>
+            <p class="product-price">${{ producto.precio }}</p>
+            <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
           </div>
         </div>
-        
-        <!-- Indicadores -->
-        <div class="carousel-indicators" id="deseos-indicators">
-          {% for producto in productos %}
-            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="deseosCarousel.goToSlide({{ forloop.counter0 }})"></span>
-          {% endfor %}
-        </div>
+        {% endfor %}
       </div>
 
       <!-- Botón volver -->
@@ -131,4 +120,6 @@
       initUserMenu();
     });
   </script>
+  
+  <!-- Las funciones eliminarFavorito y toggleFavorito están en modal.js -->
 {% endblock %}

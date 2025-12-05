@@ -1,22 +1,56 @@
 {% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Catálogo Completo - Glamoure{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+{% endblock %}
 
 {% block content %}
-<h1>Productos</h1>
-<ul>
-  {% for producto in productos %}
-    <li style="margin-bottom:1.25rem;">
-      <h3 style="display:inline-block; margin-right:0.5rem;">{{ producto.nombre }}</h3>
-      {% if request.user.is_authenticated %}
-        <form action="{% url 'toggle_favorito' producto.id %}" method="post" style="display:inline">
-          {% csrf_token %}
-          <button class="text-xl" type="submit">{% if producto in request.user.favoritos.all %}★{% else %}☆{% endif %}</button>
-        </form>
-      {% endif %}
-      <p>${{ producto.precio }}</p>
-      <p>{{ producto.descripcion}}</p>
-      <a href="{% url 'agregar_al_carrito' producto.id %}">Agregar al carrito</a>
-    </li>
-  {% endfor %}
-</ul>
-<a href="{% url 'ver_carrito' %}">Ir al carrito</a>
+  <main class="container mx-auto px-6 py-10 flex-grow pt-28">
+    <h2 class="section-title">Catálogo Completo</h2>
+    <p class="text-center text-gray-400 mb-8">Toda nuestra colección</p>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {% for producto in productos %}
+      <div class="carousel-slide">
+        <!-- Badges dinámicos -->
+        {% if producto.destacado %}
+        <div class="top-badge">⭐ TOP</div>
+        {% elif producto.en_oferta %}
+        <div class="offer-badge">🔥 OFERTA</div>
+        {% endif %}
+        
+        <!-- Botón de favoritos redondo -->
+        {% if user.is_authenticated %}
+        <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                class="favorite-btn" 
+                title="{% if user in producto.favorited_by.all %}Eliminar de mis deseos{% else %}Agregar a mis deseos{% endif %}"
+                data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
+            <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart" 
+               style="{% if user in producto.favorited_by.all %}color: #C0A76B;{% else %}color: #6B7280;{% endif %}"></i>
+        </button>
+        {% endif %}
+        
+        {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+        {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+        {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+        {% endif %}
+        <div class="product-info">
+          <p class="product-name">{{ producto.nombre }}</p>
+          <p class="product-price">${{ producto.precio }}</p>
+          <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-span-full text-center">
+        <p class="text-center text-gray-400 text-lg">No hay productos disponibles.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </main>
 {% endblock %}
