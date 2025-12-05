@@ -185,13 +185,10 @@
                         <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ producto.nombre }}</h3>
                         <div class="flex items-center justify-between">
                             <span class="text-lg font-bold text-gray-900">${{ producto.precio }}</span>
-                            <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="inline">
-                                {% csrf_token %}
-                                <input type="hidden" name="cantidad" value="1">
-                                <button type="submit" class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                    Agregar
-                                </button>
-                            </form>
+                            <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" 
+                                class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                Comprar
+                            </button>
                         </div>
                     </div>
                 </div>

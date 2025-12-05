@@ -163,6 +163,7 @@ def webhook_wompi(request):
                     if transaccion.detalle_pedido and transaccion.usuario:
                         productos = transaccion.detalle_pedido.get('productos', [])
                         from carrito.models import Producto
+                        from .utils import actualizar_stock_productos
                         
                         for prod_data in productos:
                             try:
@@ -186,6 +187,18 @@ def webhook_wompi(request):
                                 print(f"❌ Producto {prod_data['producto_id']} no encontrado")
                             except Exception as e:
                                 print(f"❌ Error creando pedido: {e}")
+                        
+                        # 📦 Actualizar stock de variantes
+                        exitoso, mensajes = actualizar_stock_productos(
+                            transaccion.detalle_pedido,
+                            transaccion.usuario
+                        )
+                        
+                        for mensaje in mensajes:
+                            print(mensaje)
+                        
+                        if not exitoso:
+                            print("⚠️ Algunos productos no pudieron actualizar su stock")
                         
                         # Vaciar carrito
                         try:
@@ -273,6 +286,7 @@ def checkout_desde_carrito(request):
             'precio': float(item.producto.precio),
             'cantidad': item.cantidad,
             'talla': item.talla,
+            'color': item.color,
             'subtotal': float(item.subtotal())
         })
     
@@ -365,6 +379,7 @@ def confirmar_pago_carrito(request):
             # 🎉 PAGO APROBADO: Crear pedidos y vaciar carrito
             if transaccion.detalle_pedido and transaccion.usuario:
                 productos = transaccion.detalle_pedido.get('productos', [])
+                from .utils import actualizar_stock_productos
                 
                 # Crear un pedido por cada producto
                 for prod_data in productos:
@@ -399,6 +414,19 @@ def confirmar_pago_carrito(request):
 
                     except Producto.DoesNotExist:
                         print(f"❌ Producto {prod_data['producto_id']} no encontrado")
+                
+                # 📦 Actualizar stock de variantes
+                exitoso, mensajes = actualizar_stock_productos(
+                    transaccion.detalle_pedido,
+                    transaccion.usuario
+                )
+                
+                for mensaje in mensajes:
+                    print(mensaje)
+                
+                if not exitoso:
+                    print("⚠️ Algunos productos no pudieron actualizar su stock")
+                    messages.warning(request, 'Pedido creado pero algunos productos no pudieron actualizar su stock.')
                 
                 # Vaciar el carrito
                 try:

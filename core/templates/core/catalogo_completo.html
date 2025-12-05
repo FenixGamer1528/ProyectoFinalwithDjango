@@ -1,286 +1,133 @@
+{% extends 'index.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="shortcut icon" href={% static "imagenes/Simbolo-transparente.png" %} />
-    <link href="{% static 'css/output.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
-    <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
-    <title>Glamoure - Catálogo Completo</title>
-</head>
-<body class="flex flex-col min-h-screen bg-black text-white font-sans antialiased">
 
-    <header class="fixed top-0 left-0 w-full bg-black bg-opacity-90 backdrop-blur-md z-50 border-b border-[#C0A76B]">
-    <nav class="container mx-auto flex justify-between items-center px-6 py-4">
-  <!-- Menú izquierdo -->
-  <ul class="hidden md:flex gap-6 text-sm uppercase tracking-wider">
-    <li><a href="{% url 'hombres' %}" class="hover:text-[#C0A76B] transition">Hombres</a></li>
-    <li><a href="{% url 'mujeres' %}" class="hover:text-[#C0A76B] transition">Mujeres</a></li>
-    <li><a href="{% url 'zapatos' %}" class="hover:text-[#C0A76B] transition">Zapatos</a></li>
-    <li><a href="{% url 'ofertas' %}" class="hover:text-[#C0A76B] transition">Ofertas</a></li>
-  </ul>
+{% block title %}Glamoure - Catálogo Completo{% endblock %}
 
-  <!-- Logo central -->
-  <div class="flex justify-center">
-    <a href="{% url 'index' %}">
-      <img src="{% static 'imagenes/Logonew.png' %}" alt="Logo" class="w-14 md:w-16">
-    </a>
-  </div>
+{% block content %}
+  <main class="container mx-auto px-6 py-10 flex-grow pt-28">
+    <h1 class="text-5xl font-bold text-[#C0A76B] mb-4 text-center uppercase tracking-wide">Catálogo Completo</h1>
+    <p class="text-gray-400 text-center mb-10 text-lg">Explora toda nuestra colección de productos</p>
 
-  <!-- Menú derecho -->
-  <div class="flex items-center gap-4">
-    <button onclick="mostrarCarrito()" class="bg-transparent hover:bg-[#C0A76B] p-2 rounded-lg transition">
-      <img src="{% static 'imagenes/Carrito_de_compras-removebg-preview.png' %}" alt="carrito" class="w-10 h-10">
-    </button>
-    
-    <div class="hidden md:flex gap-4 text-sm">
-      {% if user.is_authenticated %}
-        <!-- Menú desplegable del usuario -->
-        <div class="relative">
-          <button id="userMenuButton" class="flex items-center gap-1 hover:text-[#C0A76B] transition cursor-pointer py-2">
-            <span class="text-[#C0A76B]">¡Hola, {{ user.username }}!</span>
-            <svg id="userMenuArrow" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {% for producto in productos %}
+      <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden hover:scale-105 transform transition duration-300 hover:shadow-2xl hover:border-[#d4b96a]">
+        <div class="relative group">
+          {% if producto.imagen_url %}
+            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover group-hover:opacity-75 transition-opacity">
+          {% elif producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover group-hover:opacity-75 transition-opacity">
+          {% else %}
+            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" class="w-full h-64 object-cover">
+          {% endif %}
           
-          <!-- Menú desplegable -->
-          <div id="userMenu" class="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200 z-50 hidden">
-            <a href="{% url 'dashboard_cliente' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
-                <span>Mi Dashboard</span>
-              </div>
+          <!-- Badge de categoría -->
+          <span class="absolute top-3 right-3 bg-[#C0A76B] text-black text-xs font-bold px-3 py-1 rounded-full uppercase">
+            {{ producto.get_categoria_display }}
+          </span>
+
+          <!-- Botón de favoritos -->
+          {% if user.is_authenticated %}
+          <button 
+            onclick="toggleFavorito({{ producto.id }}, this)" 
+            class="absolute top-3 left-3 bg-white hover:bg-gray-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110"
+            title="{% if producto in user.favoritos.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}">
+            <i class="fa-{% if producto in user.favoritos.all %}solid{% else %}regular{% endif %} fa-heart text-lg" 
+              style="{% if producto in user.favoritos.all %}color: #C0A76B;{% else %}color: #666;{% endif %}"></i>
+          </button>
+          {% endif %}
+
+          {% if producto.destacado %}
+          <span class="absolute bottom-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <i class="fas fa-star"></i> Destacado
+          </span>
+          {% endif %}
+        </div>
+        
+        <div class="p-4">
+          <h3 class="text-lg font-bold text-[#C0A76B] mb-2 truncate">{{ producto.nombre }}</h3>
+          <p class="text-gray-400 text-sm mb-3 line-clamp-2">{{ producto.descripcion|default:"Sin descripción" }}</p>
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-2xl font-bold text-white">${{ producto.precio }}</span>
+          </div>
+          
+          <div class="flex gap-2">
+            <a href="{% url 'producto_detalle' producto.id %}" 
+              class="flex-1 bg-[#C0A76B] hover:bg-[#d4b96a] text-black font-semibold py-2 px-4 rounded-lg transition duration-200 text-center flex items-center justify-center gap-2">
+              <i class="fas fa-eye"></i>
+              Ver
             </a>
             
-            {% if user.is_staff %}
-            <a href="{% url 'dashboard' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #7c3aed;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <span>Panel Admin</span>
-              </div>
-            </a>
-            {% endif %}
-            
-            <a href="{% url 'logout' %}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-100">
-              <div class="flex items-center gap-2">
-                <svg style="width: 16px; height: 16px; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                <span>Cerrar sesión</span>
-              </div>
-            </a>
+            <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
+              {% csrf_token %}
+              <button type="submit" 
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                <i class="fas fa-cart-plus"></i>
+                Agregar
+              </button>
+            </form>
           </div>
         </div>
-      {% else %}
-        <a href="{% url 'login' %}" class="hover:text-[#C0A76B] transition">Iniciar Sesión</a>
-        <a href="{% url 'registro' %}" class="hover:text-[#C0A76B] transition">Registrarse</a>
-      {% endif %}
+      </div>
+      {% empty %}
+      <div class="col-span-full text-center py-20">
+        <i class="fas fa-box-open text-6xl text-gray-600 mb-4"></i>
+        <p class="text-gray-400 text-xl">No hay productos disponibles en este momento</p>
+      </div>
+      {% endfor %}
     </div>
-  </div>
-</nav>
-  </header>
+  </main>
+{% endblock %}
 
-    <main class="container mx-auto px-6 py-10 flex-grow pt-28">
-        <h1 class="text-5xl font-bold text-[#C0A76B] mb-4 text-center uppercase tracking-wide">✨ Catálogo Completo ✨</h1>
-        <p class="text-gray-400 text-center mb-10 text-lg">Explora toda nuestra colección de productos</p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {% for producto in productos %}
-            <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg overflow-hidden hover:scale-105 transform transition duration-300 hover:shadow-2xl hover:border-[#d4b96a]">
-                <div class="relative group">
-                    {% if producto.imagen_url %}
-                        <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover group-hover:opacity-75 transition-opacity">
-                    {% elif producto.imagen %}
-                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-64 object-cover group-hover:opacity-75 transition-opacity">
-                    {% else %}
-                        <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" class="w-full h-64 object-cover">
-                    {% endif %}
-                    
-                    <!-- Badge de categoría -->
-                    <span class="absolute top-3 right-3 bg-[#C0A76B] text-black text-xs font-bold px-3 py-1 rounded-full uppercase">
-                        {{ producto.get_categoria_display }}
-                    </span>
-
-                    <!-- Botón de favoritos -->
-                    {% if user.is_authenticated %}
-                    <button 
-                        onclick="toggleFavorito({{ producto.id }}, this)" 
-                        class="absolute top-3 left-3 bg-white hover:bg-gray-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110"
-                        title="{% if producto in user.favoritos.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}">
-                        <i class="fa-{% if producto in user.favoritos.all %}solid{% else %}regular{% endif %} fa-heart text-lg" 
-                           style="{% if producto in user.favoritos.all %}color: #C0A76B;{% else %}color: #666;{% endif %}"></i>
-                    </button>
-                    {% endif %}
-
-                    {% if producto.destacado %}
-                    <span class="absolute bottom-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                        <i class="fas fa-star"></i> Destacado
-                    </span>
-                    {% endif %}
-                </div>
-                
-                <div class="p-4">
-                    <h3 class="text-lg font-bold text-[#C0A76B] mb-2 truncate">{{ producto.nombre }}</h3>
-                    <p class="text-gray-400 text-sm mb-3 line-clamp-2">{{ producto.descripcion|default:"Sin descripción" }}</p>
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-2xl font-bold text-white">${{ producto.precio }}</span>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        <a href="{% url 'producto_detalle' producto.id %}" 
-                           class="flex-1 bg-[#C0A76B] hover:bg-[#d4b96a] text-black font-semibold py-2 px-4 rounded-lg transition duration-200 text-center flex items-center justify-center gap-2">
-                            <i class="fas fa-eye"></i>
-                            Ver
-                        </a>
-                        
-                        <form action="{% url 'agregar_al_carrito' producto.id %}" method="post" class="flex-1">
-                            {% csrf_token %}
-                            <button type="submit" 
-                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
-                                <i class="fas fa-cart-plus"></i>
-                                Agregar
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-span-full text-center py-20">
-                <i class="fas fa-box-open text-6xl text-gray-600 mb-4"></i>
-                <p class="text-gray-400 text-xl">No hay productos disponibles en este momento</p>
-            </div>
-            {% endfor %}
-        </div>
-    </main>
-
-    <!-- Modal del carrito -->
-    <div id="carritoModal" class="modal hidden">
-        <div class="modal-contenido">
-            <div class="carrito-header">
-                <button onclick="cerrarModal()" class="cerrar">&times;</button>
-                <h2>Carrito de Compras</h2>
-                <p class="carrito-subtitle">Glamoure Collection</p>
-            </div>
-            <div class="carrito-body">
-                <div id="carritoContenido"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal del producto -->
-    <div id="productoModal" class="modal">
-        <div class="modal-contenido">
-            <div id="productoContenido"></div>
-        </div>
-    </div>
-
-    <footer class="bg-black border-t border-[#C0A76B]/50 py-10 mt-auto">
-        <div class="container mx-auto text-center text-gray-400">
-            <p>&copy; 2025 Glamoure. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    <script src="{% static 'js/modal.js' %}?v=100000000"></script>
-    <script>
-    // Menú desplegable del usuario
-    function initUserMenu() {
-        const userMenuButton = document.getElementById('userMenuButton');
-        const userMenu = document.getElementById('userMenu');
-        const userMenuArrow = document.getElementById('userMenuArrow');
-
-        if (userMenuButton && userMenu) {
-            userMenuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                
-                if (userMenu.classList.contains('hidden')) {
-                    userMenu.classList.remove('hidden');
-                    if (userMenuArrow) {
-                        userMenuArrow.classList.add('rotate-180');
-                    }
-                } else {
-                    userMenu.classList.add('hidden');
-                    if (userMenuArrow) {
-                        userMenuArrow.classList.remove('rotate-180');
-                    }
-                }
-            });
-
-            document.addEventListener('click', function(e) {
-                if (userMenu && !userMenu.contains(e.target) && userMenuButton && !userMenuButton.contains(e.target)) {
-                    userMenu.classList.add('hidden');
-                    if (userMenuArrow) {
-                        userMenuArrow.classList.remove('rotate-180');
-                    }
-                }
-            });
-
-            userMenu.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        }
-    }
-
+{% block extra_js %}
+  <!-- Script específico para el catálogo completo -->
+  <script>
     // Función para agregar/quitar de favoritos
     function toggleFavorito(productoId, button) {
-        fetch(`/toggle-favorito/${productoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.ok) {
-                const icon = button.querySelector('i');
-                if (data.added) {
-                    icon.className = 'fa-solid fa-heart text-lg';
-                    icon.style.color = '#C0A76B';
-                    button.title = 'Eliminar de favoritos';
-                    button.classList.add('animate-bounce');
-                    setTimeout(() => button.classList.remove('animate-bounce'), 500);
-                } else {
-                    icon.className = 'fa-regular fa-heart text-lg';
-                    icon.style.color = '#666';
-                    button.title = 'Agregar a favoritos';
-                }
-            } else {
-                alert('Error: ' + (data.error || 'Por favor, intenta de nuevo'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un error. Por favor, intenta de nuevo.');
-        });
+      fetch(`/toggle-favorito/${productoId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          const icon = button.querySelector('i');
+          if (data.added) {
+            icon.className = 'fa-solid fa-heart text-lg';
+            icon.style.color = '#C0A76B';
+            button.title = 'Eliminar de favoritos';
+            button.classList.add('animate-bounce');
+            setTimeout(() => button.classList.remove('animate-bounce'), 500);
+          } else {
+            icon.className = 'fa-regular fa-heart text-lg';
+            icon.style.color = '#666';
+            button.title = 'Agregar a favoritos';
+          }
+        } else {
+          alert('Error: ' + (data.error || 'Por favor, intenta de nuevo'));
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error. Por favor, intenta de nuevo.');
+      });
     }
 
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
-        return cookieValue;
+      }
+      return cookieValue;
     }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        initUserMenu();
-    });
-    </script>
-</body>
-</html>
+  </script>
+{% endblock %}

@@ -53,18 +53,46 @@ def ver_carrito(request):
 @login_required
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
+    
+    # ⚠️ VALIDACIÓN: Verificar si el producto tiene variantes
+    from .models import ProductoVariante
+    tiene_variantes = ProductoVariante.objects.filter(producto=producto).exists()
+    
+    if tiene_variantes:
+        # Si tiene variantes, DEBE usar agregar_al_carrito_variante
+        mensaje = 'Este producto requiere seleccionar talla y color. Por favor, usa el modal de detalles.'
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "ok": False,
+                "error": mensaje
+            }, status=400)
+        else:
+            messages.warning(request, mensaje)
+            return redirect('index')
+    
     carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
 
     cantidad = int(request.POST.get('cantidad', 1))
-    # Permitimos que el usuario envíe una talla opcional al agregar al carrito
+    # Permitimos que el usuario envíe una talla y color opcional al agregar al carrito
     talla = request.POST.get('talla')
     if talla:
         talla = talla.strip()
     else:
         talla = None
+    
+    color = request.POST.get('color')
+    if color:
+        color = color.strip()
+    else:
+        color = None
 
-    # Buscamos el item teniendo en cuenta la talla seleccionada (puede ser None)
-    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto, talla=talla)
+    # Buscamos el item teniendo en cuenta la talla y color seleccionados (pueden ser None)
+    item, creado = ItemCarrito.objects.get_or_create(
+        carrito=carrito, 
+        producto=producto, 
+        talla=talla,
+        color=color
+    )
     if not creado:
         item.cantidad += cantidad
     else:
@@ -80,12 +108,81 @@ def agregar_al_carrito(request, producto_id):
                 "producto": producto.nombre,
                 "cantidad": item.cantidad,
                 "talla": item.talla,
+                "color": item.color,
                 "subtotal": float(item.subtotal())
             }
         })
 
     # ✅ Si no es AJAX, redirige normalmente
+    messages.success(request, f'{producto.nombre} agregado al carrito')
     return redirect('index')
+
+
+# Agregar variante específica al carrito (para productos con variantes de talla/color)
+@login_required
+@require_POST
+def agregar_al_carrito_variante(request):
+    """Agrega una variante específica (con talla y color) al carrito"""
+    from .models import ProductoVariante
+    
+    variante_id = request.POST.get('variante_id')
+    cantidad = int(request.POST.get('cantidad', 1))
+    
+    if not variante_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'Debes seleccionar una talla y color'
+        }, status=400)
+    
+    # Obtener la variante
+    variante = get_object_or_404(ProductoVariante, id=variante_id)
+    producto = variante.producto
+    
+    # Verificar stock
+    if variante.stock < cantidad:
+        return JsonResponse({
+            'success': False,
+            'error': f'Solo hay {variante.stock} unidades disponibles'
+        }, status=400)
+    
+    # Obtener o crear el carrito
+    carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    
+    # Buscar si ya existe un item con esta variante exacta (talla + color)
+    item, creado = ItemCarrito.objects.get_or_create(
+        carrito=carrito,
+        producto=producto,
+        talla=variante.talla,
+        color=variante.color,
+        defaults={'cantidad': cantidad}
+    )
+    
+    if not creado:
+        # Si ya existe, incrementar cantidad
+        nueva_cantidad = item.cantidad + cantidad
+        if nueva_cantidad > variante.stock:
+            return JsonResponse({
+                'success': False,
+                'error': f'Stock insuficiente. Solo hay {variante.stock} unidades disponibles'
+            }, status=400)
+        item.cantidad = nueva_cantidad
+        item.save()
+    
+    # Responder con éxito
+    return JsonResponse({
+        'success': True,
+        'message': f'Agregado al carrito: {producto.nombre} - {variante.color} - Talla {variante.talla}',
+        'item': {
+            'id': item.id,
+            'producto': producto.nombre,
+            'talla': variante.talla,
+            'color': variante.color,
+            'cantidad': item.cantidad,
+            'precio': float(producto.precio),
+            'subtotal': float(item.subtotal())
+        },
+        'carrito_total': carrito.items.count()
+    })
 
 
 # Eliminar producto del carrito
@@ -112,7 +209,8 @@ def carrito_modal(request):
             'imagen': item.producto.imagen_url if item.producto.imagen_url else (item.producto.imagen.url if item.producto.imagen else ''),
             'precio': float(item.producto.precio),
             'cantidad': item.cantidad,
-            'talla': item.talla,
+            'talla': item.talla or 'N/A',
+            'color': item.color or 'N/A',
             'subtotal': float(item.subtotal())
         })
     

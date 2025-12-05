@@ -39,22 +39,35 @@ function mostrarCarrito() {
                         <hr>
                     `;
                 });
-                
-                // 🆕 AGREGAR TOTAL Y BOTÓN DE PAGO
-                contenido += `
-                    <div class="carrito-footer">
-                        <div class="carrito-total">
-                            <strong>Total:</strong> 
-                            <span style="color: #667eea; font-size: 1.3em;">$${data.total.toLocaleString('es-CO')}</span>
-                        </div>
-                        <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
-                            Proceder al Pago
-                        </a>
-                    </div>
-                `;
             }
 
             document.getElementById('carritoContenido').innerHTML = contenido;
+            
+            // Agregar footer con total y botón fuera del body
+            const modalContenido = document.querySelector('#carritoModal .modal-contenido');
+            let footer = modalContenido.querySelector('.carrito-footer');
+            
+            // Remover footer existente si hay
+            if (footer) {
+                footer.remove();
+            }
+            
+            // Crear nuevo footer solo si hay items
+            if (data.items.length > 0) {
+                footer = document.createElement('div');
+                footer.className = 'carrito-footer';
+                footer.innerHTML = `
+                    <div class="carrito-total">
+                        <strong>Total:</strong> 
+                        <span>$${data.total.toLocaleString('es-CO')}</span>
+                    </div>
+                    <a href="/pagos/checkout-carrito/" class="btn-proceder-pago">
+                        💳 Procesar la Compra
+                    </a>
+                `;
+                modalContenido.appendChild(footer);
+            }
+            
             document.getElementById('carritoModal').style.display = 'flex';
         });
 }
@@ -160,4 +173,176 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === productoModal) cerrarProductoModal();
     });
 });
+
+
+// ==================== SISTEMA DE DESEOS ====================
+function toggleFavorito(productoId, button) {
+    // Obtener el token CSRF
+    const csrftoken = getCookie('csrftoken');
+    
+    fetch(`/toggle-favorito/${productoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const icon = button.querySelector('i');
+            
+            if (data.is_favorito) {
+                // Producto agregado a favoritos
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                icon.style.color = '#C0A76B';
+                button.setAttribute('data-favorito', 'true');
+                button.setAttribute('title', 'Eliminar de mis deseos');
+                
+                // Animación de feedback
+                button.classList.add('animate-bounce');
+                setTimeout(() => button.classList.remove('animate-bounce'), 500);
+            } else {
+                // Producto eliminado de favoritos
+                icon.classList.remove('fa-solid');
+                icon.classList.add('fa-regular');
+                icon.style.color = '#fff';
+                button.setAttribute('data-favorito', 'false');
+                button.setAttribute('title', 'Agregar a mis deseos');
+            }
+            
+            // Actualizar contador de deseos en el header si existe
+            actualizarContadorDeseos(data.total_favorites);
+            
+            // Mostrar mensaje de éxito
+            mostrarNotificacion(data.is_favorito ? 'Agregado a mis deseos ❤️' : 'Eliminado de mis deseos', data.is_favorito ? 'success' : 'info');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarNotificacion('Hubo un error. Por favor, intenta de nuevo.', 'error');
+    });
+}
+
+// Función auxiliar para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Actualizar contador de deseos en el header
+function actualizarContadorDeseos(total) {
+    const wishlistLinks = document.querySelectorAll('a[href*="mis_deseos"]');
+    wishlistLinks.forEach(link => {
+        const counter = link.querySelector('span');
+        if (counter) {
+            counter.textContent = total;
+            
+            // Animar el contador
+            counter.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                counter.style.transform = 'scale(1)';
+            }, 200);
+        }
+    });
+}
+
+// Mostrar notificaciones temporales
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear el elemento de notificación
+    const notificacion = document.createElement('div');
+    notificacion.className = 'notificacion-favorito';
+    notificacion.textContent = mensaje;
+    
+    // Estilos según el tipo - DORADO para success e info (agregar/eliminar deseos)
+    let bgColor = 'linear-gradient(135deg, #C0A76B, #d4b876, #e6c98a)'; // Dorado por defecto
+    let textColor = '#000';
+    let boxShadow = '0 8px 25px rgba(192, 167, 107, 0.6), 0 0 30px rgba(192, 167, 107, 0.4)';
+    
+    if (tipo === 'error') {
+        bgColor = '#f44336';
+        textColor = 'white';
+        boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+    }
+    // Tanto 'success' como 'info' usan el estilo dorado
+    
+    notificacion.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${bgColor};
+        color: ${textColor};
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: ${boxShadow};
+        z-index: 9999;
+        font-weight: 600;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(notificacion);
+    
+    // Eliminar después de 3 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notificacion);
+        }, 300);
+    }, 3000);
+}
+
+// Agregar animaciones CSS
+if (!document.getElementById('favoritos-animations')) {
+    const style = document.createElement('style');
+    style.id = 'favoritos-animations';
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .animate-bounce {
+            animation: bounce 0.5s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
