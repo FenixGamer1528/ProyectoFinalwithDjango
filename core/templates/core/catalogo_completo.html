@@ -1,7 +1,12 @@
 {% extends 'index.html' %}
 {% load static %}
+{% load humanize %}
 
-{% block title %}Glamoure - Catálogo Completo{% endblock %}
+{% block title %}Glamoure - Catálogo{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+{% endblock %}
 
 {% block content %}
   <main class="container mx-auto px-6 py-10 flex-grow pt-28">
@@ -11,9 +16,11 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {% for producto in productos %}
       <div class="carousel-slide">
-        <!-- Badge destacado amarillo -->
+        <!-- Badges dinámicos -->
         {% if producto.destacado %}
         <div class="top-badge">⭐ TOP</div>
+        {% elif producto.en_oferta %}
+        <div class="offer-badge">🔥 OFERTA</div>
         {% endif %}
         
         <!-- Botón de favoritos -->
@@ -39,7 +46,7 @@
         
         <div class="product-info">
           <p class="product-name">{{ producto.nombre }}</p>
-          <p class="product-price">${{ producto.precio }}</p>
+          <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
           <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')"
                   class="product-btn">Ver detalles</button>
         </div>

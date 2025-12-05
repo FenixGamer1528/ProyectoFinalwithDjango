@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -369,7 +370,7 @@
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
+                <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
@@ -426,7 +427,7 @@
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
+                <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>

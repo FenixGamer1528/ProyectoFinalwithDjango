@@ -32,7 +32,7 @@
             <!-- Imagen del producto -->
             <div class="relative">
                 <img id="producto-imagen" 
-                     src="{{ producto.imagen_url|default:'/static/imagenes/placeholder.png' }}" 
+                     src="{% if producto.imagen_url %}{{ producto.imagen_url }}{% elif producto.imagen %}{{ producto.imagen.url }}{% else %}/static/imagenes/placeholder.png{% endif %}" 
                      alt="{{ producto.nombre }}"
                      class="w-full rounded-lg shadow-2xl border border-[#C0A76B]">
                 

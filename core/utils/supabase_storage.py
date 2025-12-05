@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # Variable para indicar si queremos usar Supabase
-USE_SUPABASE = False
+USE_SUPABASE = True
 
 if USE_SUPABASE:
     from supabase import create_client
@@ -27,11 +27,15 @@ else:
 
 def subir_a_supabase(imagen):
     """
-    Función temporal que devuelve una URL de ejemplo.
+    Función que sube la imagen a Supabase si está configurado,
+    o devuelve la ruta local si no lo está.
     """
-    # Devolver una URL temporal para pruebas
-    return "/static/imagenes/zapatos.avif"
-
+    if not USE_SUPABASE or not supabase:
+        # Si Supabase no está configurado, devolver la ruta local de la imagen
+        # Django la guardará automáticamente en MEDIA_ROOT/productos/
+        print(f"ℹ️ Supabase deshabilitado. Usando almacenamiento local: {imagen.name}")
+        return None  # Retornar None para que Django use el campo 'imagen' normal
+    
     try:
         nombre_archivo = f"productos/{imagen.name}"
         contenido = imagen.read()

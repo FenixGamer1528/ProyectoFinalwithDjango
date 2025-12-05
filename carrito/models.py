@@ -59,13 +59,20 @@ class Producto(models.Model):
 
             if nueva_imagen and imagen_cambio:
                 url = subir_a_supabase(self.imagen)
-                self.imagen_url = url
-                try:
-                    self.imagen.delete(save=False)
-                except Exception:
-                    pass
+                if url:  # Solo actualizar imagen_url si Supabase devolvió una URL
+                    self.imagen_url = url
+                    try:
+                        self.imagen.delete(save=False)
+                    except Exception:
+                        pass
+                else:
+                    # Si Supabase no está configurado, guardar la imagen localmente
+                    # y construir la URL basada en MEDIA_URL
+                    print(f"💾 Guardando imagen localmente: {self.imagen.name}")
+                    # Django guardará automáticamente en MEDIA_ROOT/productos/
+                    # No eliminamos self.imagen para que se guarde localmente
         except Exception as e:
-            print("Error subiendo imagen a Supabase:", e)
+            print("Error procesando imagen:", e)
 
         super().save(*args, **kwargs)
 

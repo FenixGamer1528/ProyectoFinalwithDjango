@@ -10,15 +10,18 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Columna Izquierda - Imagen -->
         <div class="relative">
-            <div class="sticky top-0">
+            <div class="sticky top-0 relative">
                 <img id="modal-producto-imagen" 
-                     src="{{ producto.imagen_url|default:'/static/imagenes/placeholder.png' }}" 
-                     alt="{{ producto.nombre }}" 
+                     src="{% if producto.imagen_url %}{{ producto.imagen_url }}{% elif producto.imagen %}{{ producto.imagen.url }}{% else %}/static/imagenes/placeholder.png{% endif %}" 
+                     alt="{{ producto.nombre }}"
                      class="w-full rounded-xl border-4 border-[#C0A76B] shadow-2xl hover:scale-105 transition-transform duration-300">
+                
+                <!-- Badge IA -->
+                <div id="modal-ia-badge" class="hidden absolute top-4 left-4 bg-purple-900 bg-opacity-90 text-purple-300 px-4 py-2 rounded-lg border border-purple-400 z-10">
+                    <i class="fas fa-robot mr-2"></i> Color generado con IA
+                </div>
             </div>
-        </div>
-        
-        <!-- Columna Derecha - Información del producto -->
+        </div>        <!-- Columna Derecha - Información del producto -->
         <div class="text-white space-y-4">
             <!-- Nombre y Precio -->
             <div class="border-b border-[#C0A76B] pb-4">
@@ -289,7 +292,9 @@ const modalVariantesData = [
         id: {{ v.id }},
         talla: '{{ v.talla }}',
         color: '{{ v.color }}',
-        stock: {{ v.stock }}
+        stock: {{ v.stock }},
+        imagen_url: '{% if v.imagen_url %}{{ v.imagen_url }}{% elif producto.imagen %}{{ producto.imagen.url }}{% else %}/static/imagenes/placeholder.png{% endif %}',
+        imagen_ia: {% if v.imagen_generada_ia %}true{% else %}false{% endif %}
     },
     {% endfor %}
 ];
@@ -297,6 +302,8 @@ const modalVariantesData = [
 // Variables globales
 let modalTallaSeleccionada = null;
 let modalColorSeleccionado = null;
+const modalImagen = document.getElementById('modal-producto-imagen');
+const modalIaBadge = document.getElementById('modal-ia-badge');
 
 // Función para seleccionar color
 window.seleccionarColor = function(color) {
@@ -318,16 +325,24 @@ window.seleccionarColor = function(color) {
         btn.classList.add('text-white');
     });
     
-    actualizarVarianteModal();
-    
-    // ✨ NUEVO: Generar imagen con IA SIEMPRE al seleccionar color
+    // Actualizar imagen del producto según el color seleccionado
     const varianteConColor = modalVariantesData.find(v => v.color === color);
-    if (varianteConColor) {
-        console.log('🤖 Generando imagen con IA para variante', varianteConColor.id, 'color:', color);
-        generarImagenConIA(varianteConColor.id, color);
-    } else {
-        console.warn('⚠️ No se encontró variante con color:', color);
+    if (varianteConColor && modalImagen) {
+        modalImagen.src = varianteConColor.imagen_url;
+        
+        // Mostrar/ocultar badge IA
+        if (modalIaBadge) {
+            if (varianteConColor.imagen_ia) {
+                modalIaBadge.classList.remove('hidden');
+            } else {
+                modalIaBadge.classList.add('hidden');
+            }
+        }
+        
+        console.log('✅ Imagen actualizada:', varianteConColor.imagen_url, 'IA:', varianteConColor.imagen_ia);
     }
+    
+    actualizarVarianteModal();
 };
 
 // Función para seleccionar talla

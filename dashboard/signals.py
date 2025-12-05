@@ -50,11 +50,11 @@ def registrar_actividad_producto(sender, instance, created, **kwargs):
         )
     else:
         # Verificar si el stock es bajo
-        if instance.stock_bodega <= 10:
+        if hasattr(instance, 'stock') and instance.stock <= 10:
             ActividadReciente.objects.create(
                 tipo='alerta',
                 titulo='Alerta de stock bajo',
-                descripcion=f'{instance.nombre} tiene solo {instance.stock_bodega} unidades en bodega',
+                descripcion=f'{instance.nombre} tiene solo {instance.stock} unidades disponibles',
                 usuario=None,
                 objeto_id=instance.id,
                 objeto_tipo='Producto'

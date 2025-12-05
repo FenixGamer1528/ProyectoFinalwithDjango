@@ -19,7 +19,7 @@ def about(request):
 def catalogo_completo(request):
     """Vista que muestra todos los productos de todas las categorías"""
     productos = Producto.objects.all().only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion', 'en_oferta'
     )
     
     # Prefetch favoritos si el usuario está autenticado
@@ -255,7 +255,7 @@ def exportar_pdf(request):
 def hombres(request):
     # Optimizado: solo cargar campos necesarios y usar caché
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     # Prefetch favoritos si el usuario está autenticado
@@ -267,7 +267,7 @@ def hombres(request):
 
 def mujeres(request):
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
@@ -278,7 +278,7 @@ def mujeres(request):
 
 def zapatos(request):
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
@@ -288,8 +288,8 @@ def zapatos(request):
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    productos = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
