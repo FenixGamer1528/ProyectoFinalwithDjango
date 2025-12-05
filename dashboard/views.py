@@ -7,12 +7,15 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 import json
+import io
 from datetime import datetime, timedelta
+from PIL import Image
 
 from carrito.models import UsuarioPersonalizado, Producto, Pedido, Carrito, ProductoVariante, Inventario
 from core.models import Reporte, Incidencia, SeguimientoReporte
 from .forms import ProductoForm, ProductoVarianteForm, InventarioForm
 from .utils import AnalizadorDatos, ExportadorReportes
+from .sam_recolor import process_image_recolor, SamUnavailableError
 
 User = get_user_model()
 
@@ -738,31 +741,188 @@ def ajustar_inventario(request, variante_id):
 
 # ==================== API para cambio de color con IA ====================
 
-@login_required
+def _detectar_categoria_producto(producto):
+    """
+    Detecta la categoría específica del producto para usar configuración optimizada.
+    
+    Mapea categorías de Django a categorías de configuración SAM:
+    - 'zapatos' -> 'zapatos' (más saturación, brillo alto)
+    - 'mujer', 'hombre' -> 'ropa' (configuración balanceada)
+    - Accesorios detectados por nombre -> 'accesorios' (saturación máxima)
+    - Bolsos detectados por nombre -> 'bolsos' (configuración intermedia)
+    
+    Returns:
+        str: Categoría para configuración ('zapatos', 'ropa', 'accesorios', 'bolsos', 'general')
+    """
+    nombre_lower = producto.nombre.lower()
+    descripcion_lower = producto.descripcion.lower() if producto.descripcion else ''
+    
+    # Mapeo directo de categoría Django
+    if producto.categoria == 'zapatos':
+        return 'zapatos'
+    
+    # Detectar accesorios por palabras clave
+    keywords_accesorios = ['gafas', 'bufanda', 'cinturon', 'corbata', 'pañuelo', 'sombrero', 'gorra', 'reloj']
+    if any(keyword in nombre_lower or keyword in descripcion_lower for keyword in keywords_accesorios):
+        return 'accesorios'
+    
+    # Detectar bolsos
+    keywords_bolsos = ['bolso', 'bolsa', 'cartera', 'mochila', 'morral']
+    if any(keyword in nombre_lower or keyword in descripcion_lower for keyword in keywords_bolsos):
+        return 'bolsos'
+    
+    # Categorías mujer/hombre son típicamente ropa
+    if producto.categoria in ['mujer', 'hombre']:
+        return 'ropa'
+    
+    # Por defecto: configuración general
+    return 'general'
+
+
 def generar_imagen_color(request, variante_id):
     """
-    Genera una nueva imagen del producto con el color seleccionado usando IA.
-    Por ahora retorna la imagen original, pero aquí se integraría:
-    - Replicate API (Stable Diffusion, ControlNet)
-    - OpenAI DALL-E
-    - Runway ML
-    - etc.
+    API endpoint para recolorizar imágenes usando Segment Anything (SAM) + recolor HSV.
+    
+    Modos de uso:
+    1. POST con archivo 'image' + 'color' (hex): procesa imagen enviada
+    2. POST/GET con solo 'color': usa imagen existente de la variante/producto
+    
+    Devuelve:
+    - JSON con success, mensaje, imagen_url (subida a Supabase) e imagen_base64 (preview)
     """
+    from django.core.files.uploadedfile import InMemoryUploadedFile
+    from core.utils.supabase_storage import subir_a_supabase
+    import requests
+    import base64
+    
     variante = get_object_or_404(ProductoVariante, id=variante_id)
     
-    # TODO: Integrar API de IA para cambio de color
-    # Ejemplo conceptual:
-    # imagen_original = variante.producto.imagen_url or variante.producto.imagen.url
-    # prompt = f"Change the color of this {variante.producto.nombre} to {variante.color}, maintaining texture and lighting"
-    # nueva_imagen_url = llamar_api_ia(imagen_original, prompt, variante.color)
-    # variante.imagen_url = nueva_imagen_url
-    # variante.imagen_generada_ia = True
-    # variante.save()
+    # 1. Obtener imagen origen (POST upload o imagen existente)
+    pil_image = None
+    imagen_origen = None
+    
+    try:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"DEBUG: variante.imagen_url = {variante.imagen_url}")
+        logger.error(f"DEBUG: producto.imagen_url = {variante.producto.imagen_url if hasattr(variante.producto, 'imagen_url') else 'N/A'}")
+        # Prioridad 1: imagen enviada en POST
+        if request.FILES.get('image'):
+            uploaded_file = request.FILES['image']
+            pil_image = Image.open(uploaded_file).convert('RGB')
+            imagen_origen = 'upload'
+        # Prioridad 2: imagen de variante existente
+        elif variante.imagen and getattr(variante.imagen, 'path', None):
+            pil_image = Image.open(variante.imagen.path).convert('RGB')
+            imagen_origen = 'variante_local'
+        elif variante.imagen_url:
+            # Verificar si es URL relativa (archivo estático) o URL completa
+            if variante.imagen_url.startswith('http'):
+                resp = requests.get(variante.imagen_url, timeout=10)
+                resp.raise_for_status()
+                pil_image = Image.open(io.BytesIO(resp.content)).convert('RGB')
+                imagen_origen = 'variante_url'
+            else:
+                # URL relativa - construir ruta del archivo estático
+                from django.conf import settings
+                import os
+                # Normalizar barras para Windows
+                relative_path = variante.imagen_url.lstrip('/').replace('/', os.sep)
+                static_path = os.path.join(settings.BASE_DIR, relative_path)
+                if os.path.exists(static_path):
+                    pil_image = Image.open(static_path).convert('RGB')
+                    imagen_origen = 'variante_static'
+                else:
+                    raise FileNotFoundError(f'Archivo estático no encontrado: {static_path}')
+        # Prioridad 3: imagen del producto base
+        elif variante.producto.imagen and getattr(variante.producto.imagen, 'path', None):
+            pil_image = Image.open(variante.producto.imagen.path).convert('RGB')
+            imagen_origen = 'producto_local'
+        elif variante.producto.imagen_url:
+            # Verificar si es URL relativa o completa
+            if variante.producto.imagen_url.startswith('http'):
+                resp = requests.get(variante.producto.imagen_url, timeout=10)
+                resp.raise_for_status()
+                pil_image = Image.open(io.BytesIO(resp.content)).convert('RGB')
+                imagen_origen = 'producto_url'
+            else:
+                # URL relativa - archivo estático
+                from django.conf import settings
+                import os
+                # Normalizar barras para Windows
+                relative_path = variante.producto.imagen_url.lstrip('/').replace('/', os.sep)
+                static_path = os.path.join(settings.BASE_DIR, relative_path)
+                if os.path.exists(static_path):
+                    pil_image = Image.open(static_path).convert('RGB')
+                    imagen_origen = 'producto_static'
+                else:
+                    raise FileNotFoundError(f'Archivo estático no encontrado: {static_path}')
+        
+        if pil_image is None:
+            return JsonResponse({
+                'success': False, 
+                'mensaje': 'No se encontró imagen. Envíe una imagen en el campo "image" o asocie una imagen a la variante/producto.'
+            }, status=400)
+    except Exception as e:
+        import traceback
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"TRACEBACK COMPLETO: {traceback.format_exc()}")
+        return JsonResponse({'success': False, 'mensaje': f'Error al cargar imagen: {e}'}, status=500)
+    
+    # 2. Obtener color objetivo
+    target_color = request.POST.get('color') or request.GET.get('color')
+    if not target_color:
+        target_color = f'#{variante.color}' if variante.color and not variante.color.startswith('#') else (variante.color or '#ff0000')
+    
+    # 3. Detectar categoría del producto para usar configuración optimizada
+    categoria_producto = _detectar_categoria_producto(variante.producto)
+    
+    # 4. Procesar con SAM + recolor usando configuración específica
+    try:
+        result_pil = process_image_recolor(pil_image, target_color, categoria=categoria_producto)
+    except SamUnavailableError as e:
+        return JsonResponse({
+            'success': False, 
+            'mensaje': f'SAM no disponible: {e}. Verifica que hayas instalado segment-anything y definido SAM_CHECKPOINT.'
+        }, status=500)
+    except Exception as e:
+        return JsonResponse({'success': False, 'mensaje': f'Error procesando imagen: {e}'}, status=500)
+    
+    # 5. Guardar resultado en memoria
+    buf = io.BytesIO()
+    result_pil.save(buf, format='PNG')
+    buf.seek(0)
+    
+    # 6. Subir a Supabase
+    nueva_url = None
+    try:
+        from django.core.files.base import ContentFile
+        filename = f'variantes/recolor_{variante.producto.id}_{variante.id}_{target_color.replace("#", "")}.png'
+        file_content = ContentFile(buf.getvalue(), name=filename)
+        nueva_url = subir_a_supabase(file_content)
+        
+        if nueva_url and nueva_url != "/static/imagenes/zapatos.avif":  # Verificar que no sea URL de prueba
+            # Actualizar variante con nueva imagen
+            variante.imagen_url = nueva_url
+            variante.imagen_generada_ia = True
+            variante.save()
+    except Exception as e:
+        print(f'⚠️ Error subiendo a Supabase: {e}')
+        # Continuar aunque falle Supabase - devolver base64
+    
+    # 6. Generar base64 para preview
+    buf.seek(0)
+    encoded = base64.b64encode(buf.getvalue()).decode('ascii')
     
     return JsonResponse({
         'success': True,
-        'mensaje': 'Funcionalidad de IA pendiente de integración',
-        'imagen_url': variante.imagen_url or (variante.producto.imagen_url if variante.producto.imagen_url else None)
+        'mensaje': f'Imagen recolorizada a {target_color} usando SAM (origen: {imagen_origen})',
+        'imagen_url': nueva_url or variante.imagen_url,
+        'imagen_generada_ia': True,
+        'image_base64': f'data:image/png;base64,{encoded}',
+        'variante_id': variante.id,
+        'color_aplicado': target_color,
     })
 
 

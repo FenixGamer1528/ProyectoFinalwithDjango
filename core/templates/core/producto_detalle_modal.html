@@ -1,5 +1,5 @@
 {% load static %}
-<!-- CONTENIDO SOLO PARA MODAL (sin layout completo) -->
+<!-- MODAL v20251204 - Círculos de colores -->
 <button class="cerrar text-white hover:text-[#C0A76B] text-4xl font-bold cursor-pointer absolute top-4 right-6 z-20 transition-all hover:scale-110" 
         onclick="cerrarProductoModal()" 
         title="Cerrar">
@@ -87,10 +87,10 @@
                     <i class="fas fa-palette text-2xl"></i>Colores Disponibles
                 </h3>
                 <div class="flex flex-wrap gap-4" id="modal-colores-container">
-                    {% for color in colores_disponibles|slice:":3" %}
+                    {% for color in colores_disponibles %}
                     <button class="modal-color-btn relative group" data-color="{{ color }}" onclick="seleccionarColor('{{ color }}')">
-                        <div class="w-16 h-16 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
-                             style="background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
+                        <div class="w-14 h-14 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
+                             style="display: block !important; width: 3.5rem !important; height: 3.5rem !important; background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% elif color == 'Verde Oliva' %}#556B2F{% elif color == 'Caqui' %}#C3B091{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
                         </div>
                         <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                             {{ color }}
@@ -101,7 +101,7 @@
                     {% endfor %}
                 </div>
                 <p class="text-xs text-gray-400 mt-2">
-                    <i class="fas fa-info-circle mr-1"></i>Máximo 3 colores por producto
+                    <i class="fas fa-info-circle mr-1"></i>{{ colores_disponibles|length }} color{{ colores_disponibles|length|pluralize:"es" }} disponible{{ colores_disponibles|length|pluralize:"s" }}
                 </p>
             </div>
             
@@ -390,6 +390,15 @@ window.seleccionarColor = function(color) {
     
     mostrarStockPorTallas();
     actualizarVarianteModal();
+    
+    // ✨ NUEVO: Generar imagen con IA SIEMPRE al seleccionar color
+    const varianteConColor = modalVariantesData.find(v => v.color === color);
+    if (varianteConColor) {
+        console.log('🤖 Generando imagen con IA para variante', varianteConColor.id, 'color:', color);
+        generarImagenConIA(varianteConColor.id, color);
+    } else {
+        console.warn('⚠️ No se encontró variante con color:', color);
+    }
 };
 
 // Función para seleccionar talla
@@ -639,6 +648,134 @@ if (modalFormCarrito) {
             btnAgregar.innerHTML = btnTextoOriginal;
         });
     });
+}
+
+// 🤖 Función para generar imagen con IA
+async function generarImagenConIA(varianteId, colorNombre) {
+    // Mapeo de nombres de colores a códigos hex
+    const coloresHex = {
+        'Negro': '#000000',
+        'Blanco': '#FFFFFF',
+        'Rojo': '#DC2626',
+        'Azul': '#2563EB',
+        'Verde': '#16A34A',
+        'Amarillo': '#EAB308',
+        'Gris': '#6B7280',
+        'Marrón': '#92400E',
+        'Rosa': '#EC4899',
+        'Morado': '#9333EA',
+        'Beige': '#D4A574',
+        'Naranja': '#EA580C',
+        'Verde Oliva': '#556B2F',
+        'Caqui': '#C3B091'
+    };
+    
+    const colorHex = coloresHex[colorNombre] || '#C0A76B';
+    
+    // Mostrar indicador de carga en la imagen
+    if (modalImagen) {
+        modalImagen.style.opacity = '0.5';
+        const loader = document.createElement('div');
+        loader.id = 'ia-loader';
+        loader.className = 'absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg';
+        loader.innerHTML = `
+            <div class="text-center text-white">
+                <i class="fas fa-wand-magic-sparkles fa-spin text-4xl text-purple-400 mb-2"></i>
+                <p class="text-sm">Generando con IA...</p>
+                <p class="text-xs text-gray-400 mt-1">${colorNombre}</p>
+            </div>
+        `;
+        modalImagen.parentElement.style.position = 'relative';
+        modalImagen.parentElement.appendChild(loader);
+    }
+    
+    const formData = new FormData();
+    formData.append('color', colorHex);
+    
+    try {
+        const response = await fetch(`/dashboard/api/variante/${varianteId}/generar-color/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        // Quitar loader
+        const loader = document.getElementById('ia-loader');
+        if (loader) loader.remove();
+        
+        if (data.success && modalImagen) {
+            // Actualizar imagen con el resultado
+            modalImagen.src = data.image_base64;
+            modalImagen.style.opacity = '1';
+            
+            // Mostrar badge de IA
+            if (modalIaBadge) {
+                modalIaBadge.classList.remove('hidden');
+            }
+            
+            // Actualizar datos de la variante
+            const variante = modalVariantesData.find(v => v.id === varianteId);
+            if (variante) {
+                variante.imagen_url = data.imagen_url;
+                variante.imagen_ia = true;
+            }
+            
+            console.log('✅ Imagen generada con IA:', data.imagen_url);
+            mostrarNotificacion(`✨ Color ${colorNombre} generado con IA`, 'success');
+        } else {
+            if (modalImagen) modalImagen.style.opacity = '1';
+            console.error('Error:', data.mensaje);
+            mostrarNotificacion('Error al generar imagen con IA', 'error');
+        }
+    } catch (error) {
+        const loader = document.getElementById('ia-loader');
+        if (loader) loader.remove();
+        if (modalImagen) modalImagen.style.opacity = '1';
+        console.error('Error:', error);
+        mostrarNotificacion('Error de conexión con el servidor', 'error');
+    }
+}
+
+// Función auxiliar para obtener cookie CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Función para mostrar notificaciones
+function mostrarNotificacion(mensaje, tipo = 'success') {
+    const colores = {
+        success: 'bg-green-900 border-green-400 text-green-400',
+        error: 'bg-red-900 border-red-400 text-red-400',
+        info: 'bg-blue-900 border-blue-400 text-blue-400'
+    };
+    
+    const notif = document.createElement('div');
+    notif.className = `fixed top-4 right-4 ${colores[tipo]} border-2 rounded-lg p-4 shadow-2xl z-[9999] max-w-md`;
+    notif.innerHTML = `
+        <div class="flex items-start gap-3">
+            <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-2xl"></i>
+            <div class="flex-1">
+                <p class="font-bold">${mensaje}</p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-xl opacity-50 hover:opacity-100">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 4000);
 }
 
 console.log('✅ Variantes del modal inicializadas correctamente');
