@@ -197,6 +197,7 @@ WOMPI_PRIVATE_KEY_TEST = 'prv_test_XefgTCdlErJRoEZfnVGtq6UhonaNlTk2'
 WOMPI_EVENTS_SECRET_TEST = 'test_events_y0W4ySwZjHC1Wv0jheDOC7MIaIGkqqbC'
 WOMPI_INTEGRITY_SECRET_TEST = 'test_integrity_nslqVWZD7wlccQ8AjxLYITkIgpqgFmjv'
 
+
 # Claves de producción (cuando las tengas)
 WOMPI_PUBLIC_KEY_PROD = ''
 WOMPI_PRIVATE_KEY_PROD = ''
