@@ -10,27 +10,40 @@ from decimal import Decimal
 
 @login_required
 def cliente_dashboard(request):
-    # 1. Obtener los items del carrito del usuario
+    from django.core.cache import cache
+    from django.db.models import Sum
+    
+    # 1. Obtener los items del carrito del usuario con optimización
     carrito, _ = Carrito.objects.prefetch_related(
         'items__producto'
     ).get_or_create(usuario=request.user)
-    items_carrito = carrito.items.all()
+    items_carrito = carrito.items.select_related('producto').only(
+        'id', 'cantidad', 'talla', 'color',
+        'producto__id', 'producto__nombre', 'producto__precio', 'producto__imagen_url'
+    )
     
-    # Calcular total de items en carrito
-    total_items_carrito = sum(item.cantidad for item in items_carrito)
+    # Calcular total de items en carrito eficientemente
+    total_items_carrito = items_carrito.aggregate(total=Sum('cantidad'))['total'] or 0
 
-    # 2. Obtener SOLO los pedidos del usuario actual (no de otros usuarios)
+    # 2. Obtener SOLO los pedidos del usuario actual con optimización
     pedidos_usuario = Pedido.objects.filter(
         usuario=request.user
-    ).select_related('producto').order_by('-fecha')  # Todos los pedidos del usuario
+    ).select_related('producto').only(
+        'id', 'fecha', 'estado', 'total', 'cantidad',
+        'producto__id', 'producto__nombre', 'producto__imagen_url'
+    ).order_by('-fecha')[:20]  # Limitar a últimos 20 pedidos
     
     # Total de pedidos del usuario
-    total_pedidos = pedidos_usuario.count()
+    total_pedidos = Pedido.objects.filter(usuario=request.user).count()
 
-    # 3. Obtener productos destacados para explorar (sin botón de compra)
-    productos_destacados = Producto.objects.filter(
-        destacado=True
-    ).only('id', 'nombre', 'precio', 'imagen', 'imagen_url')[:8]  # 8 productos destacados
+    # 3. Obtener productos destacados con caché
+    cache_key = 'productos_destacados_dashboard'
+    productos_destacados = cache.get(cache_key)
+    if productos_destacados is None:
+        productos_destacados = Producto.objects.filter(
+            destacado=True
+        ).only('id', 'nombre', 'precio', 'imagen_url')[:8]
+        cache.set(cache_key, productos_destacados, 600)  # Cache 10 minutos
 
     # 4. Crear el contexto con toda la información
     context = {
@@ -53,7 +66,16 @@ def lista_productos(request):
 # Vista clásica del carrito
 @login_required
 def ver_carrito(request):
-    carrito, _ = Carrito.objects.prefetch_related('items__producto').get_or_create(usuario=request.user)
+    carrito, _ = Carrito.objects.prefetch_related(
+        'items__producto'
+    ).get_or_create(usuario=request.user)
+    
+    # Optimizar carga de items
+    carrito.items_optimizados = carrito.items.select_related('producto').only(
+        'id', 'cantidad', 'talla', 'color',
+        'producto__id', 'producto__nombre', 'producto__precio', 'producto__imagen_url'
+    )
+    
     return render(request, 'carrito.html', {'carrito': carrito})
 
 

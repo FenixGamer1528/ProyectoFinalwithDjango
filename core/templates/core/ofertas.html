@@ -2,7 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Glamoure - Ofertas{% endblock %}
+{% block title %}Glamoure - Ofertas Especiales | Descuentos en Moda{% endblock %}
+
+{% block meta_description %}¡Aprovecha nuestras ofertas especiales! Descuentos increíbles en ropa, zapatos y accesorios. Moda de calidad a precios únicos.{% endblock %}
+
+{% block meta_keywords %}ofertas moda, descuentos ropa, promociones, rebajas, ropa oferta, zapatos descuento, glamoure ofertas{% endblock %}
+
+{% block og_title %}Glamoure - Ofertas Especiales{% endblock %}
+{% block og_description %}No te pierdas nuestras ofertas exclusivas. Moda de calidad con descuentos increíbles. ¡Por tiempo limitado!{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
@@ -31,12 +38,12 @@
         </button>
         {% endif %}
         
-        {% if producto.imagen_url %}
-          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-        {% elif producto.imagen %}
-          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-        {% else %}
-          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+          {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
         {% endif %}
         <div class="product-info">
           <p class="product-name">{{ producto.nombre }}</p>

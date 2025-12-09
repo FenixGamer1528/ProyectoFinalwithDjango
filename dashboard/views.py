@@ -21,18 +21,31 @@ User = get_user_model()
 
 def admin_dashboard(request):
     from dashboard.models import ActividadReciente
+    from django.core.cache import cache
     
-    total_usuarios = UsuarioPersonalizado.objects.count()
-    total_productos = Producto.objects.count()
-    total_pedidos = Pedido.objects.count()
-
-    ultimos_usuarios = UsuarioPersonalizado.objects.order_by('-date_joined')[:5]
-    actividades_recientes = ActividadReciente.objects.select_related('usuario').order_by('-fecha')[:10]
+    # Cachear estadísticas por 2 minutos
+    cache_key = 'admin_dashboard_stats'
+    stats = cache.get(cache_key)
+    
+    if stats is None:
+        stats = {
+            'total_usuarios': UsuarioPersonalizado.objects.count(),
+            'total_productos': Producto.objects.count(),
+            'total_pedidos': Pedido.objects.count(),
+        }
+        cache.set(cache_key, stats, 120)
+    
+    # Optimizar consultas con only()
+    ultimos_usuarios = UsuarioPersonalizado.objects.only(
+        'id', 'username', 'email', 'date_joined'
+    ).order_by('-date_joined')[:5]
+    
+    actividades_recientes = ActividadReciente.objects.select_related('usuario').only(
+        'id', 'accion', 'fecha', 'usuario__username'
+    ).order_by('-fecha')[:10]
 
     context = {
-        'total_usuarios': total_usuarios,
-        'total_productos': total_productos,
-        'total_pedidos': total_pedidos,
+        **stats,
         'ultimos_usuarios': ultimos_usuarios,
         'actividades_recientes': actividades_recientes,
     }
@@ -40,8 +53,18 @@ def admin_dashboard(request):
 
 
 def gestion_usuarios(request):
-    usuarios = UsuarioPersonalizado.objects.all()
-    return render(request, 'dashboard/gestion_usuarios.html', {'usuarios': usuarios})
+    from django.core.paginator import Paginator
+    
+    usuarios = UsuarioPersonalizado.objects.all().only(
+        'id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'date_joined'
+    ).order_by('-date_joined')
+    
+    # Paginación: 25 usuarios por página
+    paginator = Paginator(usuarios, 25)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'dashboard/gestion_usuarios.html', {'usuarios': page_obj})
 
 
 def eliminar_usuario(request, user_id):
@@ -52,7 +75,12 @@ def eliminar_usuario(request, user_id):
 
 
 def gestion_productos(request):
-    productos = Producto.objects.all()
+    from django.core.paginator import Paginator
+    
+    productos = Producto.objects.all().only(
+        'id', 'nombre', 'precio', 'stock', 'categoria', 'imagen_url', 'destacado', 'en_oferta'
+    )
+    
     search = request.GET.get('search', '')
     categoria = request.GET.get('categoria', 'all')
     
@@ -62,6 +90,12 @@ def gestion_productos(request):
         )
     if categoria != 'all':
         productos = productos.filter(categoria=categoria)
+    
+    # Ordenar y paginar
+    productos = productos.order_by('-id')
+    paginator = Paginator(productos, 20)
+    page_number = request.GET.get('page', 1)
+    productos = paginator.get_page(page_number)
     
     form = ProductoForm()
     if request.method == 'POST':

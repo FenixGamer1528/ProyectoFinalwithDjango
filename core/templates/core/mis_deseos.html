@@ -45,12 +45,12 @@
               <i class="fa-solid fa-heart-crack" style="color: #dc2626;"></i>
           </button>
           
-          {% if producto.imagen_url %}
-            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-          {% elif producto.imagen %}
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-          {% else %}
-            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+            {% if producto.imagen_url %}
+            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+            {% elif producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+            {% else %}
+            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
           {% endif %}
           
           <div class="product-info">

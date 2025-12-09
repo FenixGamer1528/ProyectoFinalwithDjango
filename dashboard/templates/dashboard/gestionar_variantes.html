@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -59,7 +60,7 @@
                         </div>
                         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
                             <span class="text-gray-400">Precio:</span>
-                            <span class="text-[#C0A76B] font-bold">${{ producto.precio }}</span>
+                            <span class="text-[#C0A76B] font-bold">${{ producto.precio|floatformat:0|intcomma }}</span>
                         </div>
                         <div class="flex justify-between items-center border-b border-gray-700 pb-2">
                             <span class="text-gray-400">Categoría:</span>
@@ -413,10 +414,26 @@
             stockInput.addEventListener('input', function() {
                 const valor = parseInt(this.value) || 0;
                 
+                // Si el campo está vacío, restaurar estilos originales
+                if (this.value === '' || this.value === '0') {
+                    this.style.borderColor = '#C0A76B';
+                    this.style.backgroundColor = '#000000';
+                    this.style.color = '#FFFFFF';
+                    this.style.fontWeight = 'normal';
+                    
+                    const alertDiv = document.getElementById('stock-alert');
+                    if (alertDiv) {
+                        alertDiv.remove();
+                    }
+                    return;
+                }
+                
                 if (valor > stockDisponible) {
                     const exceso = valor - stockDisponible;
                     this.style.borderColor = '#EF4444';
                     this.style.backgroundColor = '#FEE2E2';
+                    this.style.color = '#991B1B'; // Rojo oscuro para mejor contraste
+                    this.style.fontWeight = '600'; // Texto semi-bold
                     
                     // Mostrar alerta
                     let alertDiv = document.getElementById('stock-alert');
@@ -430,6 +447,8 @@
                 } else if (valor <= 0) {
                     this.style.borderColor = '#EF4444';
                     this.style.backgroundColor = '#FEE2E2';
+                    this.style.color = '#991B1B'; // Rojo oscuro para mejor contraste
+                    this.style.fontWeight = '600'; // Texto semi-bold
                     
                     let alertDiv = document.getElementById('stock-alert');
                     if (!alertDiv) {
@@ -442,6 +461,8 @@
                 } else {
                     this.style.borderColor = '#10B981';
                     this.style.backgroundColor = '#D1FAE5';
+                    this.style.color = '#065F46'; // Verde oscuro para mejor contraste y legibilidad
+                    this.style.fontWeight = '700'; // Texto bold para máxima visibilidad
                     
                     const alertDiv = document.getElementById('stock-alert');
                     if (alertDiv) {

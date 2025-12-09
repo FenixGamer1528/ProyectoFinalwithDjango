@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load humanize %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -161,7 +162,7 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <span class="text-[#C0A76B] font-bold text-lg">${{ pedido.total }}</span>
+                            <span class="text-[#C0A76B] font-bold text-lg">${{ pedido.total|floatformat:0|intcomma }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
                             <button onclick="verDetallePedido({{ pedido.id }})" 

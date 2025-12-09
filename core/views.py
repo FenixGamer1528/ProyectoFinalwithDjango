@@ -9,7 +9,17 @@ from carrito.models import Producto, Pedido, UsuarioPersonalizado
 
 
 def home(request):
-    productos = Producto.objects.all()
+    from django.core.cache import cache
+    
+    cache_key = 'home_productos'
+    productos = cache.get(cache_key)
+    
+    if productos is None:
+        productos = Producto.objects.all().only(
+            'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+        )[:20]  # Limitar productos iniciales
+        cache.set(cache_key, productos, 300)  # Cache 5 minutos
+    
     return render(request, "core/home.html", {'productos': productos})
 
 
@@ -31,15 +41,15 @@ def catalogo_completo(request):
     })
 
 def index(request):
-    # Cargar productos destacados (para "Lo Más Vendido")
+    # Cargar productos destacados (para "Lo Más Vendido") - Límite de 12 productos
     productos = Producto.objects.filter(destacado=True).only(
         'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria'
-    )
+    )[:12]  # Máximo 12 productos en carrusel "Lo Más Vendido"
     
-    # Cargar productos en oferta (para "Ofertas Especiales")
+    # Cargar productos en oferta (para "Ofertas Especiales") - Límite de 9 productos
     productos_ofertas = Producto.objects.filter(en_oferta=True).only(
         'id', 'nombre', 'precio', 'imagen_url', 'en_oferta'
-    )
+    )[:9]  # Máximo 9 productos en carrusel "Ofertas"
     
     # Prefetch favoritos si el usuario está autenticado
     if request.user.is_authenticated:
@@ -106,19 +116,34 @@ def dashboard_view(request):
     return render(request, 'dashboard/dashboard.html')
 
 def admin_dashboard(request):
-    total_usuarios = UsuarioPersonalizado.objects.count()
-    total_productos = Producto.objects.count()
-    total_pedidos = Pedido.objects.count()
-
-    context = {
-        'total_usuarios': total_usuarios,
-        'total_productos': total_productos,
-        
-    }
-    return render(request, 'dashboard/dashboard.html', context)
+    from django.core.cache import cache
+    
+    # Cachear contadores por 60 segundos
+    cache_key = 'dashboard_stats'
+    stats = cache.get(cache_key)
+    
+    if stats is None:
+        stats = {
+            'total_usuarios': UsuarioPersonalizado.objects.count(),
+            'total_productos': Producto.objects.count(),
+            'total_pedidos': Pedido.objects.count(),
+        }
+        cache.set(cache_key, stats, 60)
+    
+    return render(request, 'dashboard/dashboard.html', stats)
 def gestion_productos(request):
-    productos = Producto.objects.all()
-    return render(request, 'dashboard/gestion_productos.html', {'productos': productos})
+    from django.core.paginator import Paginator
+    
+    productos = Producto.objects.all().only(
+        'id', 'nombre', 'precio', 'stock', 'categoria', 'imagen_url'
+    ).order_by('-id')
+    
+    # Paginación: 20 productos por página
+    paginator = Paginator(productos, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'dashboard/gestion_productos.html', {'productos': page_obj})
 
 #Registro de usuario
 
@@ -151,15 +176,19 @@ def buscar_productos(request):
 
     if query:
         # Búsqueda más precisa por nombre
-        productos = Producto.objects.filter(nombre__iexact=query)
+        productos = Producto.objects.filter(nombre__iexact=query).only(
+            'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+        )[:50]  # Limitar a 50 resultados
         
         # Si no encuentra resultados exactos, busca coincidencias parciales
-        if not productos:
+        if not productos.exists():
             productos = Producto.objects.filter(
                 Q(nombre__icontains=query) |
                 Q(descripcion__icontains=query) |
                 Q(categoria__icontains=query)
-            )
+            ).only(
+                'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+            )[:50]  # Limitar a 50 resultados
 
     context = {
         'productos': productos,
@@ -351,30 +380,44 @@ def producto_detalle(request, producto_id):
     """Vista de detalle del producto con todas sus variantes"""
     from carrito.models import ProductoVariante
     
-    producto = get_object_or_404(Producto, id=producto_id)
-    variantes = ProductoVariante.objects.filter(producto=producto).order_by('talla', 'color')
-    
-    # Obtener tallas y colores únicos
-    tallas_disponibles = list(set(v.talla for v in variantes))
-    colores_disponibles = list(set(v.color for v in variantes))
-    
-    # Verificar si es favorito
-    es_favorito = False
-    if request.user.is_authenticated:
-        es_favorito = producto in request.user.favoritos.all()
-    
-    context = {
-        'producto': producto,
-        'variantes': variantes,
-        'tallas_disponibles': sorted(tallas_disponibles),
-        'colores_disponibles': sorted(colores_disponibles),
-        'es_favorito': es_favorito,
-    }
-    
-    # Si se solicita desde AJAX o con parámetro modal=true, devolver solo el contenido
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('modal') == 'true':
-        return render(request, 'core/producto_detalle_modal.html', context)
-    
-    # Vista completa normal
-    return render(request, 'core/producto_detalle.html', context)
+    try:
+        # Obtener producto
+        producto = get_object_or_404(Producto, id=producto_id)
+        
+        # Obtener variantes optimizadas
+        variantes = ProductoVariante.objects.filter(producto=producto).select_related('producto')
+        
+        # Obtener tallas y colores únicos
+        tallas_disponibles = sorted(list(set(v.talla for v in variantes if v.talla)))
+        colores_disponibles = sorted(list(set(v.color for v in variantes if v.color)))
+        
+        # Verificar si es favorito
+        es_favorito = False
+        if request.user.is_authenticated:
+            es_favorito = request.user.favoritos.filter(id=producto.id).exists()
+        
+        context = {
+            'producto': producto,
+            'variantes': variantes,
+            'tallas_disponibles': tallas_disponibles,
+            'colores_disponibles': colores_disponibles,
+            'es_favorito': es_favorito,
+        }
+        
+        # Si se solicita desde AJAX o con parámetro modal=true, devolver solo el contenido
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('modal') == 'true':
+            return render(request, 'core/producto_detalle_modal.html', context)
+        
+        # Vista completa normal
+        return render(request, 'core/producto_detalle.html', context)
+        
+    except Exception as e:
+        # Log del error para debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error en producto_detalle: {str(e)}")
+        
+        # Devolver error 500 con mensaje descriptivo
+        from django.http import HttpResponse
+        return HttpResponse(f"Error al cargar producto: {str(e)}", status=500)
 

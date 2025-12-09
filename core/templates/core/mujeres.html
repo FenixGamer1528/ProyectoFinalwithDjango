@@ -2,7 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Glamoure - Mujeres{% endblock %}
+{% block title %}Glamoure - Ropa para Mujeres | Moda Femenina{% endblock %}
+
+{% block meta_description %}Explora nuestra colección de ropa para mujer. Vestidos, blusas, pantalones y más. Elegancia y estilo femenino en Glamoure.{% endblock %}
+
+{% block meta_keywords %}ropa mujer, moda femenina, vestidos, blusas mujer, pantalones mujer, ropa casual mujer, glamoure{% endblock %}
+
+{% block og_title %}Glamoure - Colección para Mujeres{% endblock %}
+{% block og_description %}Descubre nuestra colección exclusiva de moda femenina. Elegancia, estilo y las últimas tendencias.{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
@@ -35,12 +42,12 @@
         </button>
         {% endif %}
         
-        {% if producto.imagen_url %}
-          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-        {% elif producto.imagen %}
-          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-        {% else %}
-          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+          {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
         {% endif %}
         <div class="product-info">
           <p class="product-name">{{ producto.nombre }}</p>
