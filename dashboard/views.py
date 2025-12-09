@@ -782,6 +782,7 @@ def _detectar_categoria_producto(producto):
 def generar_imagen_color(request, variante_id):
     """
     API endpoint para recolorizar imágenes usando Segment Anything (SAM) + recolor HSV.
+    INCLUYE SISTEMA DE CACHÉ: Si ya existe una imagen generada para ese color, la devuelve instantáneamente.
     
     Modos de uso:
     1. POST con archivo 'image' + 'color' (hex): procesa imagen enviada
@@ -792,10 +793,48 @@ def generar_imagen_color(request, variante_id):
     """
     from django.core.files.uploadedfile import InMemoryUploadedFile
     from core.utils.supabase_storage import subir_a_supabase
+    from dashboard.models import ImagenColorCache
     import requests
     import base64
     
     variante = get_object_or_404(ProductoVariante, id=variante_id)
+    
+    # 2. Obtener color objetivo
+    target_color = request.POST.get('color') or request.GET.get('color')
+    if not target_color:
+        target_color = f'#{variante.color}' if variante.color and not variante.color.startswith('#') else (variante.color or '#ff0000')
+    
+    # Normalizar color (convertir a mayúsculas)
+    target_color = target_color.upper()
+    
+    # ===== VERIFICAR CACHÉ: Si ya existe esta imagen generada, devolverla instantáneamente =====
+    cache_existente = ImagenColorCache.objects.filter(variante=variante, color_hex=target_color).first()
+    if cache_existente:
+        print(f"✅ CACHÉ HIT: Imagen ya generada para {variante.producto.nombre} color {target_color}")
+        
+        # Descargar imagen desde Supabase y convertir a base64 para el frontend
+        try:
+            import requests
+            resp = requests.get(cache_existente.imagen_url, timeout=10)
+            resp.raise_for_status()
+            encoded = base64.b64encode(resp.content).decode('ascii')
+            image_base64 = f'data:image/png;base64,{encoded}'
+        except Exception as e:
+            print(f"⚠️ Error descargando desde caché: {e}")
+            image_base64 = cache_existente.imagen_url  # Fallback a URL
+        
+        return JsonResponse({
+            'success': True,
+            'mensaje': f'⚡ Imagen cargada desde caché (generada {cache_existente.fecha_generacion.strftime("%d/%m/%Y %H:%M")})',
+            'imagen_url': cache_existente.imagen_url,
+            'image_base64': image_base64,
+            'imagen_generada_ia': True,
+            'desde_cache': True,
+            'variante_id': variante.id,
+            'color_aplicado': target_color,
+        })
+    
+    print(f"⚙️ CACHÉ MISS: Generando nueva imagen para {variante.producto.nombre} color {target_color}")
     
     # 1. Obtener imagen origen (POST upload o imagen existente)
     pil_image = None
@@ -870,11 +909,6 @@ def generar_imagen_color(request, variante_id):
         logger.error(f"TRACEBACK COMPLETO: {traceback.format_exc()}")
         return JsonResponse({'success': False, 'mensaje': f'Error al cargar imagen: {e}'}, status=500)
     
-    # 2. Obtener color objetivo
-    target_color = request.POST.get('color') or request.GET.get('color')
-    if not target_color:
-        target_color = f'#{variante.color}' if variante.color and not variante.color.startswith('#') else (variante.color or '#ff0000')
-    
     # 3. Detectar categoría del producto para usar configuración optimizada
     categoria_producto = _detectar_categoria_producto(variante.producto)
     
@@ -915,11 +949,24 @@ def generar_imagen_color(request, variante_id):
     buf.seek(0)
     encoded = base64.b64encode(buf.getvalue()).decode('ascii')
     
+    # ===== GUARDAR EN CACHÉ para próximas solicitudes =====
+    if nueva_url:
+        try:
+            ImagenColorCache.objects.update_or_create(
+                variante=variante,
+                color_hex=target_color,
+                defaults={'imagen_url': nueva_url}
+            )
+            print(f"💾 Imagen guardada en caché: {variante.producto.nombre} - {target_color}")
+        except Exception as e:
+            print(f"⚠️ Error guardando en caché: {e}")
+    
     return JsonResponse({
         'success': True,
         'mensaje': f'Imagen recolorizada a {target_color} usando SAM (origen: {imagen_origen})',
         'imagen_url': nueva_url or variante.imagen_url,
         'imagen_generada_ia': True,
+        'desde_cache': False,
         'image_base64': f'data:image/png;base64,{encoded}',
         'variante_id': variante.id,
         'color_aplicado': target_color,

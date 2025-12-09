@@ -328,6 +328,7 @@ window.seleccionarColor = function(color) {
     // Actualizar imagen del producto según el color seleccionado
     const varianteConColor = modalVariantesData.find(v => v.color === color);
     if (varianteConColor && modalImagen) {
+        // Mostrar imagen existente primero
         modalImagen.src = varianteConColor.imagen_url;
         
         // Mostrar/ocultar badge IA
@@ -339,7 +340,10 @@ window.seleccionarColor = function(color) {
             }
         }
         
-        console.log('✅ Imagen actualizada:', varianteConColor.imagen_url, 'IA:', varianteConColor.imagen_ia);
+        console.log('✅ Imagen base:', varianteConColor.imagen_url);
+        
+        // 🎨 GENERAR IMAGEN CON IA usando el color seleccionado
+        generarImagenConIA(varianteConColor.id, color);
     }
     
     actualizarVarianteModal();
