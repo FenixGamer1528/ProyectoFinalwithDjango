@@ -181,22 +181,59 @@ body {
 }
 
 .desktop-cart-btn {
-    background: none;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-    border-radius: 4px;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    margin-left: 15px !important;
+    transition: all 0.3s ease !important;
+    width: 48px !important;
+    height: 48px !important;
 }
 
 .desktop-cart-btn:hover {
-    background: #C0A76B;
+    background: rgba(192, 167, 107, 0.2) !important;
+    border-color: #C0A76B !important;
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(192, 167, 107, 0.3) !important;
 }
 
 .desktop-cart-btn img {
-    width: 32px;
-    height: 32px;
+    width: 36px !important;
+    height: 36px !important;
+    /* Quitar filtros que puedan hacerla invisible */
+    filter: none !important;
+    transition: all 0.3s ease !important;
 }
+
+.desktop-cart-btn:hover img {
+    transform: scale(1.1) !important;
+    filter: brightness(1.2) !important;
+}
+
+/* Contador de items en el carrito (opcional) */
+.desktop-cart-btn::after {
+    
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    
+    color: #1a1a1a;
+    font-size: 12px;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #1a1a1a;
+    z-index: 2;
+}
+
 
 .wishlist-container {
     display: flex;

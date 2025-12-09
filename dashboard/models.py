@@ -1,5 +1,23 @@
 from django.db import models
 from django.conf import settings
+from carrito.models import ProductoVariante
+
+
+class ImagenColorCache(models.Model):
+    """Cache de imágenes generadas por IA para evitar regeneración"""
+    variante = models.ForeignKey(ProductoVariante, on_delete=models.CASCADE, related_name='imagenes_cache')
+    color_hex = models.CharField(max_length=7, verbose_name="Color Hex")  # Ej: #FF5733
+    imagen_url = models.URLField(max_length=500, verbose_name="URL Imagen Generada")
+    fecha_generacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de Generación")
+    
+    class Meta:
+        verbose_name = "Imagen Color Cache"
+        verbose_name_plural = "Imágenes Color Cache"
+        unique_together = ['variante', 'color_hex']  # No duplicar misma variante + color
+        ordering = ['-fecha_generacion']
+    
+    def __str__(self):
+        return f"{self.variante.producto.nombre} - {self.color_hex}"
 
 
 class ActividadReciente(models.Model):

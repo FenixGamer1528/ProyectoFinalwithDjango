@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -345,7 +346,21 @@
           <div class="carousel-track" id="mas-vendido-track">
             {% for producto in productos %}
             <div class="carousel-slide">
-              <div class="offer-badge">⭐ TOP</div>
+              <!-- Badge TOP amarillo -->
+              <div class="top-badge">⭐ TOP</div>
+              
+              <!-- Botón de favoritos -->
+              {% if user.is_authenticated %}
+              <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                      class="favorite-btn"
+                      style="background: rgba(255, 255, 255, 0.95);"
+                      title="{% if producto in user.favoritos.all %}Eliminar de mis deseos{% else %}Agregar a mis deseos{% endif %}"
+                      data-favorito="{% if producto in user.favoritos.all %}true{% else %}false{% endif %}">
+                  <i class="{% if producto in user.favoritos.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart" 
+                     style="color: {% if producto in user.favoritos.all %}#C0A76B{% else %}#666{% endif %};"></i>
+              </button>
+              {% endif %}
+              
               {% if producto.imagen_url %}
                 <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
               {% elif producto.imagen %}
@@ -355,7 +370,7 @@
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
+                <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
@@ -388,7 +403,21 @@
             
             {% for producto in productos_ofertas %}
             <div class="carousel-slide">
+              <!-- Badge OFERTA rojo -->
               <div class="offer-badge">🔥 OFERTA</div>
+              
+              <!-- Botón de favoritos -->
+              {% if user.is_authenticated %}
+              <button onclick="toggleFavorito({{ producto.id }}, this)" 
+                      class="favorite-btn"
+                      style="background: rgba(255, 255, 255, 0.95);"
+                      title="{% if producto in user.favoritos.all %}Eliminar de mis deseos{% else %}Agregar a mis deseos{% endif %}"
+                      data-favorito="{% if producto in user.favoritos.all %}true{% else %}false{% endif %}">
+                  <i class="{% if producto in user.favoritos.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart" 
+                     style="color: {% if producto in user.favoritos.all %}#C0A76B{% else %}#666{% endif %};"></i>
+              </button>
+              {% endif %}
+              
               {% if producto.imagen_url %}
                 <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
               {% elif producto.imagen %}
@@ -398,7 +427,7 @@
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
-                <p class="product-price">${{ producto.precio }}</p>
+                <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
               </div>
             </div>
@@ -517,7 +546,7 @@
   </div>
 
   <!-- SCRIPTS BASE -->
-  <script src="{% static 'js/modal.js' %}"></script>
+  <script src="{% static 'js/modal.js' %}?v=3.0"></script>
   <script src="{% static 'js/carousel-ofertas.js' %}"></script>
   <script src="{% static 'js/carousel-mas-vendido.js' %}"></script>
   

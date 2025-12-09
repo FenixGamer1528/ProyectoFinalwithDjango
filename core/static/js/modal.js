@@ -196,7 +196,8 @@ function toggleFavorito(productoId, button) {
                 // Producto agregado a favoritos
                 icon.classList.remove('fa-regular');
                 icon.classList.add('fa-solid');
-                icon.style.color = '#C0A76B';
+                icon.style.color = '#C0A76B'; // Dorado cuando está en favoritos
+                button.style.background = 'rgba(255, 255, 255, 0.95)'; // Botón siempre blanco
                 button.setAttribute('data-favorito', 'true');
                 button.setAttribute('title', 'Eliminar de mis deseos');
                 
@@ -207,7 +208,8 @@ function toggleFavorito(productoId, button) {
                 // Producto eliminado de favoritos
                 icon.classList.remove('fa-solid');
                 icon.classList.add('fa-regular');
-                icon.style.color = '#fff';
+                icon.style.color = '#666'; // Gris cuando NO está en favoritos
+                button.style.background = 'rgba(255, 255, 255, 0.95)'; // Botón siempre blanco
                 button.setAttribute('data-favorito', 'false');
                 button.setAttribute('title', 'Agregar a mis deseos');
             }
@@ -222,6 +224,84 @@ function toggleFavorito(productoId, button) {
     .catch(error => {
         console.error('Error:', error);
         mostrarNotificacion('Hubo un error. Por favor, intenta de nuevo.', 'error');
+    });
+}
+
+// Función para eliminar favorito (usada en página de Mis Deseos)
+function eliminarFavorito(productoId, button) {
+    console.log('🗑️ Iniciando eliminación de favorito:', productoId);
+    
+    const csrftoken = getCookie('csrftoken');
+    
+    if (!csrftoken) {
+        console.error('❌ No se encontró el token CSRF');
+        mostrarNotificacion('Error de seguridad. Recarga la página.', 'error');
+        return;
+    }
+    
+    // Deshabilitar botón para evitar múltiples clicks
+    button.disabled = true;
+    button.style.opacity = '0.5';
+    
+    console.log('📤 Enviando petición a /toggle-favorito/' + productoId + '/');
+    
+    fetch(`/toggle-favorito/${productoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('📥 Respuesta recibida:', response.status, response.statusText);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('✅ Datos recibidos:', data);
+        
+        if (data.success) {
+            // Eliminar la tarjeta con animación
+            const card = button.closest('.carousel-slide');
+            console.log('🎯 Tarjeta encontrada:', card ? 'Sí' : 'No');
+            
+            if (card) {
+                card.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    card.remove();
+                    console.log('🗑️ Tarjeta eliminada del DOM');
+                    
+                    // Si no quedan productos, recargar la página
+                    const remainingProducts = document.querySelectorAll('.carousel-slide').length;
+                    console.log('📊 Productos restantes:', remainingProducts);
+                    
+                    if (remainingProducts === 0) {
+                        console.log('🔄 Recargando página...');
+                        location.reload();
+                    }
+                }, 300);
+            }
+            
+            // Actualizar contador
+            actualizarContadorDeseos(data.total_favorites);
+            
+            // Mostrar notificación
+            mostrarNotificacion('Eliminado de mis deseos', 'info');
+        } else {
+            console.error('❌ La operación no fue exitosa:', data);
+            button.disabled = false;
+            button.style.opacity = '1';
+            mostrarNotificacion(data.mensaje || 'Error al eliminar el producto', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error al eliminar favorito:', error);
+        button.disabled = false;
+        button.style.opacity = '1';
+        mostrarNotificacion('Hubo un error al eliminar el producto: ' + error.message, 'error');
     });
 }
 
@@ -327,6 +407,17 @@ if (!document.getElementById('favoritos-animations')) {
             to {
                 transform: translateX(400px);
                 opacity: 0;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.8);
             }
         }
         

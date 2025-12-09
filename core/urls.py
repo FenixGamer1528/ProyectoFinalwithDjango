@@ -21,6 +21,7 @@ urlpatterns = [
     path('toggle-favorito/<int:producto_id>/', views.toggle_favorito, name='toggle_favorito'),
     path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
     path('producto/<int:producto_id>/', views.producto_detalle, name='producto_detalle'),
+    path('producto/<int:producto_id>/', views.producto_detalle, name='producto'),  # Alias para compatibilidad
     path('buscar/', views.buscar_productos, name='buscar_productos'),
     path('catalogo/', views.catalogo_completo, name='catalogo_completo'),
   

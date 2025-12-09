@@ -19,7 +19,7 @@ def about(request):
 def catalogo_completo(request):
     """Vista que muestra todos los productos de todas las categorías"""
     productos = Producto.objects.all().only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion', 'en_oferta'
     )
     
     # Prefetch favoritos si el usuario está autenticado
@@ -255,7 +255,7 @@ def exportar_pdf(request):
 def hombres(request):
     # Optimizado: solo cargar campos necesarios y usar caché
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     # Prefetch favoritos si el usuario está autenticado
@@ -267,7 +267,7 @@ def hombres(request):
 
 def mujeres(request):
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
@@ -278,7 +278,7 @@ def mujeres(request):
 
 def zapatos(request):
     productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
@@ -288,8 +288,8 @@ def zapatos(request):
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado'
+    productos = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
     )
     
     if request.user.is_authenticated:
@@ -313,20 +313,28 @@ def toggle_favorito(request, producto_id):
         if producto in usuario.favoritos.all():
             usuario.favoritos.remove(producto)
             is_favorito = False
+            mensaje = 'Producto eliminado de favoritos'
         else:
             usuario.favoritos.add(producto)
             is_favorito = True
+            mensaje = 'Producto agregado a favoritos'
         
         # Contar favoritos actualizados
         total_favoritos = usuario.favoritos.count()
+        
+        print(f"✓ Toggle favorito - Usuario: {usuario.username}, Producto: {producto.nombre}, Is_favorito: {is_favorito}, Total: {total_favoritos}")
         
         return JsonResponse({
             'success': True,
             'is_favorito': is_favorito,
             'total_favorites': total_favoritos,
-            'producto_id': producto.id
+            'producto_id': producto.id,
+            'mensaje': mensaje
         })
     except Exception as e:
+        print(f"✗ Error en toggle_favorito: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

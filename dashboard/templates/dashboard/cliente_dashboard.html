@@ -1,11 +1,29 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Mi Dashboard - Glamoure</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/carrito.css' %}">
+    <link rel="stylesheet" href="{% static 'css/producto-modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #C0A76B 0%, #d4b96a 100%);
+        }
+        .scroll-mt-8 {
+            scroll-margin-top: 2rem;
+        }
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -13,7 +31,7 @@
                     colors: {
                         'brand': {
                             DEFAULT: '#C0A76B',
-                            hover: '#A8915C'
+                            hover: '#d4b96a'
                         }
                     }
                 }
@@ -21,10 +39,10 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-black text-gray-100 font-sans">
 
     <!-- Sidebar Elegante -->
-    <div class="fixed top-0 left-0 h-screen w-64 bg-white shadow-xl border-r border-gray-200 p-6">
+    <div class="fixed top-0 left-0 h-screen w-64 bg-black shadow-2xl border-r border-[#C0A76B] p-6">
         <!-- Logo -->
         <div class="flex justify-center mb-8">
             <a href="{% url 'index' %}">
@@ -32,44 +50,42 @@
             </a>
         </div>
         
-        <h4 class="text-gray-900 text-xl font-bold text-center mb-2">Mi Panel</h4>
-        <p class="text-gray-500 text-sm text-center mb-8">Bienvenido a tu espacio</p>
+        <h4 class="text-[#C0A76B] text-xl font-bold text-center mb-2">Mi Panel</h4>
+        <p class="text-gray-400 text-sm text-center mb-8">Bienvenido a tu espacio</p>
         
         <nav class="flex flex-col space-y-3">
             <!-- Botón para volver al Index -->
-            <a href="{% url 'index' %}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg border border-gray-200 hover:border-brand transition-all duration-200 ease-in-out hover:bg-white hover:text-brand group mb-2">
+            <a href="{% url 'index' %}" class="flex items-center px-4 py-3 text-gray-300 rounded-lg border border-[#C0A76B] hover:bg-[#C0A76B] hover:text-black transition-all duration-200 ease-in-out group mb-2">
                 <span class="mr-3 group-hover:scale-110 transition-transform">🏠</span>
                 <span class="font-medium">Volver a la Tienda</span>
             </a>
 
-            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
-                <span class="mr-3 group-hover:scale-110 transition-transform">📊</span>
-                <span class="font-medium">Resumen</span>
-            </a>
-            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+            <a href="javascript:void(0)" onclick="mostrarCarrito()" class="flex items-center px-4 py-3 text-gray-300 rounded-lg transition-all duration-200 ease-in-out hover:bg-[#C0A76B] hover:text-black hover:shadow-lg group">
                 <span class="mr-3 group-hover:scale-110 transition-transform">🛒</span>
                 <span class="font-medium">Mi Carrito</span>
+                {% if total_items_carrito > 0 %}
+                <span class="ml-auto bg-[#C0A76B] text-black text-xs rounded-full px-2 py-1 font-semibold">{{ total_items_carrito }}</span>
+                {% endif %}
             </a>
-            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+            <a href="#pedidos-section" class="flex items-center px-4 py-3 text-gray-300 rounded-lg transition-all duration-200 ease-in-out hover:bg-[#C0A76B] hover:text-black hover:shadow-lg group">
                 <span class="mr-3 group-hover:scale-110 transition-transform">📦</span>
                 <span class="font-medium">Mis Pedidos</span>
+                {% if total_pedidos > 0 %}
+                <span class="ml-auto bg-[#C0A76B] text-black text-xs rounded-full px-2 py-1 font-semibold">{{ total_pedidos }}</span>
+                {% endif %}
             </a>
-            <a href="{% url 'mis_deseos' %}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
+            <a href="{% url 'mis_deseos' %}" class="flex items-center px-4 py-3 text-gray-300 rounded-lg transition-all duration-200 ease-in-out hover:bg-[#C0A76B] hover:text-black hover:shadow-lg group">
                 <span class="mr-3 group-hover:scale-110 transition-transform">❤️</span>
                 <span class="font-medium">Mis Deseos</span>
                 {% if usuario.favoritos.count > 0 %}
-                <span class="ml-auto bg-brand text-white text-xs rounded-full px-2 py-1">{{ usuario.favoritos.count }}</span>
+                <span class="ml-auto bg-[#C0A76B] text-black text-xs rounded-full px-2 py-1 font-semibold">{{ usuario.favoritos.count }}</span>
                 {% endif %}
-            </a>
-            <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-brand hover:text-white hover:shadow-md group">
-                <span class="mr-3 group-hover:scale-110 transition-transform">⚙️</span>
-                <span class="font-medium">Configuración</span>
             </a>
         </nav>
         
         <!-- Footer del Sidebar -->
         <div class="absolute bottom-6 left-6 right-6">
-            <a href="{% url 'logout' %}" class="flex items-center px-4 py-3 text-red-600 rounded-lg border border-red-200 hover:bg-red-600 hover:text-white transition-all duration-200 group">
+            <a href="{% url 'logout' %}" class="flex items-center px-4 py-3 text-red-400 rounded-lg border border-red-800 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200 group">
                 <span class="mr-3 group-hover:scale-110 transition-transform">🚪</span>
                 <span class="font-medium">Cerrar Sesión</span>
             </a>
@@ -80,122 +96,119 @@
     <div class="ml-64 p-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">¡Hola, {{ usuario.first_name }}! 👋</h1>
-            <p class="text-gray-600">Gestiona tu información, carrito y pedidos desde tu dashboard personal</p>
+            <h1 class="text-3xl font-bold text-[#C0A76B] mb-2">¡Hola, {{ usuario.first_name }}! 👋</h1>
+            <p class="text-gray-400">Gestiona tu información, carrito y pedidos desde tu dashboard personal</p>
         </div>
 
         <!-- Tarjetas de Resumen -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Tarjeta Datos Personales -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] p-6 hover:shadow-2xl hover:border-[#d4b96a] transition-all duration-300">
                 <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                        <span class="text-blue-600">👤</span>
+                    <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-2xl">👤</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Mis Datos</h3>
+                    <h3 class="text-lg font-semibold text-[#C0A76B]">Mis Datos</h3>
                 </div>
                 <div class="space-y-2 text-sm">
-                    <p><span class="font-medium text-gray-700">Usuario:</span> {{ usuario.username }}</p>
-                    <p><span class="font-medium text-gray-700">Email:</span> {{ usuario.email }}</p>
-                    <p><span class="font-medium text-gray-700">Teléfono:</span> {{ usuario.telefono }}</p>
+                    <p><span class="font-medium text-gray-400">Usuario:</span> <span class="text-white">{{ usuario.username }}</span></p>
+                    <p><span class="font-medium text-gray-400">Email:</span> <span class="text-white">{{ usuario.email }}</span></p>
+                    <p><span class="font-medium text-gray-400">Teléfono:</span> <span class="text-white">{{ usuario.telefono }}</span></p>
                 </div>
             </div>
 
             <!-- Tarjeta Carrito -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] p-6 hover:shadow-2xl hover:border-[#d4b96a] transition-all duration-300">
                 <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                        <span class="text-green-600">🛒</span>
+                    <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-2xl">🛒</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Mi Carrito</h3>
+                    <h3 class="text-lg font-semibold text-[#C0A76B]">Mi Carrito</h3>
                 </div>
-                {% if items %}
-                    <p class="text-sm text-gray-600 mb-3">{{ items|length }} producto(s) en tu carrito</p>
-                    <a href="#" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver carrito →</a>
-                {% else %}
-                    <p class="text-sm text-gray-500">Tu carrito está vacío</p>
-                    <a href="{% url 'hombres' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Descubrir productos →</a>
-                {% endif %}
+                <p class="text-sm text-gray-300 mb-3">{{ total_items_carrito }} producto(s) en tu carrito</p>
+                <a href="javascript:void(0)" onclick="mostrarCarrito()" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium text-sm transition-colors">Ver carrito →</a>
             </div>
 
             <!-- Tarjeta Favoritos (Mis Deseos) -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] p-6 hover:shadow-2xl hover:border-[#d4b96a] transition-all duration-300">
                 <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-                        <span class="text-red-600">❤️</span>
+                    <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-2xl">❤️</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Mis Deseos</h3>
+                    <h3 class="text-lg font-semibold text-[#C0A76B]">Mis Deseos</h3>
                 </div>
                 {% if usuario.favoritos.count > 0 %}
-                    <p class="text-sm text-gray-600 mb-3">{{ usuario.favoritos.count }} producto(s) favoritos</p>
-                    <a href="{% url 'mis_deseos' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver lista →</a>
+                    <p class="text-sm text-gray-300 mb-3">{{ usuario.favoritos.count }} producto(s) favoritos</p>
+                    <a href="{% url 'mis_deseos' %}" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium text-sm transition-colors">Ver lista →</a>
                 {% else %}
-                    <p class="text-sm text-gray-500">No tienes favoritos aún</p>
-                    <a href="{% url 'index' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Explorar productos →</a>
+                    <p class="text-sm text-gray-400">No tienes favoritos aún</p>
+                    <a href="{% url 'index' %}" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium text-sm transition-colors">Explorar productos →</a>
                 {% endif %}
             </div>
 
             <!-- Tarjeta Pedidos -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] p-6 hover:shadow-2xl hover:border-[#d4b96a] transition-all duration-300">
                 <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                        <span class="text-purple-600">📦</span>
+                    <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-2xl">📦</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Mis Pedidos</h3>
+                    <h3 class="text-lg font-semibold text-[#C0A76B]">Mis Pedidos</h3>
                 </div>
-                {% if pedidos %}
-                    <p class="text-sm text-gray-600 mb-3">{{ pedidos|length }} pedido(s) realizados</p>
-                    <a href="#" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver historial →</a>
+                {% if total_pedidos > 0 %}
+                    <p class="text-sm text-gray-300 mb-3">{{ total_pedidos }} pedido(s) realizados</p>
+                    <a href="#pedidos-section" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium text-sm transition-colors">Ver historial abajo →</a>
                 {% else %}
-                    <p class="text-sm text-gray-500">No tienes pedidos aún</p>
-                    <a href="{% url 'ofertas' %}" class="text-brand hover:text-brand-hover font-medium text-sm transition-colors">Ver ofertas →</a>
+                    <p class="text-sm text-gray-400">No tienes pedidos aún</p>
+                    <a href="{% url 'ofertas' %}" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium text-sm transition-colors">Ver ofertas →</a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Sección de Productos Destacados -->
+        <!-- Sección Explorar Más Productos -->
         <div class="mb-8">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">🌟 Productos Destacados</h2>
-                <a href="{% url 'index' %}" class="text-brand hover:text-brand-hover font-medium transition-colors">
-                    Ver todos →
+                <h2 class="text-2xl font-bold text-[#C0A76B]">🔍 Explorar Más Productos</h2>
+                <a href="{% url 'catalogo_completo' %}" class="text-[#C0A76B] hover:text-[#d4b96a] font-medium transition-colors">
+                    Ver catálogo completo →
                 </a>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {% for producto in productosDestacados %}
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-                    <div class="relative overflow-hidden">
-                        <img src="{{ producto.imagen_url }}" class="w-full h-48 object-cover transition-transform duration-300 hover:scale-105" alt="{{ producto.nombre }}">
-                        <div class="absolute top-3 right-3">
-                            <span class="bg-brand text-white px-2 py-1 rounded-full text-xs font-medium">Destacado</span>
-                        </div>
-                        <!-- Botón de favoritos -->
-                        <div class="absolute top-3 left-3">
-                            <button onclick="toggleFavorito({{ producto.id }}, this)" 
-                                    class="bg-white bg-opacity-90 hover:bg-opacity-100 p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110" 
-                                    title="{% if user in producto.favorited_by.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
-                                    data-favorito="{% if user in producto.favorited_by.all %}true{% else %}false{% endif %}">
-                                <i class="{% if user in producto.favorited_by.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart text-lg" 
-                                   style="{% if user in producto.favorited_by.all %}color: #C0A76B;{% else %}color: #6B7280;{% endif %}"></i>
-                            </button>
-                        </div>
+                <a href="{% url 'producto' producto.id %}" class="carousel-slide block">
+                    <!-- Badge TOP amarillo para productos destacados -->
+                    <div class="top-badge">⭐ TOP</div>
+                    
+                    <!-- Botón de favoritos -->
+                    {% if user.is_authenticated %}
+                    <button 
+                      onclick="event.preventDefault(); toggleFavorito({{ producto.id }}, this)" 
+                      class="favorite-btn"
+                      style="background: rgba(255, 255, 255, 0.95);"
+                      title="{% if producto in user.favoritos.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
+                      data-favorito="{% if producto in user.favoritos.all %}true{% else %}false{% endif %}">
+                      <i class="fa-{% if producto in user.favoritos.all %}solid{% else %}regular{% endif %} fa-heart" 
+                        style="color: {% if producto in user.favoritos.all %}#C0A76B{% else %}#666{% endif %};"></i>
+                    </button>
+                    {% endif %}
+                    
+                    {% if producto.imagen_url %}
+                      <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+                    {% elif producto.imagen %}
+                      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                    {% else %}
+                      <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+                    {% endif %}
+                    
+                    <div class="product-info">
+                      <p class="product-name">{{ producto.nombre }}</p>
+                      <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ producto.nombre }}</h3>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-gray-900">${{ producto.precio }}</span>
-                            <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" 
-                                class="bg-brand hover:bg-brand-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                Comprar
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                </a>
                 {% empty %}
-                <div class="col-span-4 text-center py-12">
-                    <p class="text-gray-500 text-lg">No hay productos destacados en este momento</p>
-                    <a href="{% url 'hombres' %}" class="inline-block mt-4 bg-brand hover:bg-brand-hover text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                <div class="col-span-4 text-center py-12 card-gradient rounded-xl border border-[#C0A76B]">
+                    <p class="text-gray-400 text-lg mb-4">No hay productos destacados en este momento</p>
+                    <a href="{% url 'catalogo_completo' %}" class="inline-block gold-gradient text-black px-6 py-3 rounded-lg font-bold hover:shadow-lg transition-all duration-200 hover:scale-105">
                         Descubrir Colección
                     </a>
                 </div>
@@ -205,64 +218,94 @@
 
         <!-- Tablas Detalladas (se muestran solo si hay datos) -->
         {% if items %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
-            <div class="p-6 border-b border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-900">🛒 Detalles del Carrito</h3>
+        <div id="carrito-section" class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] mb-8 scroll-mt-8">
+            <div class="p-6 border-b border-[#C0A76B] flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-[#C0A76B]">🛒 Detalles del Carrito</h3>
+                <span class="text-sm text-gray-400">{{ total_items_carrito }} producto(s)</span>
             </div>
             <div class="p-6">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Producto</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Precio</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Subtotal</th>
+                            <tr class="border-b border-[#C0A76B]">
+                                <th class="text-left p-4 text-sm font-semibold text-[#C0A76B] uppercase">Producto</th>
+                                <th class="text-center p-4 text-sm font-semibold text-[#C0A76B] uppercase">Cantidad</th>
+                                <th class="text-right p-4 text-sm font-semibold text-[#C0A76B] uppercase">Precio Unit.</th>
+                                <th class="text-right p-4 text-sm font-semibold text-[#C0A76B] uppercase">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for item in items %}
-                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">{{ item.producto.nombre }}</td>
-                                <td class="p-4 text-gray-600">{{ item.cantidad }}</td>
-                                <td class="p-4 text-gray-600">${{ item.producto.precio }}</td>
-                                <td class="p-4 font-semibold text-gray-900">${{ item.subtotal }}</td>
+                            <tr class="border-b border-gray-800 last:border-0 hover:bg-black hover:bg-opacity-30 transition-colors">
+                                <td class="p-4">
+                                    <div class="flex items-center gap-3">
+                                        {% if item.producto.imagen_url %}
+                                        <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg">
+                                        {% endif %}
+                                        <span class="font-medium text-white">{{ item.producto.nombre }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-center text-gray-300 font-semibold">{{ item.cantidad }}</td>
+                                <td class="p-4 text-right text-gray-300">${{ item.producto.precio }}</td>
+                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ item.subtotal }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="mostrarCarrito()" class="gold-gradient text-black px-6 py-3 rounded-lg font-bold hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer border-0">
+                        Ir al Carrito Completo →
+                    </button>
                 </div>
             </div>
         </div>
         {% endif %}
 
         {% if pedidos %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-900">📦 Historial de Pedidos</h3>
+        <div id="pedidos-section" class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] scroll-mt-8">
+            <div class="p-6 border-b border-[#C0A76B] flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-[#C0A76B]">📦 Historial de Pedidos</h3>
+                <span class="text-sm text-gray-400">{{ total_pedidos }} pedido(s)</span>
             </div>
             <div class="p-6">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b border-gray-200">
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Producto</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Cantidad</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Fecha</th>
-                                <th class="text-left p-4 text-sm font-semibold text-gray-500 uppercase">Estado</th>
+                            <tr class="border-b border-[#C0A76B]">
+                                <th class="text-left p-4 text-sm font-semibold text-[#C0A76B] uppercase">Producto</th>
+                                <th class="text-center p-4 text-sm font-semibold text-[#C0A76B] uppercase">Cantidad</th>
+                                <th class="text-left p-4 text-sm font-semibold text-[#C0A76B] uppercase">Fecha</th>
+                                <th class="text-center p-4 text-sm font-semibold text-[#C0A76B] uppercase">Estado</th>
+                                <th class="text-right p-4 text-sm font-semibold text-[#C0A76B] uppercase">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for pedido in pedidos %}
-                            <tr class="border-b border-gray-100 last:border-0 hover:bg-gray-50">
-                                <td class="p-4 font-medium text-gray-900">{{ pedido.producto.nombre }}</td>
-                                <td class="p-4 text-gray-600">{{ pedido.cantidad }}</td>
-                                <td class="p-4 text-gray-600">{{ pedido.fecha|date:"d/m/Y" }}</td>
+                            <tr class="border-b border-gray-800 last:border-0 hover:bg-black hover:bg-opacity-30 transition-colors">
                                 <td class="p-4">
-                                    <span class="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                                        Completado
+                                    <div class="flex items-center gap-3">
+                                        {% if pedido.producto.imagen_url %}
+                                        <img src="{{ pedido.producto.imagen_url }}" alt="{{ pedido.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg">
+                                        {% endif %}
+                                        <span class="font-medium text-white">{{ pedido.producto.nombre|truncatewords:5 }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-center text-gray-300 font-semibold">{{ pedido.cantidad }}</td>
+                                <td class="p-4 text-gray-300">{{ pedido.fecha|date:"d/m/Y" }}</td>
+                                <td class="p-4 text-center">
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                                        {% if pedido.estado == 'entregado' %}bg-green-900 bg-opacity-50 text-green-400 border border-green-700
+                                        {% elif pedido.estado == 'en_camino' %}bg-blue-900 bg-opacity-50 text-blue-400 border border-blue-700
+                                        {% elif pedido.estado == 'procesando' %}bg-yellow-900 bg-opacity-50 text-yellow-400 border border-yellow-700
+                                        {% else %}bg-gray-800 bg-opacity-50 text-gray-400 border border-gray-700{% endif %}">
+                                        {% if pedido.estado == 'entregado' %}✓ Entregado
+                                        {% elif pedido.estado == 'en_camino' %}🚚 En Camino
+                                        {% elif pedido.estado == 'procesando' %}⏳ Procesando
+                                        {% else %}{{ pedido.get_estado_display }}{% endif %}
                                     </span>
                                 </td>
+                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ pedido.total }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -273,78 +316,42 @@
         {% endif %}
     </div>
 
+    <!-- 🛒 MODAL CARRITO -->
+    <div id="carritoModal" class="modal" style="display: none;">
+        <div class="modal-contenido">
+            <div class="carrito-header">
+                <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                <h2>🛒 Carrito de Compras</h2>
+                <p class="carrito-subtitle">Revisa tus productos antes de pagar</p>
+            </div>
+            <div class="carrito-body" id="carritoContenido"></div>
+        </div>
+    </div>
+
+    <!-- Script unificado de favoritos -->
+    <script src="{% static 'js/modal.js' %}?v=3.0"></script>
+    
     <script>
-    // Función para agregar/quitar de favoritos
-    function toggleFavorito(productoId, button) {
-        fetch(`/toggle-favorito/${productoId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const icon = button.querySelector('i');
-                if (data.is_favorito) {
-                    // Agregado a favoritos - dorado
-                    icon.className = 'fa-solid fa-heart text-lg';
-                    icon.style.color = '#C0A76B';
-                    button.title = 'Eliminar de favoritos';
-                    // Animación de corazón
-                    button.classList.add('animate-bounce');
-                    setTimeout(() => button.classList.remove('animate-bounce'), 500);
-                } else {
-                    // Eliminado de favoritos
-                    icon.className = 'fa-regular fa-heart text-gray-600 text-lg';
-                    icon.style.color = '';
-                    button.title = 'Agregar a favoritos';
+    // Smooth scroll para enlaces internos del dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+        anchorLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetId = this.getAttribute('href');
+                if (targetId !== '#') {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
                 }
-                
-                // Actualizar contador en sidebar si existe
-                updateWishlistCount(data.total_favorites);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un error. Por favor, intenta de nuevo.');
+            });
         });
-    }
-
-    // Actualizar contador de favoritos en el sidebar
-    function updateWishlistCount(count) {
-        const wishlistLinks = document.querySelectorAll('a[href*="mis_deseos"]');
-        wishlistLinks.forEach(link => {
-            let badge = link.querySelector('.bg-brand.rounded-full');
-            if (count > 0) {
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'ml-auto bg-brand text-white text-xs rounded-full px-2 py-1';
-                    link.appendChild(badge);
-                }
-                badge.textContent = count;
-            } else if (badge) {
-                badge.remove();
-            }
-        });
-    }
-
-    // Obtener CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+    });
+    
     </script>
 
 </body>
