@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 
 <button class="cerrar text-white hover:text-[#C0A76B] text-4xl font-bold cursor-pointer absolute top-4 right-6 z-20 transition-all hover:scale-110" 
         onclick="cerrarProductoModal()" 
@@ -30,7 +31,7 @@
                 </h1>
                 <div class="flex items-center justify-between">
                     <p class="text-3xl font-bold text-white">
-                        ${{ producto.precio|floatformat:2 }}
+                        ${{ producto.precio|floatformat:0|intcomma }}
                     </p>
                     <span class="text-sm text-gray-400 bg-black/30 px-3 py-1 rounded-full">
                         {{ producto.get_categoria_display }}
@@ -192,6 +193,14 @@
             <div class="space-y-4 mt-6">
                 {% if variantes %}
                 <!-- Con variantes -->
+                {% if not request.user.is_authenticated %}
+                <div class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-3">
+                    <p class="text-yellow-400 text-sm text-center">
+                        <i class="fas fa-info-circle mr-1"></i> Debes iniciar sesión para agregar al carrito
+                    </p>
+                </div>
+                {% endif %}
+                
                 <div id="modal-mensaje-seleccion" class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-3">
                     <p class="text-yellow-400 text-sm">
                         Selecciona talla y color para comprar
@@ -266,6 +275,14 @@
                             Stock disponible: <span class="font-bold text-white">{{ producto.stock }}</span> unidades
                         </p>
                     </div>
+                    
+                    {% if not request.user.is_authenticated %}
+                    <div class="bg-yellow-900/20 border border-yellow-600 rounded-lg p-3 mb-3">
+                        <p class="text-yellow-400 text-sm text-center">
+                            <i class="fas fa-info-circle mr-1"></i> Debes iniciar sesión para agregar al carrito
+                        </p>
+                    </div>
+                    {% endif %}
                     
                     <button type="submit" 
                             class="w-full bg-[#C0A76B] hover:bg-[#d4b876] text-black font-bold py-3 px-4 rounded-lg transition-all duration-300 {% if producto.stock == 0 %}opacity-50 cursor-not-allowed{% endif %}"
@@ -446,6 +463,23 @@ if (modalFormCarrito) {
     modalFormCarrito.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Verificar si el usuario está autenticado
+        const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+        
+        if (!isAuthenticated) {
+            // Mostrar modal de confirmación para iniciar sesión
+            const confirmar = confirm('⚠️ Debes iniciar sesión para agregar productos al carrito.\n\n¿Deseas ir a la página de inicio de sesión?');
+            
+            if (confirmar) {
+                // Guardar URL actual para redirigir después del login
+                sessionStorage.setItem('redirect_after_login', window.location.href);
+                window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+            } else {
+                mostrarNotificacion('❌ Inicia sesión para continuar', 'error');
+            }
+            return;
+        }
+        
         const formData = new FormData(this);
         const btnAgregar = document.getElementById('modal-btn-agregar');
         
@@ -464,7 +498,7 @@ if (modalFormCarrito) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                mostrarNotificacion('Producto agregado al carrito ✓', 'success');
+                mostrarNotificacion('✅ Producto agregado al carrito', 'success');
                 setTimeout(() => {
                     cerrarProductoModal();
                 }, 1000);
@@ -635,11 +669,28 @@ window.cambiarCantidadBase = function(cambio) {
     input.value = nuevoValor;
 };
 
-// Manejar envío del formulario
+// Manejar envío del formulario sin variantes
 const formSinVariantes = document.querySelector('form[action*="agregar_al_carrito"]');
 if (formSinVariantes) {
     formSinVariantes.addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Verificar si el usuario está autenticado
+        const isAuthenticated = {{ request.user.is_authenticated|yesno:"true,false" }};
+        
+        if (!isAuthenticated) {
+            // Mostrar modal de confirmación para iniciar sesión
+            const confirmar = confirm('⚠️ Debes iniciar sesión para agregar productos al carrito.\n\n¿Deseas ir a la página de inicio de sesión?');
+            
+            if (confirmar) {
+                // Guardar URL actual para redirigir después del login
+                sessionStorage.setItem('redirect_after_login', window.location.href);
+                window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+            } else {
+                mostrarNotificacion('❌ Inicia sesión para continuar', 'error');
+            }
+            return;
+        }
         
         const formData = new FormData(this);
         const btnAgregar = this.querySelector('button[type="submit"]');
@@ -659,7 +710,7 @@ if (formSinVariantes) {
         .then(response => response.json())
         .then(data => {
             if (data.ok) {
-                mostrarNotificacion('Producto agregado al carrito ✓', 'success');
+                mostrarNotificacion('✅ Producto agregado al carrito', 'success');
                 setTimeout(() => {
                     cerrarProductoModal();
                 }, 1000);

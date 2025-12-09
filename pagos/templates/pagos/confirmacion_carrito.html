@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -241,7 +242,7 @@
                 </div>
                 <div class="detail-row">
                     <span class="label">Total Pagado</span>
-                    <span class="value glamour-gold-text" style="font-size: 1.1em;">${{ transaccion.monto|floatformat:0 }} COP</span>
+                    <span class="value glamour-gold-text" style="font-size: 1.1em;">${{ transaccion.monto|floatformat:0|intcomma }} COP</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Estado</span>
@@ -275,8 +276,8 @@
                         </small>
                     </div>
                     <div style="text-align: right;">
-                        <strong class="glamour-gold-text">${{ producto.subtotal|floatformat:0 }}</strong><br>
-                        <small style="color: #94a3b8;">${{ producto.precio|floatformat:0 }} c/u</small>
+                        <strong class="glamour-gold-text">${{ producto.subtotal|floatformat:0|intcomma }}</strong><br>
+                        <small style="color: #94a3b8;">${{ producto.precio|floatformat:0|intcomma }} c/u</small>
                     </div>
                 </div>
                 {% endfor %}

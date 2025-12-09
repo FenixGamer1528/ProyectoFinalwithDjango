@@ -5,6 +5,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="{% block meta_description %}Glamoure - Tienda de moda en línea. Descubre ropa para hombre y mujer, zapatos y accesorios. Ofertas exclusivas y las últimas tendencias en moda.{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}moda, ropa, zapatos, accesorios, tienda online, ropa hombre, ropa mujer, ofertas, tendencias, glamoure{% endblock %}">
+  <meta name="author" content="Glamoure">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="Spanish">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}Glamoure - Moda y Estilo en Línea{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Descubre las últimas tendencias en moda. Ropa, zapatos y accesorios para hombre y mujer. Ofertas exclusivas.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{% static 'imagenes/Logonew.png' %}{% endblock %}">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{% block twitter_url %}{{ request.build_absolute_uri }}{% endblock %}">
+  <meta property="twitter:title" content="{% block twitter_title %}Glamoure - Moda y Estilo en Línea{% endblock %}">
+  <meta property="twitter:description" content="{% block twitter_description %}Descubre las últimas tendencias en moda. Ropa, zapatos y accesorios con ofertas exclusivas.{% endblock %}">
+  <meta property="twitter:image" content="{% block twitter_image %}{% static 'imagenes/Logonew.png' %}{% endblock %}">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
   <link href="{% static 'css/output.css' %}" rel="stylesheet">
@@ -17,7 +42,35 @@
   
   {% block extra_css %}{% endblock %}
   
-  <title>{% block title %}Glamoure{% endblock %}</title>
+  <title>{% block title %}Glamoure - Moda y Estilo en Línea | Ropa, Zapatos y Accesorios{% endblock %}</title>
+  
+  <!-- Datos Estructurados JSON-LD para SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ClothingStore",
+    "name": "Glamoure",
+    "description": "Tienda de moda en línea especializada en ropa, zapatos y accesorios para hombre y mujer",
+    "url": "{{ request.build_absolute_uri }}",
+    "logo": "{% static 'imagenes/Logonew.png' %}",
+    "image": "{% static 'imagenes/Logonew.png' %}",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "CO"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+57-300-123-4567",
+      "contactType": "Customer Service",
+      "availableLanguage": ["Spanish"]
+    },
+    "sameAs": [
+      "https://facebook.com/glamoure",
+      "https://instagram.com/glamoure"
+    ]
+  }
+  </script>
 </head>
 <body class="bg-black text-white font-sans antialiased">
   <div class="min-h-screen flex flex-col">
@@ -151,7 +204,6 @@
           {% else %}
             <div class="auth-links">
               <a href="{% url 'login' %}" class="auth-link">Iniciar Sesión</a>
-              <a href="{% url 'registro' %}" class="auth-link">Registrarse</a>
             </div>
           {% endif %}
         </div>
@@ -254,17 +306,11 @@
             <div class="mobile-auth-card">
               <h3 class="auth-title">Cuenta</h3>
               <div class="auth-buttons">
-                <a href="{% url 'login' %}" class="auth-btn primary">
+                <a href="{% url 'login' %}" class="auth-btn primary" style="width: 100%;">
                   <svg class="auth-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                   </svg>
                   <span>Iniciar Sesión</span>
-                </a>
-                <a href="{% url 'registro' %}" class="auth-btn secondary">
-                  <svg class="auth-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                  </svg>
-                  <span>Registrarse</span>
                 </a>
                 <a href="{% url 'mis_deseos' %}" class="mobile-user-link">
                   <i class="fa-regular fa-heart"></i>
@@ -362,11 +408,11 @@
               {% endif %}
               
               {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
               {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
               {% else %}
-                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
@@ -419,11 +465,11 @@
               {% endif %}
               
               {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
               {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
               {% else %}
-                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+                <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>

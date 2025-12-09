@@ -38,6 +38,9 @@ class Producto(models.Model):
         indexes = [
             models.Index(fields=['categoria', 'destacado']),  # Índice compuesto
             models.Index(fields=['-precio']),  # Para ordenar por precio
+            models.Index(fields=['en_oferta']),  # Para filtrar ofertas rápidamente
+            models.Index(fields=['nombre']),  # Para búsquedas por nombre
+            models.Index(fields=['categoria', 'en_oferta']),  # Índice compuesto para ofertas por categoría
         ]
         ordering = ['-id']  # Orden por defecto
 

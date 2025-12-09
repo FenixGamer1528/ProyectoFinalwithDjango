@@ -2,7 +2,14 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}Glamoure - Hombres{% endblock %}
+{% block title %}Glamoure - Ropa para Hombres | Moda Masculina{% endblock %}
+
+{% block meta_description %}Descubre nuestra colección de ropa para hombre. Camisas, pantalones, chaquetas y más. Estilo y elegancia masculina en Glamoure.{% endblock %}
+
+{% block meta_keywords %}ropa hombre, moda masculina, camisas hombre, pantalones hombre, chaquetas, ropa casual hombre, glamoure{% endblock %}
+
+{% block og_title %}Glamoure - Colección para Hombres{% endblock %}
+{% block og_description %}Explora nuestra colección exclusiva de moda masculina. Estilo, calidad y las últimas tendencias.{% endblock %}
 
 {% block extra_css %}
   <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
@@ -35,12 +42,12 @@
         </button>
         {% endif %}
         
-        {% if producto.imagen_url %}
-          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-        {% elif producto.imagen %}
-          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-        {% else %}
-          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+          {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
         {% endif %}
         <div class="product-info">
           <p class="product-name">{{ producto.nombre }}</p>

@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.sitemaps',  # Para SEO - generación de sitemap
+    'django.contrib.sites',  # Requerido para sitemaps
     'core',
     'carrito',
     'dashboard.apps.DashboardConfig',
@@ -51,9 +53,13 @@ INSTALLED_APPS = [
     'pagos',
 ]
 
+# ID del sitio (requerido para sitemaps)
+SITE_ID = 1
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.gzip.GZipMiddleware',  # Compresión GZip para respuestas
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -141,6 +147,11 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend', 'static'), 
 ]
+
+# STATIC_ROOT solo para producción (collectstatic)
+# En desarrollo, comentar o no usar
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 MEDIA_URL='media/'
 MEDIA_ROOT= os.path.join(BASE_DIR,'media')
 
@@ -165,7 +176,7 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
         'TIMEOUT': 300,  # 5 minutos
         'OPTIONS': {
-            'MAX_ENTRIES': 1000
+            'MAX_ENTRIES': 2000  # Aumentado de 1000 a 2000
         }
     }
 }
@@ -173,6 +184,7 @@ CACHES = {
 # Configuración de sesiones (usa caché en lugar de DB)
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS = 'default'
+SESSION_COOKIE_AGE = 1209600  # 2 semanas en segundos
 
 # Configuración de templates para producción
 if not DEBUG:
@@ -182,6 +194,16 @@ if not DEBUG:
             'django.template.loaders.app_directories.Loader',
         ]),
     ]
+
+# Configuración de archivos estáticos para producción
+# Solo usar ManifestStaticFilesStorage en producción
+if not DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Optimizaciones de base de datos
+DATABASES['default']['OPTIONS']['connect_timeout'] = 10
+DATABASES['default']['OPTIONS']['options'] = '-c statement_timeout=30000'  # 30 segundos timeout
 
 
 

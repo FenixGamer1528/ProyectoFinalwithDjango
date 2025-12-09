@@ -192,12 +192,12 @@
                     </button>
                     {% endif %}
                     
-                    {% if producto.imagen_url %}
-                      <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}">
-                    {% elif producto.imagen %}
-                      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-                    {% else %}
-                      <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen">
+                      {% if producto.imagen_url %}
+                      <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+                      {% elif producto.imagen %}
+                      <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                      {% else %}
+                      <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
                     {% endif %}
                     
                     <div class="product-info">
@@ -240,14 +240,14 @@
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
                                         {% if item.producto.imagen_url %}
-                                        <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg">
+                                        <img src="{{ item.producto.imagen_url }}" alt="{{ item.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg" loading="lazy">
                                         {% endif %}
                                         <span class="font-medium text-white">{{ item.producto.nombre }}</span>
                                     </div>
                                 </td>
                                 <td class="p-4 text-center text-gray-300 font-semibold">{{ item.cantidad }}</td>
-                                <td class="p-4 text-right text-gray-300">${{ item.producto.precio }}</td>
-                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ item.subtotal }}</td>
+                                <td class="p-4 text-right text-gray-300">${{ item.producto.precio|floatformat:0|intcomma }}</td>
+                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ item.subtotal|floatformat:0|intcomma }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -286,7 +286,7 @@
                                 <td class="p-4">
                                     <div class="flex items-center gap-3">
                                         {% if pedido.producto.imagen_url %}
-                                        <img src="{{ pedido.producto.imagen_url }}" alt="{{ pedido.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg">
+                                        <img src="{{ pedido.producto.imagen_url }}" alt="{{ pedido.producto.nombre }}" class="w-12 h-12 object-cover rounded-lg" loading="lazy">
                                         {% endif %}
                                         <span class="font-medium text-white">{{ pedido.producto.nombre|truncatewords:5 }}</span>
                                     </div>
@@ -305,7 +305,7 @@
                                         {% else %}{{ pedido.get_estado_display }}{% endif %}
                                     </span>
                                 </td>
-                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ pedido.total }}</td>
+                                <td class="p-4 text-right font-bold text-[#C0A76B]">${{ pedido.total|floatformat:0|intcomma }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
