@@ -39,6 +39,7 @@ urlpatterns = [
     path('gestion/', views.gestion_productos, name='gestion_productos'),
     path('editar/<int:pk>/', views.editar_producto, name='editar_producto'),
     path('cliente/', views.dashboardCliente, name='dashboard_cliente'),
+    path('cliente/perfil/editar/', views.editar_perfil_cliente, name='editar_perfil_cliente'),
     
     # Gestión de variantes
     path('producto/<int:producto_id>/variantes/', views.gestionar_variantes, name='gestionar_variantes'),

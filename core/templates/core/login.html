@@ -57,6 +57,13 @@
             </div>
             {% endif %}
 
+            {% if require_2fa %}
+            <div class="bg-blue-900 bg-opacity-50 border border-blue-500 text-blue-200 px-4 py-3 rounded-lg mb-4 text-sm">
+                <i class="fas fa-shield-alt mr-2"></i>
+                Se requiere autenticación de dos factores. Ingresa el código de tu app autenticadora.
+            </div>
+            {% endif %}
+
             <form method="POST" class="space-y-6">
                 {% csrf_token %}
 
@@ -67,6 +74,7 @@
                         <input type="text" 
                                name="usuario" 
                                placeholder="Usuario" 
+                               value="{{ form.usuario.value|default:'' }}"
                                class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
                     </div>
                 </div>
@@ -82,10 +90,34 @@
                     </div>
                 </div>
 
+                {% if require_2fa %}
+                <!-- Campo Código 2FA (solo se muestra cuando se requiere) -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                        <input type="text" 
+                               name="otp_code" 
+                               placeholder="Código 2FA (6 dígitos)" 
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               inputmode="numeric"
+                               autofocus
+                               class="w-full bg-[#1a1a1a] border border-blue-500 border-opacity-70 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-center text-2xl tracking-widest">
+                    </div>
+                    <p class="text-gray-400 text-xs mt-2 text-center">
+                        Ingresa el código de 6 dígitos de tu app autenticadora
+                    </p>
+                </div>
+                {% endif %}
+
                 <!-- Botón de enviar -->
                 <button type="submit" 
                         class="w-full bg-[#C0A76B] text-black font-semibold py-3 rounded-lg hover:bg-yellow-400 transition duration-300 uppercase tracking-wider">
-                    INICIAR SESIÓN
+                    {% if require_2fa %}
+                        <i class="fas fa-shield-alt mr-2"></i>VERIFICAR 2FA
+                    {% else %}
+                        INICIAR SESIÓN
+                    {% endif %}
                 </button>
             </form>
             <div class="mt-4 text-center">

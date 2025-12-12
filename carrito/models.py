@@ -81,6 +81,29 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+    
+    def tiene_stock_disponible(self):
+        """Verifica si el producto tiene stock disponible en alguna variante"""
+        from carrito.models import ProductoVariante
+        
+        # Si tiene variantes, verificar stock de variantes
+        variantes = ProductoVariante.objects.filter(producto=self)
+        if variantes.exists():
+            return variantes.filter(stock__gt=0).exists()
+        
+        # Si no tiene variantes, verificar stock del producto base
+        return self.stock > 0
+    
+    def stock_total_variantes(self):
+        """Retorna el stock total sumando todas las variantes"""
+        from carrito.models import ProductoVariante
+        from django.db.models import Sum
+        
+        total = ProductoVariante.objects.filter(producto=self).aggregate(
+            total=Sum('stock')
+        )['total']
+        return total or 0
+    
     def delete(self, *args, **kwargs):
         """Elimina la imagen del bucket de Supabase al eliminar el producto."""
         if self.imagen_url:
@@ -110,8 +133,13 @@ class Producto(models.Model):
 
 class UsuarioPersonalizado(AbstractUser):
     telefono = models.CharField(max_length=15, blank=True)
+    direccion = models.CharField(max_length=255, blank=True, verbose_name='Dirección')
     # Lista de deseos: productos que el usuario marcó como favorito
     favoritos = models.ManyToManyField('Producto', blank=True, related_name='favorited_by')
+    
+    # Campos para 2FA
+    two_factor_enabled = models.BooleanField(default=False, verbose_name='2FA Activado')
+    two_factor_secret = models.CharField(max_length=32, blank=True, null=True, verbose_name='Clave secreta 2FA')
 
     def __str__(self):
         return self.username

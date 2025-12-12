@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Configurar 2FA - Glamoure</title>
+</head>
+<body class="bg-black min-h-screen flex items-center justify-center font-sans antialiased p-4">
+
+    <div class="fixed inset-0 bg-cover bg-center opacity-20" 
+         style="background-image: url('{% static 'imagenes/pexels-steve-29708304.jpg' %}');"></div>
+
+    <div class="relative z-10 w-full max-w-2xl">
+        <div class="bg-black bg-opacity-90 backdrop-blur-md border border-[#C0A76B] rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Logo -->
+            <div class="flex justify-center mb-6">
+                <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-20 h-20">
+            </div>
+
+            <h2 class="text-3xl font-bold text-center text-[#C0A76B] mb-2 uppercase tracking-wider">
+                <i class="fas fa-shield-alt mr-2"></i>Configurar Autenticación 2FA
+            </h2>
+
+            <p class="text-gray-400 text-center text-sm mb-8">
+                Configura la autenticación de dos factores para mayor seguridad
+            </p>
+
+            <!-- Instrucciones -->
+            <div class="bg-black/50 border border-[#C0A76B]/30 rounded-lg p-6 mb-6">
+                <h3 class="text-[#C0A76B] font-semibold mb-4 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>Pasos para configurar 2FA:
+                </h3>
+                <ol class="text-gray-300 space-y-3 text-sm">
+                    <li class="flex items-start">
+                        <span class="text-[#C0A76B] font-bold mr-3">1.</span>
+                        <span>Descarga una aplicación autenticadora en tu móvil (Google Authenticator, Microsoft Authenticator, o Authy)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#C0A76B] font-bold mr-3">2.</span>
+                        <span>Escanea el código QR con tu aplicación autenticadora</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#C0A76B] font-bold mr-3">3.</span>
+                        <span>O ingresa manualmente la clave secreta mostrada abajo</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#C0A76B] font-bold mr-3">4.</span>
+                        <span>Ingresa el código de 6 dígitos generado por la app para verificar</span>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                <!-- Código QR -->
+                <div class="flex flex-col items-center justify-center bg-white rounded-lg p-6">
+                    <h3 class="text-black font-semibold mb-4">Código QR</h3>
+                    <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-48 h-48">
+                </div>
+
+                <!-- Clave secreta -->
+                <div class="flex flex-col justify-center">
+                    <h3 class="text-[#C0A76B] font-semibold mb-3">Clave Secreta Manual</h3>
+                    <p class="text-xs text-gray-400 mb-2">Usa esta clave si no puedes escanear el QR:</p>
+                    <div class="bg-black/70 border border-[#C0A76B]/50 rounded-lg p-4 mb-4">
+                        <code class="text-white text-sm break-all font-mono">{{ secret }}</code>
+                    </div>
+                    <button onclick="copySecret()" class="text-[#C0A76B] hover:text-yellow-400 text-sm transition-colors">
+                        <i class="fas fa-copy mr-2"></i>Copiar clave
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulario de verificación -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label class="block text-gray-300 font-semibold mb-2 text-sm">
+                        <i class="fas fa-key mr-2 text-[#C0A76B]"></i>Código de Verificación
+                    </label>
+                    {{ form.otp_code }}
+                    {% if form.otp_code.errors %}
+                        <p class="text-red-500 text-xs mt-2">{{ form.otp_code.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-gray-400 text-xs mt-2">{{ form.otp_code.help_text }}</p>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-gradient-to-r from-[#C0A76B] to-yellow-600 text-black font-bold py-3 rounded-lg hover:from-yellow-600 hover:to-[#C0A76B] transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-check-circle mr-2"></i>Verificar y Activar 2FA
+                </button>
+            </form>
+
+            <!-- Enlace para omitir -->
+            <div class="text-center mt-6">
+                <a href="{% url 'index' %}" class="text-gray-400 hover:text-[#C0A76B] text-sm transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Omitir por ahora
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function copySecret() {
+            const secret = "{{ secret }}";
+            navigator.clipboard.writeText(secret).then(() => {
+                alert('Clave secreta copiada al portapapeles');
+            });
+        }
+
+        // Auto-focus en el input del código
+        document.addEventListener('DOMContentLoaded', function() {
+            const otpInput = document.querySelector('input[name="otp_code"]');
+            if (otpInput) {
+                otpInput.focus();
+            }
+        });
+    </script>
+
+</body>
+</html>

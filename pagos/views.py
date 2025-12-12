@@ -162,6 +162,8 @@ def webhook_wompi(request):
                     # 🎉 Crear pedidos si hay detalle
                     if transaccion.detalle_pedido and transaccion.usuario:
                         productos = transaccion.detalle_pedido.get('productos', [])
+                        direccion_envio = transaccion.detalle_pedido.get('direccion_envio', '')
+                        telefono_contacto = transaccion.detalle_pedido.get('telefono_contacto', '')
                         from carrito.models import Producto
                         from .utils import actualizar_stock_productos
                         
@@ -172,17 +174,25 @@ def webhook_wompi(request):
                                 # Calcular total del pedido
                                 total_pedido = producto.precio * prod_data['cantidad']
                                 
+                                # Crear notas del pedido con información de envío
+                                notas_pedido = f'Pedido realizado mediante Wompi - Referencia: {transaccion.referencia}'
+                                if direccion_envio:
+                                    notas_pedido += f'\nDirección de envío: {direccion_envio}'
+                                if telefono_contacto:
+                                    notas_pedido += f'\nTeléfono de contacto: {telefono_contacto}'
+                                
                                 # Crear pedido con todos los campos necesarios
                                 pedido = Pedido.objects.create(
                                     usuario=transaccion.usuario,
                                     producto=producto,
                                     cantidad=prod_data['cantidad'],
                                     total=total_pedido,
-                                    estado='pendiente',  # Forzar explícitamente
-                                    telefono=transaccion.usuario.telefono or '',
-                                    notas=f'Pedido realizado mediante Wompi - Referencia: {transaccion.referencia}'
+                                    estado='pendiente',
+                                    telefono=telefono_contacto or transaccion.usuario.telefono or '',
+                                    notas=notas_pedido
                                 )
                                 print(f"✅ Pedido {pedido.numero} creado: {producto.nombre} x{prod_data['cantidad']} - Total: ${total_pedido}")
+                                print(f"   Dirección: {direccion_envio}")
                             except Producto.DoesNotExist:
                                 print(f"❌ Producto {prod_data['producto_id']} no encontrado")
                             except Exception as e:
@@ -244,6 +254,25 @@ def checkout_desde_carrito(request):
     """
     Vista que toma los productos del carrito y crea una transacción de Wompi
     """
+    # Si es POST, el usuario está confirmando la dirección
+    if request.method == 'POST':
+        direccion = request.POST.get('direccion', '').strip()
+        telefono = request.POST.get('telefono', '').strip()
+        
+        # Validar campos obligatorios
+        if not direccion:
+            messages.error(request, 'La dirección de envío es obligatoria')
+            return redirect('checkout_carrito')
+        
+        if not telefono:
+            messages.error(request, 'El teléfono de contacto es obligatorio')
+            return redirect('checkout_carrito')
+        
+        # Guardar dirección y teléfono en el perfil del usuario
+        request.user.direccion = direccion
+        request.user.telefono = telefono
+        request.user.save()
+    
     # Obtener carrito del usuario
     try:
         carrito = Carrito.objects.prefetch_related('items__producto').get(usuario=request.user)
@@ -263,6 +292,14 @@ def checkout_desde_carrito(request):
     if total <= 0:
         messages.error(request, 'El total del carrito debe ser mayor a cero')
         return redirect('ver_carrito')
+    
+    # Si no tiene dirección guardada, mostrar formulario
+    if not request.user.direccion and request.method != 'POST':
+        return render(request, 'pagos/checkout_direccion.html', {
+            'carrito': carrito,
+            'items': items,
+            'total': total,
+        })
     
     # Generar referencia única
     referencia = WompiUtils.generar_referencia()
@@ -293,7 +330,9 @@ def checkout_desde_carrito(request):
     detalle_pedido = {
         'productos': detalle_productos,
         'total': float(total),
-        'cantidad_items': items.count()
+        'cantidad_items': items.count(),
+        'direccion_envio': request.user.direccion,
+        'telefono_contacto': request.user.telefono
     }
     
     # Crear transacción en BD
@@ -315,6 +354,8 @@ def checkout_desde_carrito(request):
     print(f"Referencia: {referencia}")
     print(f"Total: ${total} COP")
     print(f"Productos: {len(detalle_productos)}")
+    print(f"Dirección: {request.user.direccion}")
+    print(f"Teléfono: {request.user.telefono}")
     print(f"Firma: {firma}")
     print("="*60)
     
@@ -379,6 +420,8 @@ def confirmar_pago_carrito(request):
             # 🎉 PAGO APROBADO: Crear pedidos y vaciar carrito
             if transaccion.detalle_pedido and transaccion.usuario:
                 productos = transaccion.detalle_pedido.get('productos', [])
+                direccion_envio = transaccion.detalle_pedido.get('direccion_envio', '')
+                telefono_contacto = transaccion.detalle_pedido.get('telefono_contacto', '')
                 from .utils import actualizar_stock_productos
                 
                 # Crear un pedido por cada producto
@@ -391,26 +434,32 @@ def confirmar_pago_carrito(request):
                     try:
                         producto = Producto.objects.get(id=prod_data['producto_id'])
                         
-
                         # Calcular total del pedido
                         total_pedido = Decimal(str(prod_data['precio'])) * prod_data['cantidad']
                         
                         # Generar número único de pedido
                         numero_pedido = f"PED-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
                         
+                        # Crear notas del pedido con información de envío
+                        notas_pedido = f'Pedido realizado mediante Wompi - Referencia: {transaccion.referencia}'
+                        if direccion_envio:
+                            notas_pedido += f'\nDirección de envío: {direccion_envio}'
+                        if telefono_contacto:
+                            notas_pedido += f'\nTeléfono de contacto: {telefono_contacto}'
+                        
                         # Crear el pedido con todos los campos necesarios
-
                         Pedido.objects.create(
                             usuario=transaccion.usuario,
                             producto=producto,
                             cantidad=prod_data['cantidad'],
-
                             numero=numero_pedido,
                             total=total_pedido,
                             estado='pendiente',
-                            telefono=transaccion.usuario.telefono if hasattr(transaccion.usuario, 'telefono') else None
+                            telefono=telefono_contacto or (transaccion.usuario.telefono if hasattr(transaccion.usuario, 'telefono') else None),
+                            notas=notas_pedido
                         )
                         print(f"✅ Pedido {numero_pedido} creado para {producto.nombre}")
+                        print(f"   Dirección: {direccion_envio}")
 
                     except Producto.DoesNotExist:
                         print(f"❌ Producto {prod_data['producto_id']} no encontrado")

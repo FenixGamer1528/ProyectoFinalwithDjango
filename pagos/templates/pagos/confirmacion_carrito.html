@@ -262,6 +262,33 @@
                 </div>
             </div>
             
+            <!-- Información de Envío -->
+            {% if transaccion.detalle_pedido.direccion_envio or transaccion.detalle_pedido.telefono_contacto %}
+            <div class="section">
+                <h2>Información de Envío</h2>
+                <div class="detail-row">
+                    <span class="label">Nombre</span>
+                    <span class="value">{{ transaccion.nombre_completo }}</span>
+                </div>
+                {% if transaccion.detalle_pedido.direccion_envio %}
+                <div class="detail-row">
+                    <span class="label">Dirección</span>
+                    <span class="value">{{ transaccion.detalle_pedido.direccion_envio }}</span>
+                </div>
+                {% endif %}
+                {% if transaccion.detalle_pedido.telefono_contacto %}
+                <div class="detail-row">
+                    <span class="label">Teléfono</span>
+                    <span class="value">{{ transaccion.detalle_pedido.telefono_contacto }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <span class="label">Email</span>
+                    <span class="value">{{ transaccion.email }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
             <!-- Productos Comprados -->
             {% if transaccion.get_productos %}
             <div class="section">

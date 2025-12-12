@@ -67,11 +67,42 @@ def gestion_usuarios(request):
     return render(request, 'dashboard/gestion_usuarios.html', {'usuarios': page_obj})
 
 
+@login_required
 def eliminar_usuario(request, user_id):
+    """Activa o desactiva un usuario en lugar de eliminarlo"""
     if request.method == 'POST':
-        usuario = get_object_or_404(User, id=user_id)
-        usuario.delete()
+        try:
+            usuario = get_object_or_404(User, id=user_id)
+            
+            # Prevenir que un usuario se desactive a sí mismo
+            if usuario.id == request.user.id:
+                messages.error(request, 'No puedes desactivar tu propia cuenta.')
+                return redirect('gestion_usuarios')
+            
+            # Guardar el estado anterior para el mensaje
+            estado_anterior = usuario.is_active
+            
+            # Alternar el estado activo/inactivo
+            usuario.is_active = not usuario.is_active
+            usuario.save()
+            
+            # Mensaje de confirmación
+            if usuario.is_active:
+                messages.success(request, f'✅ Usuario "{usuario.username}" activado correctamente.')
+            else:
+                messages.warning(request, f'⚠️ Usuario "{usuario.username}" desactivado correctamente.')
+            
+            print(f"[DEBUG] Usuario {usuario.username} (ID: {usuario.id}) cambió de {estado_anterior} a {usuario.is_active}")
+            
+        except Exception as e:
+            messages.error(request, f'Error al cambiar el estado del usuario: {str(e)}')
+            print(f"[ERROR] {str(e)}")
+        
         return redirect('gestion_usuarios')
+    
+    # Si no es POST, redirigir
+    messages.warning(request, 'Método no permitido.')
+    return redirect('gestion_usuarios')
 
 
 def gestion_productos(request):
@@ -572,11 +603,36 @@ def dashboardCliente(request):
         'usuario': request.user,
         'items': items_del_carrito,
         'pedidos': pedidos_del_usuario,
-        'productosDestacados': productos_destacados
+        'productosDestacados': productos_destacados,
+        'total_items_carrito': items_del_carrito.count(),
+        'total_pedidos': pedidos_del_usuario.count(),
     }
 
     # 5. Renderizar la plantilla con todos los datos
     return render(request, 'dashboard/cliente_dashboard.html', context)
+
+
+@login_required
+def editar_perfil_cliente(request):
+    """Vista para editar el perfil del cliente"""
+    from core.forms import EditarPerfilForm
+    
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Perfil actualizado correctamente.')
+            return redirect('dashboard_cliente')
+        else:
+            messages.error(request, '❌ Error al actualizar el perfil. Verifica los datos.')
+    else:
+        form = EditarPerfilForm(instance=request.user)
+    
+    context = {
+        'form': form,
+        'usuario': request.user
+    }
+    return render(request, 'dashboard/editar_perfil.html', context)
 
 
 # ==================== GESTIÓN DE VARIANTES ====================

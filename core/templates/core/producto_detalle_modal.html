@@ -53,13 +53,12 @@
                 <h3 class="text-lg font-bold text-[#C0A76B] mb-2">Color</h3>
                 <div class="flex flex-wrap gap-4" id="modal-colores-container">
                     {% for color in colores_disponibles %}
-                    <button class="modal-color-btn relative group" data-color="{{ color }}" onclick="seleccionarColor('{{ color }}')">
-
-                        <div class="w-14 h-14 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg" 
-                             style="display: block !important; width: 3.5rem !important; height: 3.5rem !important; background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% elif color == 'Verde Oliva' %}#556B2F{% elif color == 'Caqui' %}#C3B091{% else %}#C0A76B{% endif %}; {% if color == 'Negro' or color == 'Blanco' %}box-shadow: 0 0 0 1px rgba(192, 167, 107, 0.3);{% endif %}">
-
-                        </div>
-                        <span class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button type="button" 
+                            class="modal-color-btn w-16 h-16 rounded-full border-4 border-transparent transition-all duration-300 hover:scale-110 hover:border-[#C0A76B] shadow-lg relative group" 
+                            data-color="{{ color }}" 
+                            onclick="event.preventDefault(); event.stopPropagation(); seleccionarColor('{{ color }}'); return false;"
+                            style="background-color: {% if color == 'Negro' %}#000000{% elif color == 'Blanco' %}#FFFFFF{% elif color == 'Rojo' %}#DC2626{% elif color == 'Azul' %}#2563EB{% elif color == 'Verde' %}#16A34A{% elif color == 'Amarillo' %}#EAB308{% elif color == 'Gris' %}#6B7280{% elif color == 'Marrón' or color == 'Marron' %}#92400E{% elif color == 'Rosa' %}#EC4899{% elif color == 'Morado' %}#9333EA{% elif color == 'Beige' %}#D4A574{% elif color == 'Naranja' %}#EA580C{% elif color == 'Verde Oliva' %}#556B2F{% elif color == 'Caqui' %}#C3B091{% else %}#C0A76B{% endif %}; {% if color == 'Negro' %}box-shadow: 0 0 0 2px rgba(192, 167, 107, 0.5);{% elif color == 'Blanco' %}box-shadow: 0 0 0 2px rgba(192, 167, 107, 0.5);{% endif %}">
+                        <span class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 text-xs text-gray-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                             {{ color }}
                         </span>
                     </button>
@@ -75,8 +74,8 @@
                 <!-- Usar tallas disponibles del backend -->
                 <div class="flex flex-wrap gap-3" id="modal-tallas-container">
                     {% for talla in tallas_disponibles %}
-                    <button class="modal-talla-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all font-bold text-white" 
-                            data-talla="{{ talla }}" onclick="seleccionarTalla('{{ talla }}')">
+                    <button type="button" class="modal-talla-btn px-4 py-2 border-2 border-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition-all font-bold text-white" 
+                            data-talla="{{ talla }}" onclick="event.preventDefault(); event.stopPropagation(); seleccionarTalla('{{ talla }}'); return false;">
                         {{ talla }}
                     </button>
                     {% endfor %}
@@ -302,6 +301,8 @@
 
 {% if variantes %}
 <script>
+console.log('🎯 Inicializando modal de producto con variantes...');
+
 // Datos de variantes
 const modalVariantesData = [
     {% for v in variantes %}
@@ -316,27 +317,46 @@ const modalVariantesData = [
     {% endfor %}
 ];
 
+console.log('📦 Total variantes cargadas:', modalVariantesData.length);
+console.log('📊 Variantes:', modalVariantesData);
+
 // Variables globales
 let modalTallaSeleccionada = null;
 let modalColorSeleccionado = null;
 const modalImagen = document.getElementById('modal-producto-imagen');
 const modalIaBadge = document.getElementById('modal-ia-badge');
 
+if (!modalImagen) {
+    console.error('❌ Elemento modal-producto-imagen no encontrado');
+} else {
+    console.log('✅ Imagen del modal encontrada');
+}
+
+if (!modalIaBadge) {
+    console.error('❌ Elemento modal-ia-badge no encontrado');
+} else {
+    console.log('✅ Badge IA encontrado');
+}
+
 // Función para seleccionar color
 window.seleccionarColor = function(color) {
+    console.log('🎨 Color seleccionado:', color);
     modalColorSeleccionado = color;
     modalTallaSeleccionada = null;
     
-    // Actualizar UI
+    // Actualizar UI - ahora el botón es directamente el círculo de color
     document.querySelectorAll('.modal-color-btn').forEach(btn => {
-        const div = btn.querySelector('div');
         if (btn.dataset.color === color) {
-            div.classList.add('border-[#C0A76B]', 'scale-110');
+            btn.classList.add('border-[#C0A76B]', 'scale-110');
+            btn.style.borderWidth = '4px';
         } else {
-            div.classList.remove('border-[#C0A76B]', 'scale-110');
+            btn.classList.remove('border-[#C0A76B]', 'scale-110');
+            btn.style.borderColor = 'transparent';
+            btn.style.borderWidth = '4px';
         }
     });
     
+    // Resetear tallas
     document.querySelectorAll('.modal-talla-btn').forEach(btn => {
         btn.classList.remove('bg-[#C0A76B]', 'text-black');
         btn.classList.add('text-white');
@@ -345,8 +365,35 @@ window.seleccionarColor = function(color) {
     // Actualizar imagen del producto según el color seleccionado
     const varianteConColor = modalVariantesData.find(v => v.color === color);
     if (varianteConColor && modalImagen) {
-        // Mostrar imagen existente primero
-        modalImagen.src = varianteConColor.imagen_url;
+        console.log('📦 Variante encontrada:', varianteConColor);
+        console.log('🖼️ Imagen URL:', varianteConColor.imagen_url);
+        
+        // Efecto de transición: fade out
+        modalImagen.style.opacity = '0.3';
+        modalImagen.style.transition = 'opacity 0.3s ease';
+        
+        // Actualizar la imagen del producto con un pequeño delay para el efecto
+        setTimeout(() => {
+            const nuevaImagen = varianteConColor.imagen_url;
+            const imagenAnterior = modalImagen.src;
+            
+            console.log('🔄 Cambiando imagen de:', imagenAnterior);
+            console.log('🔄 Cambiando imagen a:', nuevaImagen);
+            
+            // Forzar recarga agregando timestamp si es la misma URL
+            if (imagenAnterior === nuevaImagen) {
+                console.log('⚠️ Misma URL detectada - Forzando recarga visual');
+                modalImagen.src = nuevaImagen + '?t=' + new Date().getTime();
+            } else {
+                modalImagen.src = nuevaImagen;
+            }
+            
+            // Fade in
+            setTimeout(() => {
+                modalImagen.style.opacity = '1';
+                console.log('✅ Imagen actualizada con efecto visual');
+            }, 50);
+        }, 150);
         
         // Mostrar/ocultar badge IA
         if (modalIaBadge) {
@@ -357,10 +404,13 @@ window.seleccionarColor = function(color) {
             }
         }
         
-        console.log('✅ Imagen base:', varianteConColor.imagen_url);
-        
-        // 🎨 GENERAR IMAGEN CON IA usando el color seleccionado
-        generarImagenConIA(varianteConColor.id, color);
+        // 🎨 GENERACIÓN CON IA DESHABILITADA POR DEFECTO
+        // Si quieres habilitar la generación automática con IA, descomenta la siguiente línea:
+        // if (typeof generarImagenConIA === 'function') {
+        //     generarImagenConIA(varianteConColor.id, color);
+        // }
+    } else {
+        console.error('❌ No se encontró variante con color:', color);
     }
     
     actualizarVarianteModal();
@@ -368,6 +418,7 @@ window.seleccionarColor = function(color) {
 
 // Función para seleccionar talla
 window.seleccionarTalla = function(talla) {
+    console.log('👕 Talla seleccionada:', talla);
     modalTallaSeleccionada = talla;
     
     // Actualizar UI
@@ -386,9 +437,13 @@ window.seleccionarTalla = function(talla) {
 
 // Función para actualizar la variante seleccionada
 function actualizarVarianteModal() {
+    console.log('🔄 Actualizando variante - Talla:', modalTallaSeleccionada, 'Color:', modalColorSeleccionado);
+    
     const variante = modalVariantesData.find(v => 
         v.talla === modalTallaSeleccionada && v.color === modalColorSeleccionado
     );
+    
+    console.log('📦 Variante encontrada:', variante);
     
     const stockInfo = document.getElementById('modal-stock-info');
     const btnAgregar = document.getElementById('modal-btn-agregar');
@@ -396,7 +451,14 @@ function actualizarVarianteModal() {
     const cantidadInput = document.getElementById('modal-cantidad');
     const mensaje = document.getElementById('modal-mensaje-seleccion');
     
+    if (!stockInfo || !btnAgregar || !varianteIdInput || !mensaje) {
+        console.error('❌ Elementos del DOM no encontrados');
+        return;
+    }
+    
     if (variante && modalTallaSeleccionada && modalColorSeleccionado) {
+        console.log('✅ Variante válida encontrada:', variante.id);
+        
         // Mostrar información de stock
         stockInfo.classList.remove('hidden');
         document.getElementById('modal-stock-variante').textContent = `${modalColorSeleccionado} - Talla ${modalTallaSeleccionada}`;
@@ -424,15 +486,17 @@ function actualizarVarianteModal() {
         } else {
             btnAgregar.disabled = true;
             btnAgregar.classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('btn-agregar-texto').textContent = 'Sin Stock';
-            mensaje.innerHTML = `<p class="text-red-400 text-sm">✗ Sin stock disponible</p>`;
+            document.getElementById('btn-agregar-texto').textContent = 'Producto No Disponible';
+            mensaje.innerHTML = `<p class="text-red-400 text-sm font-bold">✗ Producto agotado - Sin stock disponible</p>`;
         }
     } else if (modalColorSeleccionado) {
+        console.log('⚠️ Solo color seleccionado');
         // Solo color seleccionado
         stockInfo.classList.add('hidden');
         btnAgregar.disabled = true;
         mensaje.innerHTML = `<p class="text-yellow-400 text-sm">Selecciona una talla</p>`;
     } else {
+        console.log('⚠️ Nada seleccionado');
         // Nada seleccionado
         stockInfo.classList.add('hidden');
         btnAgregar.disabled = true;

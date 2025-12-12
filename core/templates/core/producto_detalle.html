@@ -223,14 +223,16 @@
                 // Habilitar/deshabilitar botón
                 if (varianteActual.stock > 0) {
                     btnAgregarCarrito.disabled = false;
+                    btnAgregarCarrito.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i> Agregar al Carrito';
                     mensajeSeleccion.textContent = '¡Listo para agregar al carrito!';
-                    mensajeSeleccion.classList.remove('text-gray-400');
+                    mensajeSeleccion.classList.remove('text-gray-400', 'text-red-400');
                     mensajeSeleccion.classList.add('text-green-400');
                 } else {
                     btnAgregarCarrito.disabled = true;
-                    mensajeSeleccion.textContent = 'Producto agotado en esta combinación';
-                    mensajeSeleccion.classList.remove('text-green-400');
-                    mensajeSeleccion.classList.add('text-red-400');
+                    btnAgregarCarrito.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Producto No Disponible';
+                    mensajeSeleccion.textContent = '❌ Producto agotado - Sin stock disponible';
+                    mensajeSeleccion.classList.remove('text-green-400', 'text-gray-400');
+                    mensajeSeleccion.classList.add('text-red-400', 'font-bold');
                 }
             } else {
                 stockInfo.classList.add('hidden');
