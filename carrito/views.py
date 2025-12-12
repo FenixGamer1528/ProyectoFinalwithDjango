@@ -169,6 +169,12 @@ def agregar_al_carrito_variante(request):
     producto = variante.producto
     
     # Verificar stock
+    if variante.stock <= 0:
+        return JsonResponse({
+            'success': False,
+            'error': 'Este producto no está disponible (sin stock)'
+        }, status=400)
+    
     if variante.stock < cantidad:
         return JsonResponse({
             'success': False,

@@ -10,6 +10,11 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('registro/', views.registro_view, name='registro'),
+    
+    # URLs para 2FA
+    path('2fa/setup/', views.setup_2fa, name='setup_2fa'),
+    path('2fa/manage/', views.manage_2fa, name='manage_2fa'),
+    
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
     path('reportes/', ReporteListView.as_view(), name='lista_reportes'),
     path('reportes/exportar/excel/', exportar_excel, name='exportar_excel'),

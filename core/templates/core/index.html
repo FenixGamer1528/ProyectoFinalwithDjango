@@ -395,6 +395,13 @@
               <!-- Badge TOP amarillo -->
               <div class="top-badge">⭐ TOP</div>
               
+              <!-- Badge SIN STOCK -->
+              {% if not producto.tiene_stock and producto.stock == 0 %}
+              <div class="out-of-stock-badge" style="position: absolute; top: 50px; left: 10px; background: rgba(220, 38, 38, 0.95); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                ❌ AGOTADO
+              </div>
+              {% endif %}
+              
               <!-- Botón de favoritos -->
               {% if user.is_authenticated %}
               <button onclick="toggleFavorito({{ producto.id }}, this)" 
@@ -408,16 +415,20 @@
               {% endif %}
               
               {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
               {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
               {% else %}
                 <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
                 <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
+                {% if producto.tiene_stock or producto.stock > 0 %}
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
+                {% else %}
+                <button disabled class="product-btn" style="background: #666; cursor: not-allowed; opacity: 0.6;">No Disponible</button>
+                {% endif %}
               </div>
             </div>
             {% endfor %}
@@ -438,19 +449,26 @@
     <section class="py-20 bg-[#111]">
       <h2 class="section-title">Ofertas Especiales</h2>
       
-      <div class="carousel-container">
+      <div class="carousel-container" id="ofertas-container">
         <!-- Botones de navegación -->
-        <button class="carousel-nav prev" aria-label="Anterior">‹</button>
-        <button class="carousel-nav next" aria-label="Siguiente">›</button>
+        <button class="carousel-nav prev" aria-label="Anterior" onclick="ofertasCarousel.prevSlide()">‹</button>
+        <button class="carousel-nav next" aria-label="Siguiente" onclick="ofertasCarousel.nextSlide()">›</button>
         
         <!-- Carrusel -->
         <div class="carousel-wrapper">
-          <div class="carousel-track">
+          <div class="carousel-track" id="ofertas-track">
             
             {% for producto in productos_ofertas %}
             <div class="carousel-slide">
               <!-- Badge OFERTA rojo -->
               <div class="offer-badge">🔥 OFERTA</div>
+              
+              <!-- Badge SIN STOCK -->
+              {% if not producto.tiene_stock and producto.stock == 0 %}
+              <div class="out-of-stock-badge" style="position: absolute; top: 50px; left: 10px; background: rgba(220, 38, 38, 0.95); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                ❌ AGOTADO
+              </div>
+              {% endif %}
               
               <!-- Botón de favoritos -->
               {% if user.is_authenticated %}
@@ -465,16 +483,20 @@
               {% endif %}
               
               {% if producto.imagen_url %}
-                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy">
+                <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
               {% elif producto.imagen %}
-                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
               {% else %}
                 <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
               {% endif %}
               <div class="product-info">
                 <p class="product-name">{{ producto.nombre }}</p>
                 <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
+                {% if producto.tiene_stock or producto.stock > 0 %}
                 <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
+                {% else %}
+                <button disabled class="product-btn" style="background: #666; cursor: not-allowed; opacity: 0.6;">No Disponible</button>
+                {% endif %}
               </div>
             </div>
             {% empty %}
@@ -491,9 +513,9 @@
         </div>
         
         <!-- Indicadores -->
-        <div class="carousel-indicators">
+        <div class="carousel-indicators" id="ofertas-indicators">
           {% for producto in productos_ofertas %}
-            <span class="indicator {% if forloop.first %}active{% endif %}"></span>
+            <span class="indicator {% if forloop.first %}active{% endif %}" onclick="ofertasCarousel.goToSlide({{ forloop.counter0 }})"></span>
           {% endfor %}
         </div>
       </div>
@@ -595,6 +617,45 @@
   <script src="{% static 'js/modal.js' %}?v=3.0"></script>
   <script src="{% static 'js/carousel-ofertas.js' %}"></script>
   <script src="{% static 'js/carousel-mas-vendido.js' %}"></script>
+  
+  <!-- Inicialización de carruseles -->
+  <script>
+  // Inicializar carruseles en orden
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log('🎠 Inicializando carruseles...');
+      
+      // Pequeño delay para asegurar que el DOM esté completamente renderizado
+      setTimeout(() => {
+          // Inicializar carrusel de Más Vendido
+          if (typeof CarouselMasVendido !== 'undefined') {
+              window.masVendidoCarousel = new CarouselMasVendido('mas-vendido-carousel', 'mas-vendido-track', 'mas-vendido-indicators');
+              console.log('✅ Carrusel Más Vendido inicializado');
+          }
+          
+          // Inicializar carrusel de Ofertas
+          if (typeof CarouselOfertas !== 'undefined') {
+              window.ofertasCarousel = new CarouselOfertas('ofertas-container', 'ofertas-track', 'ofertas-indicators');
+              console.log('✅ Carrusel Ofertas inicializado');
+          }
+          
+          // Manejar resize para ambos carruseles
+          let resizeTimer;
+          window.addEventListener('resize', () => {
+              clearTimeout(resizeTimer);
+              resizeTimer = setTimeout(() => {
+                  if (window.masVendidoCarousel && window.masVendidoCarousel.track) {
+                      window.masVendidoCarousel.currentSlide = 0;
+                      window.masVendidoCarousel.updateCarousel();
+                  }
+                  if (window.ofertasCarousel && window.ofertasCarousel.track) {
+                      window.ofertasCarousel.currentSlide = 0;
+                      window.ofertasCarousel.updateCarousel();
+                  }
+              }, 250);
+          });
+      }, 100);
+  });
+  </script>
   
   <!-- Scripts de navegación -->
   <script>

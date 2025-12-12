@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - Glamoure</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+    <div class="min-h-screen pt-8 pb-12">
+        <div class="container mx-auto px-4 max-w-2xl">
+        <!-- Encabezado -->
+        <div class="mb-8">
+            <a href="{% url 'dashboard_cliente' %}" class="inline-flex items-center text-[#C0A76B] hover:text-yellow-400 transition-colors mb-4">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Volver al Dashboard
+            </a>
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
+                <span class="bg-gradient-to-r from-[#C0A76B] to-yellow-600 bg-clip-text text-transparent">
+                    Editar Perfil
+                </span>
+            </h1>
+            <p class="text-gray-400">Actualiza tu información personal</p>
+        </div>
+
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg mb-3 {% if message.tags == 'success' %}bg-green-900/30 border border-green-500 text-green-400{% elif message.tags == 'error' %}bg-red-900/30 border border-red-500 text-red-400{% else %}bg-blue-900/30 border border-blue-500 text-blue-400{% endif %}">
+                <p>{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulario -->
+        <div class="card-gradient rounded-xl border border-[#C0A76B] p-8 shadow-2xl">
+            <form method="post" action="{% url 'editar_perfil_cliente' %}" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Nombre -->
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-[#C0A76B] mb-2">
+                        <i class="fas fa-user mr-2"></i>Nombre
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Apellido -->
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-[#C0A76B] mb-2">
+                        <i class="fas fa-user mr-2"></i>Apellido
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-[#C0A76B] mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label for="{{ form.telefono.id_for_label }}" class="block text-sm font-medium text-[#C0A76B] mb-2">
+                        <i class="fas fa-phone mr-2"></i>Teléfono
+                    </label>
+                    {{ form.telefono }}
+                    {% if form.telefono.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.telefono.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Dirección -->
+                <div>
+                    <label for="{{ form.direccion.id_for_label }}" class="block text-sm font-medium text-[#C0A76B] mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Dirección
+                    </label>
+                    {{ form.direccion }}
+                    {% if form.direccion.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.direccion.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-gray-400 text-xs mt-1">Incluye calle, número, ciudad y código postal</p>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-gradient-to-r from-[#C0A76B] to-yellow-600 text-black font-semibold py-3 px-6 rounded-lg hover:from-yellow-600 hover:to-[#C0A76B] transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    </button>
+                    <a href="{% url 'dashboard_cliente' %}" 
+                       class="flex-1 bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-600 transition-all duration-300 text-center">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Información Adicional -->
+        <div class="mt-6 p-4 bg-blue-900/20 border border-blue-500/50 rounded-lg">
+            <div class="flex items-start">
+                <i class="fas fa-info-circle text-blue-400 mt-1 mr-3"></i>
+                <div class="text-sm text-gray-300">
+                    <p class="font-medium text-blue-400 mb-1">Información importante:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Tu email será usado para notificaciones de pedidos</li>
+                        <li>El teléfono es necesario para contactarte sobre entregas</li>
+                        <li>La dirección completa asegura entregas precisas</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

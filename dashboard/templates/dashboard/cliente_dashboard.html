@@ -81,6 +81,15 @@
                 <span class="ml-auto bg-[#C0A76B] text-black text-xs rounded-full px-2 py-1 font-semibold">{{ usuario.favoritos.count }}</span>
                 {% endif %}
             </a>
+            
+            <!-- Opción de Seguridad 2FA -->
+            <a href="{% url 'manage_2fa' %}" class="flex items-center px-4 py-3 text-gray-300 rounded-lg transition-all duration-200 ease-in-out hover:bg-[#C0A76B] hover:text-black hover:shadow-lg group">
+                <span class="mr-3 group-hover:scale-110 transition-transform">🔒</span>
+                <span class="font-medium">Seguridad (2FA)</span>
+                {% if usuario.two_factor_enabled %}
+                <span class="ml-auto bg-green-500 text-white text-xs rounded-full px-2 py-1 font-semibold">✓</span>
+                {% endif %}
+            </a>
         </nav>
         
         <!-- Footer del Sidebar -->
@@ -104,16 +113,25 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <!-- Tarjeta Datos Personales -->
             <div class="card-gradient rounded-xl shadow-lg border border-[#C0A76B] p-6 hover:shadow-2xl hover:border-[#d4b96a] transition-all duration-300">
-                <div class="flex items-center mb-4">
-                    <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
-                        <span class="text-2xl">👤</span>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-[#C0A76B] bg-opacity-20 rounded-lg flex items-center justify-center mr-3">
+                            <span class="text-2xl">👤</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-[#C0A76B]">Mis Datos</h3>
                     </div>
-                    <h3 class="text-lg font-semibold text-[#C0A76B]">Mis Datos</h3>
+                    <a href="{% url 'editar_perfil_cliente' %}" 
+                       class="text-[#C0A76B] hover:text-yellow-400 transition-colors" 
+                       title="Editar perfil">
+                        <i class="fas fa-edit"></i>
+                    </a>
                 </div>
                 <div class="space-y-2 text-sm">
+                    <p><span class="font-medium text-gray-400">Nombre:</span> <span class="text-white">{{ usuario.first_name }} {{ usuario.last_name }}</span></p>
                     <p><span class="font-medium text-gray-400">Usuario:</span> <span class="text-white">{{ usuario.username }}</span></p>
-                    <p><span class="font-medium text-gray-400">Email:</span> <span class="text-white">{{ usuario.email }}</span></p>
-                    <p><span class="font-medium text-gray-400">Teléfono:</span> <span class="text-white">{{ usuario.telefono }}</span></p>
+                    <p><span class="font-medium text-gray-400">Email:</span> <span class="text-white text-xs">{{ usuario.email }}</span></p>
+                    <p><span class="font-medium text-gray-400">Teléfono:</span> <span class="text-white">{{ usuario.telefono|default:"No registrado" }}</span></p>
+                    <p><span class="font-medium text-gray-400">Dirección:</span> <span class="text-white text-xs">{{ usuario.direccion|default:"No registrada" }}</span></p>
                 </div>
             </div>
 

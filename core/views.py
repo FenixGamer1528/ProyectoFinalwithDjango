@@ -4,8 +4,12 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.db.models import Q
-from .forms import LoginForm, RegistroForm 
+from .forms import LoginForm, RegistroForm, TwoFactorVerifyForm
 from carrito.models import Producto, Pedido, UsuarioPersonalizado
+import pyotp
+import qrcode
+import io
+import base64
 
 
 def home(request):
@@ -41,14 +45,31 @@ def catalogo_completo(request):
     })
 
 def index(request):
+    from carrito.models import ProductoVariante
+    from django.db.models import Exists, OuterRef
+    
     # Cargar productos destacados (para "Lo Más Vendido") - Límite de 12 productos
-    productos = Producto.objects.filter(destacado=True).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria'
+    productos = Producto.objects.filter(destacado=True).annotate(
+        tiene_stock=Exists(
+            ProductoVariante.objects.filter(
+                producto=OuterRef('pk'),
+                stock__gt=0
+            )
+        )
+    ).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'stock'
     )[:12]  # Máximo 12 productos en carrusel "Lo Más Vendido"
     
     # Cargar productos en oferta (para "Ofertas Especiales") - Límite de 9 productos
-    productos_ofertas = Producto.objects.filter(en_oferta=True).only(
-        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta'
+    productos_ofertas = Producto.objects.filter(en_oferta=True).annotate(
+        tiene_stock=Exists(
+            ProductoVariante.objects.filter(
+                producto=OuterRef('pk'),
+                stock__gt=0
+            )
+        )
+    ).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta', 'stock'
     )[:9]  # Máximo 9 productos en carrusel "Ofertas"
     
     # Prefetch favoritos si el usuario está autenticado
@@ -93,13 +114,29 @@ def login_view(request):
         if form.is_valid():
             usuario = form.cleaned_data['usuario']
             password = form.cleaned_data['password']
+            otp_code = form.cleaned_data.get('otp_code', '')
+            
             user = authenticate(request, username=usuario, password=password)
 
             if user is not None:
-                login(request, user)  # Iniciar sesión
-                
-                # TODOS los usuarios van al index
-                return redirect('index')
+                # Verificar si el usuario tiene 2FA activado
+                if user.two_factor_enabled and user.two_factor_secret:
+                    if otp_code:
+                        # Verificar el código 2FA
+                        totp = pyotp.TOTP(user.two_factor_secret)
+                        if totp.verify(otp_code, valid_window=1):
+                            login(request, user)
+                            return redirect('index')
+                        else:
+                            error_message = "Código 2FA inválido"
+                            return render(request, 'login.html', {'form': form, 'error_message': error_message, 'require_2fa': True})
+                    else:
+                        # Solicitar código 2FA
+                        return render(request, 'login.html', {'form': form, 'require_2fa': True})
+                else:
+                    # Login normal sin 2FA
+                    login(request, user)
+                    return redirect('index')
             else:
                 error_message = "Datos inválidos"
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
@@ -152,8 +189,16 @@ def registro_view(request):
         form = RegistroForm(request.POST)
         if form.is_valid():
             usuario = form.save()
-            login(request, usuario)
-            return redirect('index')  # O a donde quieras redirigir
+            enable_2fa = form.cleaned_data.get('enable_2fa', False)
+            
+            if enable_2fa:
+                # Guardar en sesión que necesitamos configurar 2FA
+                request.session['setup_2fa_user_id'] = usuario.id
+                return redirect('setup_2fa')
+            else:
+                # Login directo sin 2FA
+                login(request, usuario)
+                return redirect('index')
     else:
         form = RegistroForm()
     return render(request, 'core/registro.html', {'form': form})
@@ -420,4 +465,174 @@ def producto_detalle(request, producto_id):
         # Devolver error 500 con mensaje descriptivo
         from django.http import HttpResponse
         return HttpResponse(f"Error al cargar producto: {str(e)}", status=500)
+
+
+# ==================== VISTAS 2FA ====================
+
+def setup_2fa(request):
+    """Vista para configurar 2FA durante el registro"""
+    user_id = request.session.get('setup_2fa_user_id')
+    
+    if not user_id:
+        return redirect('login')
+    
+    try:
+        user = UsuarioPersonalizado.objects.get(id=user_id)
+    except UsuarioPersonalizado.DoesNotExist:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        form = TwoFactorVerifyForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['otp_code']
+            secret = request.session.get('temp_2fa_secret')
+            
+            if secret:
+                totp = pyotp.TOTP(secret)
+                if totp.verify(otp_code, valid_window=1):
+                    # Código válido - activar 2FA
+                    user.two_factor_secret = secret
+                    user.two_factor_enabled = True
+                    user.save()
+                    
+                    # Limpiar sesión
+                    del request.session['setup_2fa_user_id']
+                    del request.session['temp_2fa_secret']
+                    
+                    # Hacer login y redirigir
+                    login(request, user)
+                    return render(request, 'core/2fa_success.html', {'user': user})
+                else:
+                    form.add_error('otp_code', 'Código inválido. Por favor, intenta de nuevo.')
+    else:
+        form = TwoFactorVerifyForm()
+        # Generar secreto nuevo
+        secret = pyotp.random_base32()
+        request.session['temp_2fa_secret'] = secret
+    
+    # Generar código QR
+    secret = request.session.get('temp_2fa_secret')
+    totp = pyotp.TOTP(secret)
+    provisioning_uri = totp.provisioning_uri(
+        name=user.email,
+        issuer_name='Glamoure Store'
+    )
+    
+    # Crear imagen QR
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(provisioning_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Convertir a base64 para mostrar en template
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    
+    context = {
+        'form': form,
+        'qr_code': img_str,
+        'secret': secret,
+        'user': user
+    }
+    
+    return render(request, 'core/setup_2fa.html', context)
+
+
+@login_required
+def manage_2fa(request):
+    """Vista para activar/desactivar 2FA desde el perfil"""
+    user = request.user
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'enable':
+            # Generar secreto nuevo
+            secret = pyotp.random_base32()
+            request.session['temp_2fa_secret'] = secret
+            
+            # Generar código QR
+            totp = pyotp.TOTP(secret)
+            provisioning_uri = totp.provisioning_uri(
+                name=user.email,
+                issuer_name='Glamoure Store'
+            )
+            
+            # Crear imagen QR
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(provisioning_uri)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            
+            # Convertir a base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            
+            form = TwoFactorVerifyForm()
+            
+            context = {
+                'form': form,
+                'qr_code': img_str,
+                'secret': secret,
+                'user': user,
+                'activating': True
+            }
+            
+            return render(request, 'core/manage_2fa.html', context)
+            
+        elif action == 'verify':
+            form = TwoFactorVerifyForm(request.POST)
+            if form.is_valid():
+                otp_code = form.cleaned_data['otp_code']
+                secret = request.session.get('temp_2fa_secret')
+                
+                if secret:
+                    totp = pyotp.TOTP(secret)
+                    if totp.verify(otp_code, valid_window=1):
+                        # Activar 2FA
+                        user.two_factor_secret = secret
+                        user.two_factor_enabled = True
+                        user.save()
+                        
+                        # Limpiar sesión
+                        del request.session['temp_2fa_secret']
+                        
+                        return render(request, 'core/2fa_success.html', {'user': user, 'from_profile': True})
+                    else:
+                        form.add_error('otp_code', 'Código inválido')
+                        secret = request.session.get('temp_2fa_secret')
+                        totp = pyotp.TOTP(secret)
+                        provisioning_uri = totp.provisioning_uri(name=user.email, issuer_name='Glamoure Store')
+                        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                        qr.add_data(provisioning_uri)
+                        qr.make(fit=True)
+                        img = qr.make_image(fill_color="black", back_color="white")
+                        buffer = io.BytesIO()
+                        img.save(buffer, format='PNG')
+                        img_str = base64.b64encode(buffer.getvalue()).decode()
+                        
+                        return render(request, 'core/manage_2fa.html', {
+                            'form': form,
+                            'qr_code': img_str,
+                            'secret': secret,
+                            'user': user,
+                            'activating': True
+                        })
+        
+        elif action == 'disable':
+            # Desactivar 2FA
+            user.two_factor_enabled = False
+            user.two_factor_secret = None
+            user.save()
+            
+            return redirect('manage_2fa')
+    
+    context = {
+        'user': user
+    }
+    
+    return render(request, 'core/manage_2fa.html', context)
+
 

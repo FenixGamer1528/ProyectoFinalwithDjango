@@ -2,9 +2,20 @@
 
 Sistema integrado para cambiar automáticamente el color de productos usando **Segment Anything Model (SAM)** + recolorización HSV.
 
-## ⚡ Instalación Rápida (5 minutos)
+## 🆕 NUEVO: Generación Automática
 
-### Opción 1: Script Automático (Recomendado)
+**✨ El sistema ahora genera imágenes automáticamente:**
+
+- 🔄 **Para productos nuevos**: Al crear una variante sin imagen, se genera automáticamente
+- 📦 **Para productos existentes**: Usa `.\generar_imagenes_ia.ps1` o el comando Django
+- 💾 **Cache inteligente**: No regenera imágenes que ya existen
+- ⚡ **Background processing**: No bloquea la creación de variantes
+
+**Ver:** `IA_QUICK_START.md` y `GUIA_IA_AUTOMATICA.md` para más detalles.
+
+---
+
+## ⚡ Instalación Rápida (5 minutos)
 
 ```powershell
 # Ejecutar en PowerShell
