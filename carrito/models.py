@@ -25,6 +25,7 @@ class Producto(models.Model):
     en_oferta = models.BooleanField(default=False)
     colores = models.CharField(max_length=200, blank=True, null=True)
     destacado = models.BooleanField(default=False)  # Índice creado manualmente
+    activo = models.BooleanField(default=True)  # Para inactivar productos sin stock
     stock = models.IntegerField(default=0)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     categoria = models.CharField(
