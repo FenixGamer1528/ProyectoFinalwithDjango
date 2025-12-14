@@ -215,9 +215,16 @@
                             </thead>
                             <tbody class="divide-y divide-gray-700">
                                 {% for producto in productos %}
-                                <tr class="hover:bg-[#C0A76B] hover:bg-opacity-5 transition-colors">
+                                <tr class="hover:bg-[#C0A76B] hover:bg-opacity-5 transition-colors {% if not producto.activo %}opacity-60{% endif %}">
                                     <td class="px-4 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-semibold text-white">{{ producto.nombre }}</div>
+                                        <div class="text-sm font-semibold text-white">
+                                            {{ producto.nombre }}
+                                            {% if not producto.activo %}
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-900 text-gray-400 border border-gray-600">
+                                                <i class="fas fa-eye-slash mr-1"></i> Inactivo
+                                            </span>
+                                            {% endif %}
+                                        </div>
                                     </td>
                                     <td class="px-4 py-4">
                                         <div class="text-sm text-gray-400 max-w-xs truncate">{{ producto.descripcion|default:"Sin descripción"|truncatewords:10 }}</div>
@@ -252,13 +259,23 @@
                                             <button onclick="editProduct({{ producto.id }})" class="p-2 text-[#C0A76B] hover:text-yellow-400 hover:bg-[#C0A76B] hover:bg-opacity-10 rounded-md transition-all" title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <form method="post" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este producto?')">
+                                            {% if producto.activo %}
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('{% if producto.stock > 0 %}Este producto tiene {{ producto.stock }} unidades en stock. No se puede inactivar.{% else %}¿Inactivar este producto? Podrás reactivarlo después.{% endif %}')">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="producto_id" value="{{ producto.id }}">
-                                                <button type="submit" name="eliminar" class="p-2 text-red-400 hover:text-red-300 hover:bg-red-900 hover:bg-opacity-20 rounded-md transition-all" title="Eliminar">
-                                                    <i class="fas fa-trash"></i>
+                                                <button type="submit" name="inactivar" class="p-2 {% if producto.stock > 0 %}text-gray-600 cursor-not-allowed{% else %}text-orange-400 hover:text-orange-300 hover:bg-orange-900 hover:bg-opacity-20{% endif %} rounded-md transition-all" title="{% if producto.stock > 0 %}No se puede inactivar (tiene stock){% else %}Inactivar producto{% endif %}" {% if producto.stock > 0 %}disabled{% endif %}>
+                                                    <i class="fas fa-ban"></i>
                                                 </button>
                                             </form>
+                                            {% else %}
+                                            <form method="post" style="display:inline;" onsubmit="return confirm('¿Reactivar este producto?')">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                                <button type="submit" name="activar" class="p-2 text-green-400 hover:text-green-300 hover:bg-green-900 hover:bg-opacity-20 rounded-md transition-all" title="Reactivar producto">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -526,6 +543,32 @@
         cancelBtn.addEventListener('click', () => productModal.classList.add('hidden'));
         searchInput.addEventListener('input', filterProducts);
         categoryFilter.addEventListener('change', filterProducts);
+
+        // Protección contra doble clic en el formulario
+        let isSubmitting = false;
+        productForm.addEventListener('submit', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                console.log('⚠️ Formulario ya está siendo enviado');
+                return false;
+            }
+            
+            isSubmitting = true;
+            
+            // Deshabilitar botón y cambiar texto
+            saveBtn.disabled = true;
+            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            
+            // Re-habilitar después de 3 segundos (por si hay error)
+            setTimeout(() => {
+                isSubmitting = false;
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                saveBtn.innerHTML = originalText;
+            }, 3000);
+        });
 
         // Cerrar modal con ESC
         document.addEventListener('keydown', (e) => {

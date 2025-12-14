@@ -141,11 +141,25 @@ def gestion_productos(request):
                 instance.save()
                 messages.success(request, f'Producto creado con {instance.stock} unidades totales. Ahora distribuye el stock en variantes (tallas y colores) desde el botón "Variantes".')
                 return redirect('gestion_productos')
-        elif 'eliminar' in request.POST:
+        elif 'inactivar' in request.POST:
             producto_id = request.POST.get('producto_id')
             producto = get_object_or_404(Producto, id=producto_id)
-            producto.delete()
-            messages.success(request, 'Producto eliminado.')
+            
+            # Verificar que no tenga stock
+            if producto.stock > 0:
+                messages.error(request, f'No se puede inactivar "{producto.nombre}" porque tiene {producto.stock} unidades en stock.')
+            else:
+                # Inactivar en lugar de eliminar
+                producto.activo = False
+                producto.save()
+                messages.success(request, f'Producto "{producto.nombre}" inactivado correctamente.')
+            return redirect('gestion_productos')
+        elif 'activar' in request.POST:
+            producto_id = request.POST.get('producto_id')
+            producto = get_object_or_404(Producto, id=producto_id)
+            producto.activo = True
+            producto.save()
+            messages.success(request, f'Producto "{producto.nombre}" reactivado correctamente.')
             return redirect('gestion_productos')
     
     context = {
