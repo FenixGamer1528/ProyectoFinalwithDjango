@@ -135,6 +135,8 @@ def gestion_productos(request):
             if form.is_valid():
                 # Guardar producto base con stock general
                 instance = form.save(commit=False)
+                # Asegurar que el producto esté activo por defecto
+                instance.activo = True
                 # Guardar el tipo_producto como campo adicional (puedes usarlo en variantes)
                 tipo_producto = request.POST.get('tipo_producto', 'ropa')
                 # Guardamos temporalmente en un campo o lo usamos en el contexto
@@ -144,8 +146,18 @@ def gestion_productos(request):
         elif 'eliminar' in request.POST:
             producto_id = request.POST.get('producto_id')
             producto = get_object_or_404(Producto, id=producto_id)
-            producto.delete()
-            messages.success(request, 'Producto eliminado.')
+            
+            # Verificar si el producto tiene pedidos asociados
+            tiene_pedidos = producto.pedido_set.exists()
+            
+            if tiene_pedidos:
+                # Si tiene pedidos, no permitir eliminarlo
+                messages.error(request, f'No se puede eliminar "{producto.nombre}" porque ya tiene pedidos asociados. Los productos comprados deben permanecer en el sistema.')
+            else:
+                # Si no tiene pedidos, permitir eliminarlo
+                producto.delete()
+                messages.success(request, f'Producto "{producto.nombre}" eliminado correctamente.')
+            
             return redirect('gestion_productos')
     
     context = {

@@ -183,6 +183,15 @@ def actualizar_stock_productos(detalle_pedido, usuario=None):
                             f"Descontado: {cantidad}, Nuevo stock: {variante.stock}"
                         )
                         
+                        # También actualizar el stock del producto base
+                        if producto.stock >= cantidad:
+                            producto.stock -= cantidad
+                            producto.save()
+                            mensajes.append(
+                                f"✅ Stock del producto base actualizado: {nombre} - "
+                                f"Nuevo stock total: {producto.stock}"
+                            )
+                        
                     except ProductoVariante.DoesNotExist:
                         mensajes.append(
                             f"⚠️ Variante no encontrada para {nombre} "
@@ -191,12 +200,21 @@ def actualizar_stock_productos(detalle_pedido, usuario=None):
                         # No marcamos como error crítico ya que el pedido se creó
                         
                 else:
-                    # Si no tiene talla/color especificados, podríamos actualizar el stock general del producto
-                    # o simplemente registrar que no se puede actualizar
-                    mensajes.append(
-                        f"ℹ️ Producto {nombre} sin talla/color especificados. "
-                        f"No se actualizó stock de variantes."
-                    )
+                    # Si no tiene talla/color especificados, actualizar solo el stock general del producto
+                    if producto.stock >= cantidad:
+                        stock_anterior = producto.stock
+                        producto.stock -= cantidad
+                        producto.save()
+                        mensajes.append(
+                            f"✅ Stock del producto actualizado: {nombre} - "
+                            f"Descontado: {cantidad}, Nuevo stock: {producto.stock}"
+                        )
+                    else:
+                        mensajes.append(
+                            f"⚠️ Stock insuficiente para {nombre}. "
+                            f"Disponible: {producto.stock}, Solicitado: {cantidad}"
+                        )
+                        exitoso = False
         
         return exitoso, mensajes
         
