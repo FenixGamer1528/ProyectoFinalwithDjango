@@ -81,7 +81,67 @@ function cerrarModal() {
 }
 
 function cambiarCantidad(itemId, accion) {
-    fetch(`/carrito/cambiar/${itemId}/${accion}/`).then(() => mostrarCarrito());
+    console.log(`🔄 Cambiando cantidad: item ${itemId}, acción: ${accion}`);
+    
+    fetch(`/carrito/cambiar/${itemId}/${accion}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al cambiar cantidad');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.ok) {
+            alert(data.error || 'No se pudo actualizar la cantidad');
+            return;
+        }
+        
+        console.log('✅ Cantidad actualizada:', data);
+        
+        // Actualizar UI inmediatamente sin recargar
+        const itemElement = document.querySelector(`button[onclick="cambiarCantidad(${itemId}, 'mas')"]`).closest('.item-carrito');
+        if (itemElement) {
+            // Actualizar el texto de precio x cantidad = subtotal
+            const precioElement = itemElement.querySelector('.info-carrito p:nth-child(2)');
+            if (precioElement) {
+                const precioFormateado = data.precio.toLocaleString('es-CO');
+                const subtotalFormateado = data.subtotal.toLocaleString('es-CO');
+                precioElement.innerHTML = `$${precioFormateado} x ${data.cantidad} = <strong>$${subtotalFormateado}</strong>`;
+            }
+        }
+        
+        // Actualizar total del carrito en el footer
+        const totalElement = document.querySelector('.carrito-total span');
+        if (totalElement) {
+            totalElement.textContent = `$${data.total_carrito.toLocaleString('es-CO')}`;
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        alert('No se pudo actualizar la cantidad');
+    });
+}
+
+// Función para obtener el CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
 // ==================== MODAL DE PRODUCTO ====================

@@ -151,7 +151,7 @@ def actualizar_stock_productos(detalle_pedido, usuario=None):
                             color=color
                         )
                         
-                        # Verificar stock disponible
+                        # Verificar stock disponible en la variante
                         if variante.stock < cantidad:
                             mensajes.append(
                                 f"⚠️ Stock insuficiente para {nombre} ({talla}/{color}). "
@@ -160,12 +160,26 @@ def actualizar_stock_productos(detalle_pedido, usuario=None):
                             exitoso = False
                             continue
                         
+                        # Verificar stock total del producto
+                        if producto.stock < cantidad:
+                            mensajes.append(
+                                f"⚠️ Stock total insuficiente para {nombre}. "
+                                f"Disponible: {producto.stock}, Solicitado: {cantidad}"
+                            )
+                            exitoso = False
+                            continue
+                        
                         # Guardar stock anterior
                         stock_anterior = variante.stock
+                        stock_anterior_producto = producto.stock
                         
-                        # Actualizar stock
+                        # Actualizar stock de la variante
                         variante.stock -= cantidad
                         variante.save()
+                        
+                        # ✅ ACTUALIZAR STOCK TOTAL DEL PRODUCTO
+                        producto.stock -= cantidad
+                        producto.save()
                         
                         # Registrar movimiento de inventario
                         Inventario.objects.create(
@@ -175,12 +189,14 @@ def actualizar_stock_productos(detalle_pedido, usuario=None):
                             stock_anterior=stock_anterior,
                             stock_nuevo=variante.stock,
                             usuario=usuario,
-                            observaciones=f'Venta realizada - Pago Wompi'
+                            observaciones=f'Venta realizada - Pago Wompi (Stock total: {stock_anterior_producto} → {producto.stock})'
                         )
                         
                         mensajes.append(
                             f"✅ Stock actualizado: {nombre} ({talla}/{color}) - "
-                            f"Descontado: {cantidad}, Nuevo stock: {variante.stock}"
+                            f"Descontado: {cantidad} | "
+                            f"Stock variante: {variante.stock} | "
+                            f"Stock total producto: {producto.stock}"
                         )
                         
                     except ProductoVariante.DoesNotExist:

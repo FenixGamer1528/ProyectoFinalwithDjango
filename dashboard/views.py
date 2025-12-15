@@ -130,17 +130,36 @@ def gestion_productos(request):
     
     form = ProductoForm()
     if request.method == 'POST':
+        print(f"📥 POST recibido en gestion_productos")
+        print(f"   POST data: {request.POST}")
+        print(f"   FILES data: {request.FILES}")
+        
         if 'guardar' in request.POST:
+            print(f"✅ Botón 'guardar' detectado")
             form = ProductoForm(request.POST, request.FILES)
+            print(f"   Form creado: {form}")
+            print(f"   Form is_valid: {form.is_valid()}")
+            
             if form.is_valid():
+                print(f"✅ Formulario válido")
                 # Guardar producto base con stock general
                 instance = form.save(commit=False)
                 # Guardar el tipo_producto como campo adicional (puedes usarlo en variantes)
                 tipo_producto = request.POST.get('tipo_producto', 'ropa')
+                print(f"   Tipo producto: {tipo_producto}")
                 # Guardamos temporalmente en un campo o lo usamos en el contexto
                 instance.save()
+                print(f"✅ Producto guardado: {instance.id} - {instance.nombre}")
                 messages.success(request, f'Producto creado con {instance.stock} unidades totales. Ahora distribuye el stock en variantes (tallas y colores) desde el botón "Variantes".')
                 return redirect('gestion_productos')
+            else:
+                # Mostrar errores del formulario
+                print(f"❌ Formulario inválido")
+                print(f"   Errores: {form.errors}")
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f'{field}: {error}')
+                        print(f"   Error en {field}: {error}")
         elif 'inactivar' in request.POST:
             producto_id = request.POST.get('producto_id')
             producto = get_object_or_404(Producto, id=producto_id)
@@ -160,6 +179,25 @@ def gestion_productos(request):
             producto.activo = True
             producto.save()
             messages.success(request, f'Producto "{producto.nombre}" reactivado correctamente.')
+            return redirect('gestion_productos')
+        elif 'eliminar' in request.POST:
+            producto_id = request.POST.get('producto_id')
+            producto = get_object_or_404(Producto, id=producto_id)
+            
+            # Verificar si el producto tiene pedidos asociados
+            from carrito.models import Pedido
+            pedidos_count = Pedido.objects.filter(producto=producto).count()
+            
+            if pedidos_count > 0:
+                messages.error(request, f'No se puede eliminar "{producto.nombre}" porque tiene {pedidos_count} pedido(s) asociado(s).')
+            else:
+                # Verificar que no tenga stock
+                if producto.stock > 0:
+                    messages.error(request, f'No se puede eliminar "{producto.nombre}" porque aún tiene {producto.stock} unidades en stock.')
+                else:
+                    nombre_producto = producto.nombre
+                    producto.delete()
+                    messages.success(request, f'Producto "{nombre_producto}" eliminado correctamente.')
             return redirect('gestion_productos')
     
     context = {

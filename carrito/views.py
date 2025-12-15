@@ -300,11 +300,41 @@ def mis_deseos(request):
 
 # Cambiar cantidad de un producto en el carrito
 @login_required
+@require_POST
 def cambiar_cantidad(request, item_id, accion):
-    item = get_object_or_404(ItemCarrito, id=item_id)
-    if accion == "mas":
-        item.cantidad += 1
-    elif accion == "menos" and item.cantidad > 1:
-        item.cantidad -= 1
-    item.save()
-    return JsonResponse({"ok": True, "cantidad": item.cantidad})
+    try:
+        item = get_object_or_404(ItemCarrito, id=item_id)
+        
+        # Validar que el item pertenece al usuario
+        if item.carrito.usuario != request.user:
+            return JsonResponse({"ok": False, "error": "No autorizado"}, status=403)
+        
+        print(f"🔄 Cambiando cantidad: item {item_id}, acción {accion}, cantidad actual: {item.cantidad}")
+        
+        if accion == "mas":
+            item.cantidad += 1
+            print(f"  ➕ Nueva cantidad: {item.cantidad}")
+        elif accion == "menos" and item.cantidad > 1:
+            item.cantidad -= 1
+            print(f"  ➖ Nueva cantidad: {item.cantidad}")
+        elif accion == "menos" and item.cantidad == 1:
+            print(f"  ⚠️ No se puede reducir más (cantidad mínima: 1)")
+            return JsonResponse({"ok": False, "error": "Cantidad mínima es 1"}, status=400)
+        
+        item.save()
+        print(f"  ✅ Cantidad guardada: {item.cantidad}")
+        
+        # Calcular subtotal del item y total del carrito
+        subtotal = float(item.subtotal())
+        total_carrito = float(item.carrito.total())
+        
+        return JsonResponse({
+            "ok": True, 
+            "cantidad": item.cantidad,
+            "subtotal": subtotal,
+            "precio": float(item.producto.precio),
+            "total_carrito": total_carrito
+        })
+    except Exception as e:
+        print(f"  ❌ Error cambiando cantidad: {e}")
+        return JsonResponse({"ok": False, "error": str(e)}, status=500)
