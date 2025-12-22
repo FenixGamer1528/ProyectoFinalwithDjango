@@ -1,26 +1,86 @@
 from django.contrib.auth import logout, authenticate, login
-from django.shortcuts import render,HttpResponse, redirect
-from .forms import LoginForm, RegistroForm 
-from carrito.models import Producto,Pedido, UsuarioPersonalizado
-from django.shortcuts import render, get_object_or_404
-
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.db.models import Q
+from .forms import LoginForm, RegistroForm, TwoFactorVerifyForm
+from carrito.models import Producto, Pedido, UsuarioPersonalizado
+import pyotp
+import qrcode
+import io
+import base64
 
 
 def home(request):
-    productos = Producto.objects.all()
+    from django.core.cache import cache
+    
+    cache_key = 'home_productos'
+    productos = cache.get(cache_key)
+    
+    if productos is None:
+        productos = Producto.objects.all().only(
+            'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+        )[:20]  # Limitar productos iniciales
+        cache.set(cache_key, productos, 300)  # Cache 5 minutos
+    
     return render(request, "core/home.html", {'productos': productos})
 
 
 def about(request):
     return render(request, "about.html",{})
 
-def index(request):
-    productos= Producto.objects.all()
-    print(productos)
-    return render(request, 'index.html', {
+def catalogo_completo(request):
+    """Vista que muestra todos los productos de todas las categorías"""
+    productos = Producto.objects.all().only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'descripcion', 'en_oferta'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
+    return render(request, 'core/catalogo_completo.html', {
         'productos': productos
-  
-})
+    })
+
+def index(request):
+    from carrito.models import ProductoVariante
+    from django.db.models import Exists, OuterRef
+    
+    # Cargar productos destacados (para "Lo Más Vendido") - Límite de 12 productos
+    productos = Producto.objects.filter(destacado=True).annotate(
+        tiene_stock=Exists(
+            ProductoVariante.objects.filter(
+                producto=OuterRef('pk'),
+                stock__gt=0
+            )
+        )
+    ).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'categoria', 'stock'
+    )[:12]  # Máximo 12 productos en carrusel "Lo Más Vendido"
+    
+    # Cargar productos en oferta (para "Ofertas Especiales") - Límite de 9 productos
+    productos_ofertas = Producto.objects.filter(en_oferta=True).annotate(
+        tiene_stock=Exists(
+            ProductoVariante.objects.filter(
+                producto=OuterRef('pk'),
+                stock__gt=0
+            )
+        )
+    ).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'en_oferta', 'stock'
+    )[:9]  # Máximo 9 productos en carrusel "Ofertas"
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+        productos_ofertas = productos_ofertas.prefetch_related('favorited_by')
+    
+    return render(request, 'index.html', {
+        'productos': productos,
+        'productos_ofertas': productos_ofertas
+    })
   
 
 def login_view(request):
@@ -54,15 +114,29 @@ def login_view(request):
         if form.is_valid():
             usuario = form.cleaned_data['usuario']
             password = form.cleaned_data['password']
+            otp_code = form.cleaned_data.get('otp_code', '')
+            
             user = authenticate(request, username=usuario, password=password)
 
             if user is not None:
-                login(request, user)  # <- LOGIN SIEMPRE QUE SEA VÁLIDO
-                
-                if user.is_staff:
-                    return redirect('dashboard')  # vista del admin
+                # Verificar si el usuario tiene 2FA activado
+                if user.two_factor_enabled and user.two_factor_secret:
+                    if otp_code:
+                        # Verificar el código 2FA
+                        totp = pyotp.TOTP(user.two_factor_secret)
+                        if totp.verify(otp_code, valid_window=1):
+                            login(request, user)
+                            return redirect('index')
+                        else:
+                            error_message = "Código 2FA inválido"
+                            return render(request, 'login.html', {'form': form, 'error_message': error_message, 'require_2fa': True})
+                    else:
+                        # Solicitar código 2FA
+                        return render(request, 'login.html', {'form': form, 'require_2fa': True})
                 else:
-                    return redirect('index')   # vista del usuario normal
+                    # Login normal sin 2FA
+                    login(request, user)
+                    return redirect('index')
             else:
                 error_message = "Datos inválidos"
                 return render(request, 'login.html', {'form': form, 'error_message': error_message})
@@ -79,19 +153,34 @@ def dashboard_view(request):
     return render(request, 'dashboard/dashboard.html')
 
 def admin_dashboard(request):
-    total_usuarios = UsuarioPersonalizado.objects.count()
-    total_productos = Producto.objects.count()
-    total_pedidos = Pedido.objects.count()
-
-    context = {
-        'total_usuarios': total_usuarios,
-        'total_productos': total_productos,
-        
-    }
-    return render(request, 'dashboard/dashboard.html', context)
+    from django.core.cache import cache
+    
+    # Cachear contadores por 60 segundos
+    cache_key = 'dashboard_stats'
+    stats = cache.get(cache_key)
+    
+    if stats is None:
+        stats = {
+            'total_usuarios': UsuarioPersonalizado.objects.count(),
+            'total_productos': Producto.objects.count(),
+            'total_pedidos': Pedido.objects.count(),
+        }
+        cache.set(cache_key, stats, 60)
+    
+    return render(request, 'dashboard/dashboard.html', stats)
 def gestion_productos(request):
-    productos = Producto.objects.all()
-    return render(request, 'dashboard/gestion_productos.html', {'productos': productos})
+    from django.core.paginator import Paginator
+    
+    productos = Producto.objects.all().only(
+        'id', 'nombre', 'precio', 'stock', 'categoria', 'imagen_url'
+    ).order_by('-id')
+    
+    # Paginación: 20 productos por página
+    paginator = Paginator(productos, 20)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'dashboard/gestion_productos.html', {'productos': page_obj})
 
 #Registro de usuario
 
@@ -100,8 +189,16 @@ def registro_view(request):
         form = RegistroForm(request.POST)
         if form.is_valid():
             usuario = form.save()
-            login(request, usuario)
-            return redirect('index')  # O a donde quieras redirigir
+            enable_2fa = form.cleaned_data.get('enable_2fa', False)
+            
+            if enable_2fa:
+                # Guardar en sesión que necesitamos configurar 2FA
+                request.session['setup_2fa_user_id'] = usuario.id
+                return redirect('setup_2fa')
+            else:
+                # Login directo sin 2FA
+                login(request, usuario)
+                return redirect('index')
     else:
         form = RegistroForm()
     return render(request, 'core/registro.html', {'form': form})
@@ -118,8 +215,32 @@ def portfolio(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+def buscar_productos(request):
+    query = request.GET.get('q', '').strip()
+    productos = []
 
+    if query:
+        # Búsqueda más precisa por nombre
+        productos = Producto.objects.filter(nombre__iexact=query).only(
+            'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+        )[:50]  # Limitar a 50 resultados
+        
+        # Si no encuentra resultados exactos, busca coincidencias parciales
+        if not productos.exists():
+            productos = Producto.objects.filter(
+                Q(nombre__icontains=query) |
+                Q(descripcion__icontains=query) |
+                Q(categoria__icontains=query)
+            ).only(
+                'id', 'nombre', 'precio', 'imagen_url', 'categoria'
+            )[:50]  # Limitar a 50 resultados
 
+    context = {
+        'productos': productos,
+        'query': query,
+    }
+    
+    return render(request, 'core/resultados_busqueda.html', context)
 
 
 from django.views.generic import ListView
@@ -206,21 +327,312 @@ def exportar_pdf(request):
     return response
 
 def hombres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE)
+    # Optimizado: solo cargar campos necesarios y usar caché
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.HOMBRE).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
+    )
+    
+    # Prefetch favoritos si el usuario está autenticado
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/hombres.html", {"productos": productos})
 
 
 def mujeres(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.MUJER).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/mujeres.html", {"productos": productos})
 
 
 def zapatos(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS)
+    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.ZAPATOS).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/zapatos.html", {"productos": productos})
 
 
 def ofertas(request):
-    productos = Producto.objects.filter(categoria=Producto.CategoriaEnum.OFERTAS)
+    productos = Producto.objects.filter(en_oferta=True).only(
+        'id', 'nombre', 'precio', 'imagen_url', 'destacado', 'en_oferta'
+    )
+    
+    if request.user.is_authenticated:
+        productos = productos.prefetch_related('favorited_by')
+    
     return render(request, "core/ofertas.html", {"productos": productos})
+
+
+@login_required
+@require_POST
+def toggle_favorito(request, producto_id):
+    """Alterna el favorito (lista de deseos) del usuario para un producto.
+    
+    Responde JSON: {success: True, is_favorito: True/False, total_favorites: int}
+    """
+    try:
+        producto = get_object_or_404(Producto, id=producto_id)
+        usuario = request.user
+        
+        # Verificar si el producto ya está en favoritos
+        if producto in usuario.favoritos.all():
+            usuario.favoritos.remove(producto)
+            is_favorito = False
+            mensaje = 'Producto eliminado de favoritos'
+        else:
+            usuario.favoritos.add(producto)
+            is_favorito = True
+            mensaje = 'Producto agregado a favoritos'
+        
+        # Contar favoritos actualizados
+        total_favoritos = usuario.favoritos.count()
+        
+        print(f"✓ Toggle favorito - Usuario: {usuario.username}, Producto: {producto.nombre}, Is_favorito: {is_favorito}, Total: {total_favoritos}")
+        
+        return JsonResponse({
+            'success': True,
+            'is_favorito': is_favorito,
+            'total_favorites': total_favoritos,
+            'producto_id': producto.id,
+            'mensaje': mensaje
+        })
+    except Exception as e:
+        print(f"✗ Error en toggle_favorito: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
+@login_required
+def mis_deseos(request):
+    productos = request.user.favoritos.all()
+    return render(request, 'core/mis_deseos.html', {'productos': productos})
+
+
+def producto_detalle(request, producto_id):
+    """Vista de detalle del producto con todas sus variantes"""
+    from carrito.models import ProductoVariante
+    
+    try:
+        # Obtener producto
+        producto = get_object_or_404(Producto, id=producto_id)
+        
+        # Obtener variantes optimizadas
+        variantes = ProductoVariante.objects.filter(producto=producto).select_related('producto')
+        
+        # Obtener tallas y colores únicos
+        tallas_disponibles = sorted(list(set(v.talla for v in variantes if v.talla)))
+        colores_disponibles = sorted(list(set(v.color for v in variantes if v.color)))
+        
+        # Verificar si es favorito
+        es_favorito = False
+        if request.user.is_authenticated:
+            es_favorito = request.user.favoritos.filter(id=producto.id).exists()
+        
+        context = {
+            'producto': producto,
+            'variantes': variantes,
+            'tallas_disponibles': tallas_disponibles,
+            'colores_disponibles': colores_disponibles,
+            'es_favorito': es_favorito,
+        }
+        
+        # Si se solicita desde AJAX o con parámetro modal=true, devolver solo el contenido
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.GET.get('modal') == 'true':
+            return render(request, 'core/producto_detalle_modal.html', context)
+        
+        # Vista completa normal
+        return render(request, 'core/producto_detalle.html', context)
+        
+    except Exception as e:
+        # Log del error para debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error en producto_detalle: {str(e)}")
+        
+        # Devolver error 500 con mensaje descriptivo
+        from django.http import HttpResponse
+        return HttpResponse(f"Error al cargar producto: {str(e)}", status=500)
+
+
+# ==================== VISTAS 2FA ====================
+
+def setup_2fa(request):
+    """Vista para configurar 2FA durante el registro"""
+    user_id = request.session.get('setup_2fa_user_id')
+    
+    if not user_id:
+        return redirect('login')
+    
+    try:
+        user = UsuarioPersonalizado.objects.get(id=user_id)
+    except UsuarioPersonalizado.DoesNotExist:
+        return redirect('login')
+    
+    if request.method == 'POST':
+        form = TwoFactorVerifyForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data['otp_code']
+            secret = request.session.get('temp_2fa_secret')
+            
+            if secret:
+                totp = pyotp.TOTP(secret)
+                if totp.verify(otp_code, valid_window=1):
+                    # Código válido - activar 2FA
+                    user.two_factor_secret = secret
+                    user.two_factor_enabled = True
+                    user.save()
+                    
+                    # Limpiar sesión
+                    del request.session['setup_2fa_user_id']
+                    del request.session['temp_2fa_secret']
+                    
+                    # Hacer login y redirigir
+                    login(request, user)
+                    return render(request, 'core/2fa_success.html', {'user': user})
+                else:
+                    form.add_error('otp_code', 'Código inválido. Por favor, intenta de nuevo.')
+    else:
+        form = TwoFactorVerifyForm()
+        # Generar secreto nuevo
+        secret = pyotp.random_base32()
+        request.session['temp_2fa_secret'] = secret
+    
+    # Generar código QR
+    secret = request.session.get('temp_2fa_secret')
+    totp = pyotp.TOTP(secret)
+    provisioning_uri = totp.provisioning_uri(
+        name=user.email,
+        issuer_name='Glamoure Store'
+    )
+    
+    # Crear imagen QR
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(provisioning_uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    # Convertir a base64 para mostrar en template
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    
+    context = {
+        'form': form,
+        'qr_code': img_str,
+        'secret': secret,
+        'user': user
+    }
+    
+    return render(request, 'core/setup_2fa.html', context)
+
+
+@login_required
+def manage_2fa(request):
+    """Vista para activar/desactivar 2FA desde el perfil"""
+    user = request.user
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'enable':
+            # Generar secreto nuevo
+            secret = pyotp.random_base32()
+            request.session['temp_2fa_secret'] = secret
+            
+            # Generar código QR
+            totp = pyotp.TOTP(secret)
+            provisioning_uri = totp.provisioning_uri(
+                name=user.email,
+                issuer_name='Glamoure Store'
+            )
+            
+            # Crear imagen QR
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(provisioning_uri)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            
+            # Convertir a base64
+            buffer = io.BytesIO()
+            img.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            
+            form = TwoFactorVerifyForm()
+            
+            context = {
+                'form': form,
+                'qr_code': img_str,
+                'secret': secret,
+                'user': user,
+                'activating': True
+            }
+            
+            return render(request, 'core/manage_2fa.html', context)
+            
+        elif action == 'verify':
+            form = TwoFactorVerifyForm(request.POST)
+            if form.is_valid():
+                otp_code = form.cleaned_data['otp_code']
+                secret = request.session.get('temp_2fa_secret')
+                
+                if secret:
+                    totp = pyotp.TOTP(secret)
+                    if totp.verify(otp_code, valid_window=1):
+                        # Activar 2FA
+                        user.two_factor_secret = secret
+                        user.two_factor_enabled = True
+                        user.save()
+                        
+                        # Limpiar sesión
+                        del request.session['temp_2fa_secret']
+                        
+                        return render(request, 'core/2fa_success.html', {'user': user, 'from_profile': True})
+                    else:
+                        form.add_error('otp_code', 'Código inválido')
+                        secret = request.session.get('temp_2fa_secret')
+                        totp = pyotp.TOTP(secret)
+                        provisioning_uri = totp.provisioning_uri(name=user.email, issuer_name='Glamoure Store')
+                        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+                        qr.add_data(provisioning_uri)
+                        qr.make(fit=True)
+                        img = qr.make_image(fill_color="black", back_color="white")
+                        buffer = io.BytesIO()
+                        img.save(buffer, format='PNG')
+                        img_str = base64.b64encode(buffer.getvalue()).decode()
+                        
+                        return render(request, 'core/manage_2fa.html', {
+                            'form': form,
+                            'qr_code': img_str,
+                            'secret': secret,
+                            'user': user,
+                            'activating': True
+                        })
+        
+        elif action == 'disable':
+            # Desactivar 2FA
+            user.two_factor_enabled = False
+            user.two_factor_secret = None
+            user.save()
+            
+            return redirect('manage_2fa')
+    
+    context = {
+        'user': user
+    }
+    
+    return render(request, 'core/manage_2fa.html', context)
+
 

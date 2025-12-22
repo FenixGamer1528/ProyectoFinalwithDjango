@@ -1,0 +1,331 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <title>Confirmación de Compra - Glamoure</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e2e8f0;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid rgba(192, 167, 107, 0.3);
+        }
+        
+        .status-header {
+            padding: 50px 40px;
+            text-align: center;
+            color: #1a1a1a;
+        }
+        
+        .status-header.success {
+            background: linear-gradient(135deg, #C0A76B 0%, #D4AF37 100%);
+        }
+        
+        .status-header.error {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+        
+        .status-header.pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        
+        .header-accent {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .status-header h1 { 
+            font-size: 2.2em; 
+            margin-bottom: 10px; 
+            font-weight: 700;
+        }
+        
+        .content { padding: 40px; }
+        
+        .section {
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(192, 167, 107, 0.2);
+        }
+        
+        .section h2 {
+            color: #D4AF37;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #C0A76B;
+            padding-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0.5px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .detail-row:last-child { border-bottom: none; }
+        
+        .label { color: #94a3b8; }
+        .value { 
+            color: #e2e8f0; 
+            font-weight: 600; 
+            text-align: right; 
+        }
+        
+        .glamour-gold-text {
+            color: #D4AF37;
+        }
+        
+        .producto-item {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .producto-item:hover {
+            border-color: rgba(192, 167, 107, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .success-message {
+            background: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .btn:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #C0A76B 0%, #D4AF37 100%);
+            color: #1a1a1a;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #D4AF37 0%, #C0A76B 100%);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+            border: 2px solid rgba(192, 167, 107, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(192, 167, 107, 0.5);
+        }
+
+        /* Iconos elegantes con CSS */
+        .icon-check::before { content: "✓"; }
+        .icon-cross::before { content: "✗"; }
+        .icon-clock::before { content: "⏳"; }
+        .icon-diamond::before { content: "◆"; }
+        .icon-bag::before { content: "🛍"; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .actions {
+                flex-direction: column;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .status-header {
+                padding: 40px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        {% if transaccion.estado == 'APPROVED' %}
+            <div class="status-header success">
+                <div class="icon icon-check"></div>
+                <h1 class="header-accent">Compra Exitosa</h1>
+                <p>Tu pedido ha sido confirmado</p>
+            </div>
+        {% elif transaccion.estado == 'DECLINED' %}
+            <div class="status-header error">
+                <div class="icon icon-cross"></div>
+                <h1 class="header-accent">Pago Rechazado</h1>
+                <p>La transacción no pudo ser procesada</p>
+            </div>
+        {% else %}
+            <div class="status-header pending">
+                <div class="icon icon-clock"></div>
+                <h1 class="header-accent">Pago Pendiente</h1>
+                <p>Tu transacción está siendo verificada</p>
+            </div>
+        {% endif %}
+        
+        <div class="content">
+            <!-- Información de la Transacción -->
+            <div class="section">
+                <h2>Información de la Compra</h2>
+                <div class="detail-row">
+                    <span class="label">Referencia</span>
+                    <span class="value glamour-gold-text">{{ transaccion.referencia }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Total Pagado</span>
+                    <span class="value glamour-gold-text" style="font-size: 1.1em;">${{ transaccion.monto|floatformat:0|intcomma }} COP</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Estado</span>
+                    <span class="value" style="color: {% if transaccion.estado == 'APPROVED' %}#38ef7d{% elif transaccion.estado == 'DECLINED'%}#ef4444{% else %}#f59e0b{% endif %};">
+                        {{ transaccion.get_estado_display }}
+                    </span>
+                </div>
+                {% if transaccion.metodo_pago %}
+                <div class="detail-row">
+                    <span class="label">Método de Pago</span>
+                    <span class="value">{{ transaccion.metodo_pago }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <span class="label">Fecha</span>
+                    <span class="value">{{ transaccion.creado|date:"d/m/Y H:i" }}</span>
+                </div>
+            </div>
+            
+            <!-- Información de Envío -->
+            {% if transaccion.detalle_pedido.direccion_envio or transaccion.detalle_pedido.telefono_contacto %}
+            <div class="section">
+                <h2>Información de Envío</h2>
+                <div class="detail-row">
+                    <span class="label">Nombre</span>
+                    <span class="value">{{ transaccion.nombre_completo }}</span>
+                </div>
+                {% if transaccion.detalle_pedido.direccion_envio %}
+                <div class="detail-row">
+                    <span class="label">Dirección</span>
+                    <span class="value">{{ transaccion.detalle_pedido.direccion_envio }}</span>
+                </div>
+                {% endif %}
+                {% if transaccion.detalle_pedido.telefono_contacto %}
+                <div class="detail-row">
+                    <span class="label">Teléfono</span>
+                    <span class="value">{{ transaccion.detalle_pedido.telefono_contacto }}</span>
+                </div>
+                {% endif %}
+                <div class="detail-row">
+                    <span class="label">Email</span>
+                    <span class="value">{{ transaccion.email }}</span>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Productos Comprados -->
+            {% if transaccion.get_productos %}
+            <div class="section">
+                <h2>Productos Comprados ({{ transaccion.get_total_productos }})</h2>
+                {% for producto in transaccion.get_productos %}
+                <div class="producto-item">
+                    <div>
+                        <strong style="color: #e2e8f0;">{{ producto.nombre }}</strong><br>
+                        <small style="color: #94a3b8;">
+                            Cantidad: {{ producto.cantidad }}
+                            {% if producto.talla %} | Talla: {{ producto.talla }}{% endif %}
+                        </small>
+                    </div>
+                    <div style="text-align: right;">
+                        <strong class="glamour-gold-text">${{ producto.subtotal|floatformat:0|intcomma }}</strong><br>
+                        <small style="color: #94a3b8;">${{ producto.precio|floatformat:0|intcomma }} c/u</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <!-- Mensaje de Éxito -->
+            {% if transaccion.estado == 'APPROVED' %}
+            <div class="success-message">
+                <strong style="color: #d4edda;">Gracias por tu compra</strong><br>
+                <span style="color: #94d4a3;">
+                    Recibirás un email de confirmación en <strong>{{ transaccion.email }}</strong>
+                </span>
+            </div>
+            {% endif %}
+            
+            <!-- Acciones -->
+            <div class="actions">
+                <a href="/" class="btn btn-primary">Continuar Comprando</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

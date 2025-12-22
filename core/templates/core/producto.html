@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -26,7 +27,17 @@
             <!-- Detalles -->
             <div class="p-6">
                 <h1 class="text-3xl font-bold text-gray-800 mb-3">{{ producto.nombre|default:"[Sin nombre]" }}</h1>
-                <p class="text-xl text-indigo-600 font-semibold mb-4">${{ producto.precio|default:"0.00" }}</p>
+                <!-- Estrella de favoritos -->
+                {% if request.user.is_authenticated %}
+                <button id="fav-btn" type="button" aria-label="Agregar a deseos" class="ml-3 inline-flex items-center justify-center w-10 h-10 rounded-full border bg-white text-2xl" style="line-height:1">
+                    {% if producto in request.user.favoritos.all %}
+                        <i id="fav-icon" class="fa-solid fa-heart text-[#C0A76B] fa-lg" aria-hidden="true"></i>
+                    {% else %}
+                        <i id="fav-icon" class="fa-regular fa-heart text-gray-700 fa-lg" aria-hidden="true"></i>
+                    {% endif %}
+                </button>
+                {% endif %}
+                <p class="text-xl text-indigo-600 font-semibold mb-4">${{ producto.precio|floatformat:0|intcomma }}</p>
                 <p class="text-gray-600 mb-6">{{ producto.descripcion|default:"Sin descripción" }}</p>
 
                 <!-- Formulario -->
@@ -35,6 +46,10 @@
     <label for="cantidad" class="text-sm text-gray-700">Cantidad:</label>
     <input type="number" name="cantidad" id="cantidad" min="1" value="1" 
            class="w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-[#d4af37] focus:border-[#d4af37]">
+        <!-- Campo Talla -->
+        <label for="talla" class="text-sm text-gray-700">Talla:</label>
+        <input type="text" name="talla" id="talla" placeholder="Ej: M, L, 38" 
+               class="w-28 px-2 py-1 border border-gray-300 rounded-md focus:ring-[#d4af37] focus:border-[#d4af37]" value="{{ producto.talla }}">
     
     <!-- Botón Agregar -->
     <button type="submit" 
@@ -48,6 +63,61 @@
    class="block w-full text-center bg-black text-white font-medium text-sm px-4 py-3 rounded-lg transition duration-300 hover:bg-[#d4af37] hover:text-black">
    Volver al inicio
 </a>
+
+{% if request.user.is_authenticated %}
+<script>
+    // CSRF helper taken from Django docs
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    (function(){
+        const btn = document.getElementById('fav-btn');
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+            const csrftoken = getCookie('csrftoken');
+            fetch("{% url 'toggle_favorito' producto.id %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(r=>r.json()).then(data=>{
+                        if(data.ok){
+                            const icon = document.getElementById('fav-icon');
+                            if(data.added){
+                                icon.classList.remove('fa-regular');
+                                icon.classList.add('fa-solid');
+                                icon.classList.add('text-[#C0A76B]');
+                                // tiny animation
+                                icon.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 300 });
+                            } else {
+                                icon.classList.remove('fa-solid');
+                                icon.classList.add('fa-regular');
+                                icon.classList.remove('text-[#C0A76B]');
+                            }
+                            // update header counter if present
+                            const counter = document.getElementById('wishlist-count');
+                            if(counter && typeof data.total_favorites !== 'undefined'){
+                                counter.textContent = data.total_favorites;
+                            }
+                        }
+            }).catch(err=>console.error(err));
+        });
+    })();
+</script>
+{% endif %}
 
             </div>
         </div>

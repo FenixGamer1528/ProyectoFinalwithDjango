@@ -1,0 +1,282 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Ventas - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-black text-white min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'gestion_reportes' %}" class="text-[#C0A76B] hover:text-yellow-400 flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-8">
+            <h1 class="text-3xl font-bold text-[#C0A76B] mb-6">
+                <i class="fas fa-chart-line"></i> Análisis de Ventas
+            </h1>
+
+            <!-- Selector de periodo -->
+            <form method="get" class="mb-8 flex gap-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Mes</label>
+                    <select name="mes" class="px-4 py-2 bg-black border border-[#C0A76B] rounded-lg text-white">
+                        {% for i in "123456789012" %}
+                        <option value="{{ forloop.counter }}" {% if mes == forloop.counter|stringformat:"s" %}selected{% endif %}>
+                            {{ forloop.counter }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-2">Año</label>
+                    <input type="number" name="anio" value="{{ anio }}" 
+                        class="px-4 py-2 bg-black border border-[#C0A76B] rounded-lg text-white">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="px-6 py-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition">
+                        <i class="fas fa-search"></i> Analizar
+                    </button>
+                </div>
+            </form>
+
+            {% if analisis %}
+            <!-- Resumen -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-black bg-opacity-50 border border-green-400 rounded-xl p-6">
+                    <p class="text-gray-400 text-sm mb-2">Total Ventas</p>
+                    <p class="text-3xl font-bold text-green-400">${{ analisis.total_ventas|floatformat:0|intcomma }}</p>
+                </div>
+                <div class="bg-black bg-opacity-50 border border-blue-400 rounded-xl p-6">
+                    <p class="text-gray-400 text-sm mb-2">Cantidad Pedidos</p>
+                    <p class="text-3xl font-bold text-blue-400">{{ analisis.cantidad_pedidos }}</p>
+                </div>
+                <div class="bg-black bg-opacity-50 border border-[#C0A76B] rounded-xl p-6">
+                    <p class="text-gray-400 text-sm mb-2">Promedio por Venta</p>
+                    <p class="text-3xl font-bold text-[#C0A76B]">${{ analisis.promedio_venta|floatformat:0|intcomma }}</p>
+                </div>
+            </div>
+
+            <!-- Botones de exportación -->
+            <div class="mb-8 flex gap-4">
+                <a href="{% url 'exportar_reporte_ventas' %}?mes={{ mes }}&anio={{ anio }}&formato=excel" 
+                   class="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i> Descargar Excel (Polars)
+                </a>
+                <a href="{% url 'exportar_reporte_ventas' %}?mes={{ mes }}&anio={{ anio }}&formato=csv" 
+                   class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-file-csv"></i> Descargar CSV
+                </a>
+            </div>
+
+            <!-- Gráficas -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Gráfica de ventas por estado -->
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-[#C0A76B] mb-4">Distribución de Ventas por Estado</h2>
+                    <canvas id="chartVentasEstado"></canvas>
+                </div>
+
+                <!-- Gráfica de ventas por ciudad -->
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-[#C0A76B] mb-4">Top 10 Ciudades por Ventas</h2>
+                    <canvas id="chartVentasCiudad"></canvas>
+                </div>
+            </div>
+
+            <!-- Ventas por estado -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-[#C0A76B] mb-4">Ventas por Estado</h2>
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-2 text-[#C0A76B]">Estado</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Total Ventas</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Cantidad Pedidos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in analisis.ventas_por_estado_list %}
+                            <tr class="border-b border-gray-800">
+                                <td class="py-3 text-white">{{ row.estado }}</td>
+                                <td class="py-3 text-right text-green-400">${{ row.total_ventas|floatformat:0|intcomma }}</td>
+                                <td class="py-3 text-right text-blue-400">{{ row.cantidad_pedidos }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Ventas por ciudad -->
+            <div>
+                <h2 class="text-xl font-bold text-[#C0A76B] mb-4">Ventas por Ciudad (Top 10)</h2>
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-2 text-[#C0A76B]">Ciudad</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Total Ventas</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Cantidad Pedidos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in analisis.ventas_por_ciudad_list %}
+                            <tr class="border-b border-gray-800">
+                                <td class="py-3 text-white">{{ row.ciudad }}</td>
+                                <td class="py-3 text-right text-green-400">${{ row.total_ventas|floatformat:0|intcomma }}</td>
+                                <td class="py-3 text-right text-blue-400">{{ row.cantidad_pedidos }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fas fa-chart-line text-6xl mb-4 opacity-50"></i>
+                <p class="text-xl">No hay datos disponibles para el periodo seleccionado</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if analisis %}
+    <script>
+        // Datos de ventas por estado
+        const ventasEstadoData = {
+            labels: [{% for row in analisis.ventas_por_estado_list %}'{{ row.estado }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Total Ventas ($)',
+                data: [{% for row in analisis.ventas_por_estado_list %}{{ row.total_ventas }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: [
+                    'rgba(192, 167, 107, 0.8)',  // Dorado
+                    'rgba(59, 130, 246, 0.8)',   // Azul
+                    'rgba(34, 197, 94, 0.8)',    // Verde
+                    'rgba(249, 115, 22, 0.8)',   // Naranja
+                ],
+                borderColor: [
+                    'rgba(192, 167, 107, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(249, 115, 22, 1)',
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        // Datos de ventas por ciudad
+        const ventasCiudadData = {
+            labels: [{% for row in analisis.ventas_por_ciudad_list %}'{{ row.ciudad }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Total Ventas ($)',
+                data: [{% for row in analisis.ventas_por_ciudad_list %}{{ row.total_ventas }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                backgroundColor: 'rgba(192, 167, 107, 0.8)',
+                borderColor: 'rgba(192, 167, 107, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+            }]
+        };
+
+        // Configuración común para las gráficas
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#C0A76B',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: '#C0A76B',
+                    bodyColor: '#ffffff',
+                    borderColor: '#C0A76B',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += '$' + context.parsed.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Gráfica de ventas por estado (Pie/Doughnut)
+        const ctxEstado = document.getElementById('chartVentasEstado').getContext('2d');
+        new Chart(ctxEstado, {
+            type: 'doughnut',
+            data: ventasEstadoData,
+            options: {
+                ...commonOptions,
+                plugins: {
+                    ...commonOptions.plugins,
+                    legend: {
+                        ...commonOptions.plugins.legend,
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfica de ventas por ciudad (Barras horizontales)
+        const ctxCiudad = document.getElementById('chartVentasCiudad').getContext('2d');
+        new Chart(ctxCiudad, {
+            type: 'bar',
+            data: ventasCiudadData,
+            options: {
+                ...commonOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(192, 167, 107, 0.1)'
+                        },
+                        ticks: {
+                            color: '#C0A76B',
+                            callback: function(value) {
+                                return '$' + value.toFixed(0).replace(/\d(?=(\d{3})+$)/g, '$&,');
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(192, 167, 107, 0.1)'
+                        },
+                        ticks: {
+                            color: '#C0A76B'
+                        }
+                    }
+                },
+                plugins: {
+                    ...commonOptions.plugins,
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

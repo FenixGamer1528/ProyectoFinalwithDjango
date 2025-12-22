@@ -1,0 +1,622 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Distribución - {{ producto.nombre }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .variant-card {
+            transition: all 0.3s ease;
+        }
+        .variant-card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-[#C0A76B]">Distribución de Producto</h1>
+                    <p class="text-gray-400 mt-2">{{ producto.nombre }}</p>
+                </div>
+                <a href="{% url 'gestion_productos' %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+                    <i class="fas fa-arrow-left mr-2"></i> Volver
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="bg-[#C0A76B] bg-opacity-20 border border-[#C0A76B] text-[#C0A76B] p-3 rounded-lg mt-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- COLUMNA IZQUIERDA -->
+            <div class="space-y-6">
+                <!-- Información del producto base -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                        <i class="fas fa-info-circle mr-2"></i> Producto Base
+                    </h2>
+                    
+                    {% if producto.imagen_url %}
+                        <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-48 object-cover rounded-lg mb-4 border border-[#C0A76B]">
+                    {% endif %}
+                    
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Nombre:</span>
+                            <span class="text-white font-semibold">{{ producto.nombre }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Precio:</span>
+                            <span class="text-[#C0A76B] font-bold">${{ producto.precio|floatformat:0|intcomma }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <span class="text-gray-400">Categoría:</span>
+                            <span class="text-white font-semibold">{{ producto.get_categoria_display }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Panel de Stock -->
+                    <div class="mt-4 pt-4 border-t border-gray-700">
+                        <h3 class="text-sm font-semibold text-[#C0A76B] mb-3">
+                            <i class="fas fa-warehouse mr-2"></i>Distribución de Stock
+                        </h3>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Stock Total:</span>
+                                <span class="text-white font-bold text-lg">{{ stock_total }} unidades</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Stock Asignado:</span>
+                                <span class="text-yellow-400 font-semibold">{{ stock_asignado }} unidades</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-700">
+                                <span class="text-gray-400 text-sm font-semibold">Stock Disponible:</span>
+                                <span class="{% if stock_disponible > 0 %}text-green-400{% else %}text-red-400{% endif %} font-bold text-lg">
+                                    {{ stock_disponible }} unidades
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso -->
+                        <div class="mt-3">
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-[#C0A76B] h-2 rounded-full" style="width: {% widthratio stock_asignado stock_total 100 %}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 text-center">
+                                {% widthratio stock_asignado stock_total 100 %}% distribuido
+                            </p>
+                        </div>
+                        
+                        {% if stock_disponible == 0 %}
+                        <div class="mt-3 bg-yellow-900 bg-opacity-20 border border-yellow-400 text-yellow-300 p-2 rounded text-xs">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Todo el stock está distribuido
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Formulario para agregar variantes -->
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                    <i class="fas fa-plus-circle mr-2"></i> Agregar Variante
+                </h2>
+                
+                <form method="post" enctype="multipart/form-data" id="variantForm" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Tipo de Producto *</label>
+                        <select name="tipo_producto" id="id_tipo_producto" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="ropa">Prenda Superior (camisetas, blusas, chaquetas)</option>
+                            <option value="pantalones">Prenda Inferior (pantalones, jeans)</option>
+                            <option value="zapatos">Calzado</option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">
+                            {% if producto.categoria == 'hombre' %}
+                                🚹 Hombre: Superior (XS-XXL) | Inferior (28-38)
+                            {% elif producto.categoria == 'mujer' %}
+                                🚺 Mujer: Superior (XS-XL) | Inferior (6-16)
+                            {% elif producto.categoria == 'zapatos' %}
+                                👞 Zapatos: Sistema europeo (33-45)
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Color *</label>
+                        <select name="color" id="id_color" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="">Selecciona un color</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Talla *</label>
+                        <select name="talla" id="id_talla" required class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white">
+                            <option value="">Selecciona una talla</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Stock Inicial *</label>
+                        <input type="number" 
+                               name="stock" 
+                               min="1" 
+                               max="{{ stock_disponible }}"
+                               value="0"
+                               required 
+                               class="w-full px-4 py-2 bg-black border border-[#C0A76B] rounded-md text-white focus:outline-none focus:ring-2 focus:ring-[#C0A76B]"
+                               placeholder="Ingresa cantidad">
+                        <p class="text-xs text-gray-400 mt-1">
+                            Máximo disponible: <span class="{% if stock_disponible > 0 %}text-green-400{% else %}text-red-400{% endif %} font-semibold">{{ stock_disponible }} unidades</span>
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="text-sm text-[#C0A76B] block mb-2">Imagen (opcional)</label>
+                        {{ form.imagen }}
+                        <p class="text-xs text-gray-500 mt-1">Si no subes imagen, se puede generar con IA después</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold py-3 px-4 rounded-md transition-all {% if stock_disponible == 0 %}opacity-50 cursor-not-allowed{% endif %}" {% if stock_disponible == 0 %}disabled{% endif %}>
+                        <i class="fas fa-save mr-2"></i> 
+                        {% if stock_disponible > 0 %}Crear Variante{% else %}Sin stock disponible{% endif %}
+                    </button>
+                </form>
+                </div>
+            </div>
+            
+            <!-- COLUMNA DERECHA -->
+            <div class="space-y-6">
+                <!-- Resumen de tallas y colores disponibles (estilo Longines) -->
+                {% if tallas_disponibles or colores_disponibles %}
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                        <i class="fas fa-layer-group mr-2"></i> Tallas y Colores Disponibles
+                    </h2>
+                    
+                    <!-- Tallas disponibles -->
+                    {% if tallas_disponibles %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                            <i class="fas fa-ruler mr-2"></i>Tallas:
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for talla in tallas_disponibles %}
+                                <button class="px-4 py-2 bg-black border-2 border-[#C0A76B] rounded-lg text-white hover:bg-[#C0A76B] hover:text-black transition-all font-semibold cursor-default">
+                                    {{ talla }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Colores disponibles -->
+                    {% if colores_disponibles %}
+                    <div class="mb-6">
+                        <h3 class="text-sm font-medium text-gray-400 mb-3 uppercase tracking-wide">
+                            <i class="fas fa-palette mr-2"></i>Colores:
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for color in colores_disponibles %}
+                                <button class="px-4 py-2 bg-black border-2 border-[#C0A76B] rounded-lg text-white hover:bg-[#C0A76B] hover:text-black transition-all font-semibold cursor-default">
+                                    {{ color }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Miniaturas de variantes disponibles -->
+                {% if variantes %}
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
+                    <div>
+                        <h3 class="text-sm font-medium text-[#C0A76B] mb-3">
+                            <i class="fas fa-images mr-2"></i>Disponible en {{ variantes.count }} opción{{ variantes.count|pluralize:"es" }}
+                        </h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for variante in variantes %}
+                                <div class="group relative bg-black border border-[#C0A76B] border-opacity-30 hover:border-opacity-100 rounded-lg p-2 transition-all cursor-pointer w-24">
+                                    {% if variante.imagen_url %}
+                                        <img src="{{ variante.imagen_url }}" alt="{{ variante.talla }} - {{ variante.color }}" class="w-full h-24 object-cover rounded-md mb-2">
+                                    {% elif variante.producto.imagen_url %}
+                                        <img src="{{ variante.producto.imagen_url }}" alt="{{ variante.talla }} - {{ variante.color }}" class="w-full h-24 object-cover rounded-md mb-2 opacity-40">
+                                    {% else %}
+                                        <div class="w-full h-24 bg-gray-800 rounded-md mb-2 flex items-center justify-center">
+                                            <i class="fas fa-image text-gray-600 text-2xl"></i>
+                                        </div>
+                                    {% endif %}
+                                    <p class="text-xs text-center text-white font-semibold">{{ variante.talla }}</p>
+                                    <p class="text-xs text-center text-gray-400">{{ variante.color }}</p>
+                                    
+                                    <!-- Tooltip al hacer hover -->
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-[#1a1a1a] border border-[#C0A76B] rounded-lg p-3 z-10 w-48 shadow-xl">
+                                        <p class="text-xs text-white font-semibold mb-1">{{ variante.talla }} - {{ variante.color }}</p>
+                                        <p class="text-xs text-gray-400 mb-1">Stock: <span class="{% if variante.stock > 10 %}text-green-400{% elif variante.stock > 0 %}text-yellow-400{% else %}text-red-400{% endif %}">{{ variante.stock }} unidades</span></p>
+                                        {% if variante.imagen_generada_ia %}
+                                            <p class="text-xs text-purple-400"><i class="fas fa-robot mr-1"></i>Generada con IA</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Lista detallada de variantes -->
+                {% if variantes %}
+                <div class="bg-[#1a1a1a] border border-[#C0A76B] p-5 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-[#C0A76B]">
+                    <i class="fas fa-list mr-2"></i> Distribución Existente ({{ variantes.count }})
+                </h2>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    {% for variante in variantes %}
+                        <div class="bg-black border border-[#C0A76B] border-opacity-30 rounded-lg p-4 hover:border-opacity-100 transition-all hover:shadow-lg">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="font-semibold text-white">{{ variante.talla }} - {{ variante.color }}</h3>
+                                    <p class="text-sm text-gray-400">{{ variante.get_tipo_producto_display }}</p>
+                                </div>
+                                <span class="{% if variante.stock > 10 %}bg-green-900 text-green-400{% elif variante.stock > 0 %}bg-yellow-900 text-yellow-400{% else %}bg-red-900 text-red-400{% endif %} text-xs px-3 py-1 rounded-full border border-current">
+                                    Stock: {{ variante.stock }}
+                                </span>
+                            </div>
+                            
+                            {% if variante.imagen_url %}
+                                <img src="{{ variante.imagen_url }}" alt="{{ variante }}" class="w-full h-32 object-cover rounded-lg mb-3">
+                            {% elif variante.producto.imagen_url %}
+                                <img src="{{ variante.producto.imagen_url }}" alt="{{ variante }}" class="w-full h-32 object-cover rounded-lg mb-3 opacity-50">
+                                <p class="text-xs text-gray-500 text-center -mt-2 mb-2">Imagen del producto base</p>
+                            {% endif %}
+
+                            {% if variante.imagen_generada_ia %}
+                                <span class="inline-block text-xs bg-purple-900 text-purple-400 px-2 py-1 rounded-full border border-purple-400 mb-2">
+                                    <i class="fas fa-robot mr-1"></i> Generada con IA
+                                </span>
+                            {% endif %}
+
+                            <!-- Selector de Color con IA -->
+                            <div class="mt-3 p-3 bg-gradient-to-r from-purple-900/20 to-pink-900/20 border border-purple-500/30 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <input type="color" 
+                                           id="color-picker-{{ variante.id }}" 
+                                           value="#{{ variante.color|default:'ff0000' }}"
+                                           class="w-10 h-10 rounded border-2 border-[#C0A76B] cursor-pointer">
+                                    <button onclick="recolorizarConIA({{ variante.id }})" 
+                                            class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-3 py-2 rounded-md text-sm font-semibold transition-all shadow-lg">
+                                        <i class="fas fa-wand-magic-sparkles mr-1"></i> Cambiar Color con IA
+                                    </button>
+                                </div>
+                                <div id="loader-{{ variante.id }}" class="hidden text-center py-2">
+                                    <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-purple-400"></div>
+                                    <span class="ml-2 text-xs text-purple-400">Procesando con IA...</span>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 mt-3">
+                                <a href="{% url 'historial_inventario' variante.id %}" class="flex-1 text-center bg-blue-900 hover:bg-blue-800 text-blue-400 px-3 py-2 rounded-md text-sm transition-all">
+                                    <i class="fas fa-history mr-1"></i> Historial
+                                </a>
+                                <a href="{% url 'ajustar_inventario' variante.id %}" class="flex-1 text-center bg-green-900 hover:bg-green-800 text-green-400 px-3 py-2 rounded-md text-sm transition-all">
+                                    <i class="fas fa-boxes mr-1"></i> Ajustar
+                                </a>
+                                <form method="post" action="{% url 'eliminar_variante' variante.id %}" class="inline" onsubmit="return confirm('¿Eliminar esta variante?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="bg-red-900 hover:bg-red-800 text-red-400 px-3 py-2 rounded-md text-sm transition-all">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-400 col-span-2 text-center py-8">
+                            No hay distribución creada. Agrega la primera distribución usando el formulario.
+                        </p>
+                    {% endfor %}
+                </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Categoría del producto desde Django
+        const categoriaProducto = '{{ producto.categoria }}'; // 'mujer', 'hombre', 'zapatos'
+        
+        // Tallas según categoría y tipo de producto
+        const SIZE_GROUPS = {
+            // HOMBRE
+            'hombre_ropa': ['XS', 'S', 'M', 'L', 'XL', 'XXL'],  // Prendas superiores
+            'hombre_pantalones': ['28', '30', '32', '34', '36', '38'],  // Pantalones
+            
+            // MUJER
+            'mujer_ropa': ['XS', 'S', 'M', 'L', 'XL'],  // Prendas superiores
+            'mujer_pantalones': ['6', '8', '10', '12', '14', '16'],  // Jeans/Pantalones
+            
+            // ZAPATOS (sistema europeo, unisex)
+            'zapatos_zapatos': ['33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'],
+            
+            // Fallback genérico
+            'ropa': ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+            'pantalones': ['28', '30', '32', '34', '36', '38'],
+            'zapatos': ['33', '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
+        };
+
+        const COLOR_GROUPS = {
+            'ropa': ['Blanco', 'Negro', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Gris', 'Marrón', 'Rosa', 'Morado', 'Beige', 'Naranja'],
+            'pantalones': ['Negro', 'Azul', 'Gris', 'Marrón', 'Caqui', 'Blanco', 'Verde Oliva'],
+            'zapatos': ['Negro', 'Blanco', 'Marrón', 'Beige', 'Azul', 'Rojo', 'Gris', 'Verde']
+        };
+
+        const tipoSelect = document.getElementById('id_tipo_producto');
+        const tallaSelect = document.getElementById('id_talla');
+        const colorSelect = document.getElementById('id_color');
+        const stockInput = document.querySelector('input[name="stock"]');
+        const variantForm = document.getElementById('variantForm');
+        
+        const stockDisponible = {{ stock_disponible }};
+
+        function updateOptions() {
+            const tipo = tipoSelect.value;
+            
+            // Determinar clave de tallas según categoría del producto + tipo seleccionado
+            let sizesKey = tipo; // fallback
+            
+            if (categoriaProducto === 'hombre') {
+                sizesKey = `hombre_${tipo}`;
+            } else if (categoriaProducto === 'mujer') {
+                sizesKey = `mujer_${tipo}`;
+            } else if (categoriaProducto === 'zapatos') {
+                sizesKey = `zapatos_zapatos`;
+            }
+            
+            // Actualizar colores (PRIMERO)
+            colorSelect.innerHTML = '<option value="">Selecciona un color</option>';
+            (COLOR_GROUPS[tipo] || []).forEach(color => {
+                const opt = document.createElement('option');
+                opt.value = color;
+                opt.textContent = color;
+                colorSelect.appendChild(opt);
+            });
+
+            // Actualizar tallas (SEGUNDO) según categoría + tipo
+            tallaSelect.innerHTML = '<option value="">Selecciona una talla</option>';
+            const sizes = SIZE_GROUPS[sizesKey] || SIZE_GROUPS[tipo] || [];
+            sizes.forEach(size => {
+                const opt = document.createElement('option');
+                opt.value = size;
+                opt.textContent = size;
+                tallaSelect.appendChild(opt);
+            });
+        }
+
+        // Validación en tiempo real del stock
+        if (stockInput) {
+            stockInput.addEventListener('input', function() {
+                const valor = parseInt(this.value) || 0;
+                
+                // Si el campo está vacío, restaurar estilos originales
+                if (this.value === '' || this.value === '0') {
+                    this.style.borderColor = '#C0A76B';
+                    this.style.backgroundColor = '#000000';
+                    this.style.color = '#FFFFFF';
+                    this.style.fontWeight = 'normal';
+                    
+                    const alertDiv = document.getElementById('stock-alert');
+                    if (alertDiv) {
+                        alertDiv.remove();
+                    }
+                    return;
+                }
+                
+                if (valor > stockDisponible) {
+                    const exceso = valor - stockDisponible;
+                    this.style.borderColor = '#EF4444';
+                    this.style.backgroundColor = '#FEE2E2';
+                    this.style.color = '#991B1B'; // Rojo oscuro para mejor contraste
+                    this.style.fontWeight = '600'; // Texto semi-bold
+                    
+                    // Mostrar alerta
+                    let alertDiv = document.getElementById('stock-alert');
+                    if (!alertDiv) {
+                        alertDiv = document.createElement('div');
+                        alertDiv.id = 'stock-alert';
+                        alertDiv.className = 'mt-2 bg-red-900 bg-opacity-20 border border-red-400 text-red-300 p-2 rounded text-xs';
+                        this.parentElement.appendChild(alertDiv);
+                    }
+                    alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> ¡Error! Te excedes por <strong>${exceso}</strong> unidad${exceso > 1 ? 'es' : ''}. Máximo: ${stockDisponible}`;
+                } else if (valor <= 0) {
+                    this.style.borderColor = '#EF4444';
+                    this.style.backgroundColor = '#FEE2E2';
+                    this.style.color = '#991B1B'; // Rojo oscuro para mejor contraste
+                    this.style.fontWeight = '600'; // Texto semi-bold
+                    
+                    let alertDiv = document.getElementById('stock-alert');
+                    if (!alertDiv) {
+                        alertDiv = document.createElement('div');
+                        alertDiv.id = 'stock-alert';
+                        alertDiv.className = 'mt-2 bg-red-900 bg-opacity-20 border border-red-400 text-red-300 p-2 rounded text-xs';
+                        this.parentElement.appendChild(alertDiv);
+                    }
+                    alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i> El stock debe ser mayor a 0';
+                } else {
+                    this.style.borderColor = '#10B981';
+                    this.style.backgroundColor = '#D1FAE5';
+                    this.style.color = '#065F46'; // Verde oscuro para mejor contraste y legibilidad
+                    this.style.fontWeight = '700'; // Texto bold para máxima visibilidad
+                    
+                    const alertDiv = document.getElementById('stock-alert');
+                    if (alertDiv) {
+                        alertDiv.remove();
+                    }
+                }
+            });
+        }
+
+        // Validación antes de enviar
+        if (variantForm) {
+            variantForm.addEventListener('submit', function(e) {
+                const stockValue = parseInt(stockInput.value) || 0;
+                
+                if (stockValue > stockDisponible) {
+                    e.preventDefault();
+                    const exceso = stockValue - stockDisponible;
+                    alert(`❌ ERROR: No puedes asignar ${stockValue} unidades.\\n\\n` +
+                          `Stock disponible: ${stockDisponible} unidades\\n` +
+                          `Te excedes por: ${exceso} unidad${exceso > 1 ? 'es' : ''}\\n\\n` +
+                          `Por favor, ajusta el stock.`);
+                    stockInput.focus();
+                    return false;
+                }
+                
+                if (stockValue <= 0) {
+                    e.preventDefault();
+                    alert('❌ ERROR: El stock debe ser mayor a 0.');
+                    stockInput.focus();
+                    return false;
+                }
+            });
+        }
+
+        tipoSelect.addEventListener('change', updateOptions);
+        updateOptions(); // Inicializar
+
+        // ============ RECOLORIZACIÓN CON IA ============
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function recolorizarConIA(varianteId) {
+            const colorPicker = document.getElementById(`color-picker-${varianteId}`);
+            const loader = document.getElementById(`loader-${varianteId}`);
+            
+            // Buscar la tarjeta de la variante y su imagen
+            const varianteCard = colorPicker.closest('.bg-black');
+            const imagenElement = varianteCard ? varianteCard.querySelector('img') : null;
+            
+            const colorHex = colorPicker.value;
+            
+            // Mostrar loader
+            loader.classList.remove('hidden');
+            if (imagenElement) {
+                imagenElement.style.opacity = '0.5';
+            }
+            
+            // Crear FormData
+            const formData = new FormData();
+            formData.append('color', colorHex);
+            
+            try {
+                const response = await fetch(`/dashboard/api/variante/${varianteId}/generar-color/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar imagen con el resultado
+                    if (imagenElement && data.image_base64) {
+                        imagenElement.src = data.image_base64;
+                        imagenElement.style.opacity = '1';
+                        imagenElement.classList.remove('opacity-50'); // Quitar opacidad de "producto base"
+                        
+                        // Ocultar texto "Imagen del producto base"
+                        const textoBase = varianteCard.querySelector('.text-gray-500');
+                        if (textoBase && textoBase.textContent.includes('producto base')) {
+                            textoBase.remove();
+                        }
+                    }
+                    
+                    // Notificación de éxito
+                    mostrarNotificacion('success', `✅ ¡Color cambiado a ${data.color_aplicado}!`, 
+                                       'La imagen ha sido procesada con IA y guardada.');
+                    
+                    // Recargar página después de 2 segundos para ver la imagen en Supabase
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    mostrarNotificacion('error', '❌ Error al procesar', data.mensaje);
+                    if (imagenElement) imagenElement.style.opacity = '1';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('error', '❌ Error de conexión', 
+                                   'No se pudo conectar con el servidor. Verifica que SAM esté configurado.');
+                if (imagenElement) imagenElement.style.opacity = '1';
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function mostrarNotificacion(tipo, titulo, mensaje) {
+            const colores = {
+                success: 'bg-green-900 border-green-400 text-green-400',
+                error: 'bg-red-900 border-red-400 text-red-400',
+                info: 'bg-blue-900 border-blue-400 text-blue-400'
+            };
+            
+            const notif = document.createElement('div');
+            notif.className = `fixed top-4 right-4 ${colores[tipo]} border-2 rounded-lg p-4 shadow-2xl z-50 max-w-md animate-fade-in`;
+            notif.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <i class="fas ${tipo === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} text-2xl"></i>
+                    <div class="flex-1">
+                        <h4 class="font-bold mb-1">${titulo}</h4>
+                        <p class="text-sm opacity-90">${mensaje}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-xl opacity-50 hover:opacity-100">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 5000);
+        }
+
+        // CSS para animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fade-in {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            .animate-fade-in {
+                animation: fade-in 0.3s ease-out;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

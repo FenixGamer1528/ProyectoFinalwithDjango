@@ -1,0 +1,21 @@
+# Robots.txt para Glamoure
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /carrito/
+Disallow: /password-reset/
+Disallow: /password-reset-confirm/
+Disallow: /login/
+Disallow: /logout/
+Disallow: /registro/
+
+# Sitemap
+Sitemap: {{ protocol }}://{{ domain }}/sitemap.xml
+
+# Crawl-delay para bots más agresivos
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 1

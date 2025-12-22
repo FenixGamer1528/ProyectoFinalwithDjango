@@ -1,5 +1,6 @@
-{% load static %}
 <!DOCTYPE html>
+{% load static %}
+{% load humanize %}
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -46,6 +47,11 @@
                 <p class="text-gray-400 text-sm">Administra los pedidos de Glamoure</p>
             </div>
         </div>
+        <a href="{% url 'dashboard' %}" 
+            class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
+            <i class="fas fa-arrow-left"></i>
+            <span class="group-hover:underline">Volver al Dashboard</span>
+        </a>
         <a href="{% url 'logout' %}" 
            class="flex items-center gap-2 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-lg transition duration-300">
             <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -77,25 +83,32 @@
 
     <!-- Filtros -->
     <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl shadow-lg p-4 mb-6">
-        <div class="flex flex-col md:flex-row gap-4 items-center">
+        <form method="GET" action="{% url 'gestion_pedidos' %}" class="flex flex-col md:flex-row gap-4 items-center">
             <div class="flex-1">
                 <input type="text" 
-                       placeholder="Buscar pedidos..." 
+                       name="search"
+                       value="{{ search_query }}"
+                       placeholder="Buscar por número, cliente o email..." 
                        class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
             </div>
             <div class="flex gap-2">
-                <select class="bg-black border border-[#C0A76B] border-opacity-50 text-white rounded-lg px-3 py-3 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
-                    <option class="bg-[#1a1a1a]">Todos los estados</option>
-                    <option class="bg-[#1a1a1a]">Pendiente</option>
-                    <option class="bg-[#1a1a1a]">Procesando</option>
-                    <option class="bg-[#1a1a1a]">Completado</option>
-                    <option class="bg-[#1a1a1a]">Cancelado</option>
+                <select name="estado" class="bg-black border border-[#C0A76B] border-opacity-50 text-white rounded-lg px-3 py-3 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition">
+                    <option value="todos" {% if estado_filtro == 'todos' %}selected{% endif %} class="bg-[#1a1a1a]">Todos los estados</option>
+                    <option value="pendiente" {% if estado_filtro == 'pendiente' %}selected{% endif %} class="bg-[#1a1a1a]">Pendiente</option>
+                    <option value="procesando" {% if estado_filtro == 'procesando' %}selected{% endif %} class="bg-[#1a1a1a]">Procesando</option>
+                    <option value="completado" {% if estado_filtro == 'completado' %}selected{% endif %} class="bg-[#1a1a1a]">Completado</option>
+                    <option value="cancelado" {% if estado_filtro == 'cancelado' %}selected{% endif %} class="bg-[#1a1a1a]">Cancelado</option>
                 </select>
-                <button class="bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-3 rounded-lg transition duration-300">
+                <button type="submit" class="bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-4 py-3 rounded-lg transition duration-300">
                     <i class="fas fa-filter mr-2"></i>Filtrar
                 </button>
+                {% if search_query or estado_filtro != 'todos' %}
+                <a href="{% url 'gestion_pedidos' %}" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-3 rounded-lg transition duration-300">
+                    <i class="fas fa-times mr-2"></i>Limpiar
+                </a>
+                {% endif %}
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- Tabla de pedidos -->
@@ -149,24 +162,24 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
-                            <span class="text-[#C0A76B] font-bold text-lg">${{ pedido.total }}</span>
+                            <span class="text-[#C0A76B] font-bold text-lg">${{ pedido.total|floatformat:0|intcomma }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                            <a href="#" 
+                            <button onclick="verDetallePedido({{ pedido.id }})" 
                                class="inline-flex items-center justify-center w-8 h-8 bg-[#C0A76B] bg-opacity-20 text-[#C0A76B] rounded-lg hover:bg-[#C0A76B] hover:text-black transition duration-300"
                                title="Ver detalles">
                                 <i class="fas fa-eye text-sm"></i>
-                            </a>
-                            <a href="#" 
+                            </button>
+                            <button onclick="abrirModalEstado({{ pedido.id }}, '{{ pedido.estado }}')" 
                                class="inline-flex items-center justify-center w-8 h-8 bg-blue-900 bg-opacity-20 text-blue-400 rounded-lg hover:bg-blue-400 hover:text-white transition duration-300"
-                               title="Editar pedido">
+                               title="Cambiar estado">
                                 <i class="fas fa-edit text-sm"></i>
-                            </a>
-                            <a href="#" 
+                            </button>
+                            <button onclick="eliminarPedido({{ pedido.id }}, '{{ pedido.numero }}')" 
                                class="inline-flex items-center justify-center w-8 h-8 bg-red-900 bg-opacity-20 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition duration-300"
                                title="Eliminar pedido">
                                 <i class="fas fa-trash text-sm"></i>
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     {% empty %}
@@ -221,12 +234,287 @@
     </div>
 </main>
 
+<!-- Modal Detalle del Pedido -->
+<div id="modalDetalle" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-[#1a1a1a] border-b border-[#C0A76B] border-opacity-30 p-6 flex justify-between items-center">
+            <h3 class="text-2xl font-bold text-[#C0A76B]">
+                <i class="fas fa-file-invoice mr-2"></i>Detalles del Pedido
+            </h3>
+            <button onclick="cerrarModalDetalle()" class="text-gray-400 hover:text-[#C0A76B] transition">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <div id="contenidoDetalle" class="p-6">
+            <!-- Contenido cargado dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Estado -->
+<div id="modalEstado" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center z-50 p-4">
+    <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl max-w-md w-full">
+        <div class="border-b border-[#C0A76B] border-opacity-30 p-6">
+            <h3 class="text-xl font-bold text-[#C0A76B]">
+                <i class="fas fa-sync-alt mr-2"></i>Cambiar Estado del Pedido
+            </h3>
+        </div>
+        <form id="formEstado" class="p-6">
+            {% csrf_token %}
+            <input type="hidden" id="pedidoIdEstado" name="pedido_id">
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-[#C0A76B] mb-3">Nuevo Estado</label>
+                <select id="nuevoEstado" name="estado" class="w-full px-4 py-3 bg-black border border-[#C0A76B] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#C0A76B]">
+                    <option value="pendiente" class="bg-[#1a1a1a]">Pendiente</option>
+                    <option value="procesando" class="bg-[#1a1a1a]">Procesando</option>
+                    <option value="completado" class="bg-[#1a1a1a]">Completado</option>
+                    <option value="cancelado" class="bg-[#1a1a1a]">Cancelado</option>
+                </select>
+            </div>
+            <div class="flex gap-3 justify-end">
+                <button type="button" onclick="cerrarModalEstado()" class="px-6 py-3 border-2 border-[#C0A76B] rounded-lg text-[#C0A76B] font-semibold hover:bg-[#C0A76B] hover:text-black transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-6 py-3 bg-[#C0A76B] text-black font-semibold rounded-lg hover:bg-yellow-400 transition">
+                    <i class="fas fa-save mr-2"></i>Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Botón Volver al Dashboard -->
-<a href="{% url 'dashboard' %}" 
-   class="fixed bottom-6 right-6 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-lg flex items-center gap-2 shadow-lg transition duration-300 z-50 group">
-    <i class="fas fa-arrow-left"></i>
-    <span class="group-hover:underline">Volver al Dashboard</span>
-</a>
+
+
+<script>
+// Funciones para gestión de pedidos
+
+function verDetallePedido(pedidoId) {
+    const modal = document.getElementById('modalDetalle');
+    const contenido = document.getElementById('contenidoDetalle');
+    
+    // Mostrar modal con loader
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    contenido.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-[#C0A76B]"></i><p class="mt-4 text-gray-400">Cargando detalles...</p></div>';
+    
+    // Cargar detalles del pedido
+    fetch(`/dashboard/pedidos/${pedidoId}/detalle/`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        contenido.innerHTML = `
+            <div class="space-y-6">
+                <!-- Información del pedido -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-info-circle mr-2"></i>Información del Pedido
+                        </h4>
+                        <div>
+                            <p class="text-gray-400 text-sm">Número de Pedido</p>
+                            <p class="text-white font-semibold">${data.numero}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Estado</p>
+                            <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold ${getEstadoClasses(data.estado_valor)}">
+                                ${data.estado}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Fecha del Pedido</p>
+                            <p class="text-white">${data.fecha}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Última Actualización</p>
+                            <p class="text-white">${data.fecha_actualizacion}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                            <i class="fas fa-user mr-2"></i>Información del Cliente
+                        </h4>
+                        <div>
+                            <p class="text-gray-400 text-sm">Nombre</p>
+                            <p class="text-white font-semibold">${data.cliente}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Email</p>
+                            <p class="text-white">${data.email}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Teléfono</p>
+                            <p class="text-white">${data.telefono}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dirección de envío -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Dirección de Envío
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-400 text-sm">Dirección</p>
+                            <p class="text-white">${data.direccion}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Ciudad</p>
+                            <p class="text-white">${data.ciudad}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Código Postal</p>
+                            <p class="text-white">${data.codigo_postal}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Producto -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                        <i class="fas fa-box mr-2"></i>Productos del Pedido
+                    </h4>
+                    <div class="bg-black bg-opacity-30 rounded-lg p-4 flex items-center gap-4">
+                        ${data.producto.imagen ? `<img src="${data.producto.imagen}" alt="${data.producto.nombre}" class="w-20 h-20 object-cover rounded-lg">` : ''}
+                        <div class="flex-1">
+                            <p class="text-white font-semibold text-lg">${data.producto.nombre}</p>
+                            <p class="text-gray-400">Cantidad: ${data.cantidad}</p>
+                            <p class="text-[#C0A76B] font-bold">$${data.producto.precio} c/u</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 text-sm">Subtotal</p>
+                            <p class="text-[#C0A76B] font-bold text-xl">$${data.total}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notas -->
+                ${data.notas !== 'Sin notas' ? `
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-[#C0A76B] border-b border-[#C0A76B] border-opacity-30 pb-2">
+                        <i class="fas fa-sticky-note mr-2"></i>Notas
+                    </h4>
+                    <p class="text-white bg-black bg-opacity-30 rounded-lg p-4">${data.notas}</p>
+                </div>
+                ` : ''}
+                
+                <!-- Total -->
+                <div class="bg-[#C0A76B] bg-opacity-10 border border-[#C0A76B] rounded-lg p-4 flex justify-between items-center">
+                    <span class="text-xl font-bold text-white">TOTAL DEL PEDIDO</span>
+                    <span class="text-3xl font-bold text-[#C0A76B]">$${data.total}</span>
+                </div>
+            </div>
+        `;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        contenido.innerHTML = '<div class="text-center py-8 text-red-400"><i class="fas fa-exclamation-triangle text-4xl mb-4"></i><p>Error al cargar los detalles</p></div>';
+    });
+}
+
+function getEstadoClasses(estado) {
+    const classes = {
+        'pendiente': 'bg-yellow-900 bg-opacity-20 text-yellow-400 border border-yellow-400 border-opacity-30',
+        'procesando': 'bg-blue-900 bg-opacity-20 text-blue-400 border border-blue-400 border-opacity-30',
+        'completado': 'bg-green-900 bg-opacity-20 text-green-400 border border-green-400 border-opacity-30',
+        'cancelado': 'bg-red-900 bg-opacity-20 text-red-400 border border-red-400 border-opacity-30'
+    };
+    return classes[estado] || '';
+}
+
+function cerrarModalDetalle() {
+    const modal = document.getElementById('modalDetalle');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function abrirModalEstado(pedidoId, estadoActual) {
+    const modal = document.getElementById('modalEstado');
+    document.getElementById('pedidoIdEstado').value = pedidoId;
+    document.getElementById('nuevoEstado').value = estadoActual;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function cerrarModalEstado() {
+    const modal = document.getElementById('modalEstado');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Manejar envío del formulario de cambio de estado
+document.getElementById('formEstado').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const pedidoId = document.getElementById('pedidoIdEstado').value;
+    const nuevoEstado = document.getElementById('nuevoEstado').value;
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`/dashboard/pedidos/${pedidoId}/actualizar-estado/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `estado=${nuevoEstado}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            cerrarModalEstado();
+            location.reload();
+        } else {
+            alert('Error al actualizar el estado');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al actualizar el estado');
+    });
+});
+
+function eliminarPedido(pedidoId, numeroPedido) {
+    if (!confirm(`¿Estás seguro de que deseas eliminar el pedido ${numeroPedido}? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+    
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`/dashboard/pedidos/${pedidoId}/eliminar/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error al eliminar el pedido');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar el pedido');
+    });
+}
+
+// Cerrar modales con ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModalDetalle();
+        cerrarModalEstado();
+    }
+});
+</script>
 
 </body>
 </html>

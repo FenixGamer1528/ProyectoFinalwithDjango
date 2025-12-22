@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from .views import ReporteListView, exportar_excel, exportar_pdf
 from django.conf import settings
@@ -10,6 +10,11 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('registro/', views.registro_view, name='registro'),
+    
+    # URLs para 2FA
+    path('2fa/setup/', views.setup_2fa, name='setup_2fa'),
+    path('2fa/manage/', views.manage_2fa, name='manage_2fa'),
+    
     path('gestion_productos/', views.gestion_productos, name='gestion_productos'),
     path('reportes/', ReporteListView.as_view(), name='lista_reportes'),
     path('reportes/exportar/excel/', exportar_excel, name='exportar_excel'),
@@ -18,6 +23,11 @@ urlpatterns = [
     path('mujeres/', views.mujeres, name='mujeres'),
     path('zapatos/', views.zapatos, name='zapatos'),
     path('ofertas/', views.ofertas, name='ofertas'),
-    
+    path('toggle-favorito/<int:producto_id>/', views.toggle_favorito, name='toggle_favorito'),
+    path('mis-deseos/', views.mis_deseos, name='mis_deseos'),
+    path('producto/<int:producto_id>/', views.producto_detalle, name='producto_detalle'),
+    path('producto/<int:producto_id>/', views.producto_detalle, name='producto'),  # Alias para compatibilidad
+    path('buscar/', views.buscar_productos, name='buscar_productos'),
+    path('catalogo/', views.catalogo_completo, name='catalogo_completo'),
   
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

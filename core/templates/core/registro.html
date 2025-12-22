@@ -11,172 +11,158 @@
     <title>Registro - Glamoure</title>
     
     <style>
-        /* Fondo que cubre toda la página */
-        .full-page-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('{% static 'imagenes/pexels-steve-29708304.jpg' %}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.2;
-            z-index: -1;
+        /* Estilos personalizados consistentes con el login */
+        .input-icon {
+            position: relative;
         }
-        
-        /* Estilos para los campos del formulario Django */
-        form input, form select, form textarea {
-            width: 100%;
-            background: #1a1a1a;
-            border: 1px solid rgba(192, 167, 107, 0.5);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            color: white;
-            font-size: 14px;
+        .input-icon i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #C0A76B;
+            z-index: 10;
         }
-        
-        form input:focus, form select:focus, form textarea:focus {
-            outline: none;
-            border-color: #C0A76B;
-            box-shadow: 0 0 0 1px #C0A76B;
-        }
-        
-        /* Placeholder color */
-        form input::placeholder {
-            color: #9CA3AF;
-        }
-        
-        /* Estilos para el texto de ayuda */
-        .helptext, form ul.helptext {
-            color: #D1D5DB !important;
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
-            background: rgba(55, 65, 81, 0.5);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border-left: 3px solid #C0A76B;
-            line-height: 1.4;
-        }
-        
-        form ul.helptext li {
-            margin-bottom: 0.25rem;
-        }
-        
-        /* Estilos para errores */
-        .errorlist {
-            color: #FCA5A5 !important;
-            font-size: 0.75rem;
-            background: rgba(127, 29, 29, 0.3);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border-left: 3px solid #EF4444;
-            margin-top: 0.5rem;
+        .input-icon input {
+            padding-left: 40px;
         }
     </style>
 </head>
-<body class="bg-black min-h-screen font-sans antialiased">
+<body class="bg-black min-h-screen flex items-center justify-center font-sans antialiased p-4">
 
-    <!-- Fondo que cubre toda la página -->
-    <div class="full-page-bg"></div>
+    <!-- Fondo similar al de la página principal -->
+    <div class="fixed inset-0 bg-cover bg-center opacity-20" 
+         style="background-image: url('{% static 'imagenes/pexels-steve-29708304.jpg' %}');"></div>
 
-    <!-- Contenido principal -->
-    <div class="min-h-screen flex items-center justify-center py-8">
-        <div class="relative z-10 w-full max-w-md mx-4">
-            <div class="bg-black bg-opacity-80 backdrop-blur-md border border-[#C0A76B] rounded-2xl p-8 shadow-2xl">
-                
-                <div class="flex justify-center mb-6">
-                    <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-20 h-20">
-                </div>
-
-                <h2 class="text-2xl font-bold text-center text-[#C0A76B] mb-2 uppercase tracking-wider">
-                    REGISTRO DE USUARIO
-                </h2>
-
-                <p class="text-gray-400 text-center text-sm mb-6">
-                    Crea tu cuenta en Glamoure
-                </p>
-
-                <form method="POST" class="space-y-4">
-                    {% csrf_token %}
-                    
-                    {% for field in form %}
-                    <div class="space-y-2">
-                        <label class="block text-[#C0A76B] font-semibold text-sm">
-                            {{ field.label }}
-                        </label>
-                        <div class="relative">
-                            {{ field }}
-                        </div>
-                        
-                        <!-- Texto de ayuda -->
-                        {% if field.help_text %}
-                            <div class="helptext">
-                                {{ field.help_text }}
-                            </div>
-                        {% endif %}
-                        
-                        <!-- Errores -->
-                        {% for error in field.errors %}
-                            <div class="errorlist">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
-
-                    <button type="submit" 
-                            class="w-full bg-[#C0A76B] text-black font-semibold py-3 rounded-lg hover:bg-yellow-400 transition duration-300 uppercase tracking-wider mt-6">
-                        REGISTRARSE
-                    </button>
-                </form>
-
-                <div class="mt-6 text-center">
-                    <p class="text-gray-400 text-sm mb-2">¿Ya tienes cuenta?</p>
-                    <a href="{% url 'login' %}" 
-                       class="inline-block border border-[#C0A76B] text-[#C0A76B] font-semibold px-6 py-2 rounded-lg hover:bg-[#C0A76B] hover:text-black transition duration-300">
-                        Iniciar Sesión
-                    </a>
-                </div>
-
-                <div class="mt-4 text-center">
-                    <a href="{% url 'index' %}" 
-                       class="text-gray-400 hover:text-[#C0A76B] text-sm transition">
-                        ← Volver al inicio
-                    </a>
-                </div>
+    <div class="relative z-10 w-full max-w-md">
+        <!-- Contenedor del registro -->
+        <div class="bg-black bg-opacity-80 backdrop-blur-md border border-[#C0A76B] rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Logo centrado como en la página principal -->
+            <div class="flex justify-center mb-6">
+                <img src="{% static 'imagenes/Simbolo-transparente.png' %}" alt="Logo Glamoure" class="w-20 h-20">
             </div>
 
-            <!-- Footer -->
-            <footer class="mt-8 text-center">
-                <p class="text-gray-500 text-sm">
-                    &copy; 2025 Glamoure. Todos los derechos reservados.
-                </p>
-            </footer>
+            <h2 class="text-2xl font-bold text-center text-[#C0A76B] mb-2 uppercase tracking-wider">
+                REGISTRARSE
+            </h2>
+
+            <p class="text-gray-400 text-center text-sm mb-6">
+                Crea tu cuenta Glamoure
+            </p>
+
+            {% if form.errors %}
+            <div class="bg-red-900 bg-opacity-50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-4 text-sm">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p>❌ {{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Campo Usuario -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-user"></i>
+                        <input type="text" 
+                               name="username" 
+                               placeholder="Usuario" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition"
+                               value="{{ form.username.value|default:'' }}" required>
+                    </div>
+                </div>
+
+                <!-- Campo Email -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-envelope"></i>
+                        <input type="email" 
+                               name="email" 
+                               placeholder="Correo Electrónico" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition"
+                               value="{{ form.email.value|default:'' }}" required>
+                    </div>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-lock"></i>
+                        <input type="password" 
+                               name="password1" 
+                               placeholder="Contraseña" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" required>
+                    </div>
+                    <p class="text-gray-400 text-xs mt-2 ml-1">Mínimo 8 caracteres</p>
+                </div>
+
+                <!-- Confirmar Contraseña -->
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fa fa-lock"></i>
+                        <input type="password" 
+                               name="password2" 
+                               placeholder="Confirmar Contraseña" 
+                               class="w-full bg-[#1a1a1a] border border-[#C0A76B] border-opacity-50 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B] transition" required>
+                    </div>
+                </div>
+
+                <!-- Opción de 2FA -->
+                <div class="form-group">
+                    <div class="bg-[#1a1a1a] border border-[#C0A76B] border-opacity-30 rounded-lg p-4">
+                        <label class="flex items-start cursor-pointer group">
+                            <input type="checkbox" 
+                                   name="enable_2fa" 
+                                   class="mt-1 w-5 h-5 text-[#C0A76B] bg-black border-[#C0A76B] rounded focus:ring-[#C0A76B] focus:ring-2">
+                            <div class="ml-3">
+                                <span class="text-white font-semibold flex items-center">
+                                    <i class="fas fa-shield-alt text-[#C0A76B] mr-2"></i>
+                                    Activar Autenticación de Dos Factores (2FA)
+                                </span>
+                                <p class="text-gray-400 text-xs mt-1">
+                                    Protege tu cuenta con una capa adicional de seguridad. Recomendado para mayor protección.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Botón de enviar -->
+                <button type="submit" 
+                        class="w-full bg-[#C0A76B] text-black font-semibold py-3 rounded-lg hover:bg-yellow-400 transition duration-300 uppercase tracking-wider">
+                    REGISTRARSE
+                </button>
+            </form>
+
+            <!-- Enlace para iniciar sesión -->
+            <div class="mt-6 text-center">
+                <p class="text-gray-400 text-sm mb-2">¿Ya tienes cuenta?</p>
+                <a href="{% url 'login' %}" 
+                   class="inline-block border border-[#C0A76B] text-[#C0A76B] font-semibold px-6 py-2 rounded-lg hover:bg-[#C0A76B] hover:text-black transition duration-300">
+                    Iniciar Sesión
+                </a>
+            </div>
+
+            <!-- Enlace para volver al inicio -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'index' %}" 
+                   class="text-gray-400 hover:text-[#C0A76B] text-sm transition">
+                    ← Volver al inicio
+                </a>
+            </div>
         </div>
+
+        <!-- Footer similar al de la página principal -->
+        <footer class="mt-8 text-center">
+            <p class="text-gray-500 text-sm">
+                &copy; 2025 Glamoure. Todos los derechos reservados.
+            </p>
+        </footer>
     </div>
 
-    <!-- Script para mejorar la visualización del formulario -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Convertir listas de ayuda de Django en elementos más legibles
-            const helpLists = document.querySelectorAll('form ul');
-            helpLists.forEach(ul => {
-                if (ul.innerHTML.includes('contraseña') || ul.innerHTML.includes('caracteres') || 
-                    ul.innerHTML.includes('numérica') || ul.innerHTML.includes('común')) {
-                    ul.classList.add('helptext', 'bg-gray-800', 'bg-opacity-50', 'p-3', 'rounded-lg');
-                }
-            });
-            
-            // Asegurar que todos los textos de ayuda tengan buen contraste
-            const helpTexts = document.querySelectorAll('.helptext, form p');
-            helpTexts.forEach(element => {
-                if (element.style.color === '' || element.style.color === 'black') {
-                    element.style.color = '#D1D5DB';
-                }
-            });
-        });
-    </script>
 </body>
 </html>

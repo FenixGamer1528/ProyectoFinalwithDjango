@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-black text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-[#C0A76B]">Historial de Inventario</h1>
+                    <p class="text-gray-400 mt-2">{{ variante }}</p>
+                    <p class="text-sm text-gray-500">Stock actual: <span class="text-[#C0A76B] font-bold">{{ variante.stock }} unidades</span></p>
+                </div>
+                <div class="flex gap-3">
+                    <a href="{% url 'ajustar_inventario' variante.id %}" class="bg-[#C0A76B] hover:bg-yellow-400 text-black px-6 py-3 rounded-lg transition-all">
+                        <i class="fas fa-plus-circle mr-2"></i> Ajustar Stock
+                    </a>
+                    <a href="{% url 'gestionar_variantes' variante.producto.id %}" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+                        <i class="fas fa-arrow-left mr-2"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-lg overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-[#C0A76B] bg-opacity-20">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-[#C0A76B]">Fecha</th>
+                        <th class="px-6 py-4 text-left text-[#C0A76B]">Tipo</th>
+                        <th class="px-6 py-4 text-right text-[#C0A76B]">Cantidad</th>
+                        <th class="px-6 py-4 text-right text-[#C0A76B]">Stock Anterior</th>
+                        <th class="px-6 py-4 text-right text-[#C0A76B]">Stock Nuevo</th>
+                        <th class="px-6 py-4 text-left text-[#C0A76B]">Usuario</th>
+                        <th class="px-6 py-4 text-left text-[#C0A76B]">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movimiento in movimientos %}
+                        <tr class="border-t border-gray-700 hover:bg-gray-900 transition-all">
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                {{ movimiento.fecha|date:"d/m/Y H:i" }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="{% if movimiento.tipo_movimiento == 'entrada' %}bg-green-900 text-green-400{% elif movimiento.tipo_movimiento == 'salida' %}bg-red-900 text-red-400{% else %}bg-blue-900 text-blue-400{% endif %} text-xs px-3 py-1 rounded-full border border-current">
+                                    {{ movimiento.get_tipo_movimiento_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right font-semibold {% if movimiento.tipo_movimiento == 'entrada' %}text-green-400{% elif movimiento.tipo_movimiento == 'salida' %}text-red-400{% else %}text-blue-400{% endif %}">
+                                {% if movimiento.tipo_movimiento == 'entrada' %}+{% elif movimiento.tipo_movimiento == 'salida' %}-{% endif %}{{ movimiento.cantidad }}
+                            </td>
+                            <td class="px-6 py-4 text-right text-gray-400">{{ movimiento.stock_anterior }}</td>
+                            <td class="px-6 py-4 text-right text-[#C0A76B] font-bold">{{ movimiento.stock_nuevo }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-400">
+                                {% if movimiento.usuario %}
+                                    {{ movimiento.usuario.username }}
+                                {% else %}
+                                    Sistema
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-400">{{ movimiento.observaciones|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-400">
+                                No hay movimientos registrados
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

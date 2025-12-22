@@ -1,30 +1,41 @@
 import os
-from supabase import create_client
-from dotenv import load_dotenv
 from pathlib import Path
 
-# Cargar variables del archivo .env
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+# Variable para indicar si queremos usar Supabase
+USE_SUPABASE = True
 
-# Leer las variables de entorno
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+if USE_SUPABASE:
+    from supabase import create_client
+    from dotenv import load_dotenv
+    
+    # Cargar variables del archivo .env
+    BASE_DIR = Path(__file__).resolve().parent.parent.parent
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# Crear cliente de Supabase
-supabase = None
-if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # Leer las variables de entorno
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+    # Crear cliente de Supabase
+    supabase = None
+    if SUPABASE_URL and SUPABASE_KEY:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    else:
+        print("⚠️ No se pudo cargar SUPABASE_URL o SUPABASE_KEY desde .env")
 else:
-    print("⚠️ No se pudo cargar SUPABASE_URL o SUPABASE_KEY desde .env")
+    supabase = None
 
 def subir_a_supabase(imagen):
     """
-    Sube una imagen al bucket 'media' y devuelve la URL pública.
+    Función que sube la imagen a Supabase si está configurado,
+    o devuelve la ruta local si no lo está.
     """
-    if not supabase:
-        raise Exception("❌ Supabase no está configurado correctamente.")
-
+    if not USE_SUPABASE or not supabase:
+        # Si Supabase no está configurado, devolver la ruta local de la imagen
+        # Django la guardará automáticamente en MEDIA_ROOT/productos/
+        print(f"ℹ️ Supabase deshabilitado. Usando almacenamiento local: {imagen.name}")
+        return None  # Retornar None para que Django use el campo 'imagen' normal
+    
     try:
         nombre_archivo = f"productos/{imagen.name}"
         contenido = imagen.read()
@@ -41,3 +52,20 @@ def subir_a_supabase(imagen):
     except Exception as e:
         print(f"⚠️ Error al subir imagen a Supabase: {e}")
         return None
+    
+def eliminar_de_supabase(nombre_archivo):
+    """Elimina un archivo del bucket de Supabase."""
+    if not supabase:
+        raise Exception("❌ Supabase no está configurado correctamente.")
+    
+    try:
+        nombre_archivo = nombre_archivo.strip()
+        if nombre_archivo.startswith("/"):
+            nombre_archivo = nombre_archivo[1:]
+        
+        print(f"🧹 Intentando eliminar de bucket 'media': {nombre_archivo}")
+        respuesta = supabase.storage.from_("media").remove([nombre_archivo])
+        print("🧾 Respuesta Supabase:", respuesta)
+    except Exception as e:
+        print(f"⚠️ Error al eliminar archivo de Supabase: {e}")
+

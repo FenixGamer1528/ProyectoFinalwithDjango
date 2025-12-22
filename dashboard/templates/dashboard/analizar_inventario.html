@@ -1,0 +1,151 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Inventario - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+</head>
+<body class="bg-black text-white min-h-screen p-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'gestion_reportes' %}" class="text-[#C0A76B] hover:text-yellow-400 flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Volver a Reportes
+            </a>
+        </div>
+
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-8">
+            <h1 class="text-3xl font-bold text-[#C0A76B] mb-6">
+                <i class="fas fa-boxes"></i> Análisis de Inventario
+            </h1>
+
+            {% if analisis %}
+            <!-- Resumen -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-black bg-opacity-50 border border-[#C0A76B] rounded-xl p-6">
+                    <p class="text-gray-400 text-sm mb-2">Total Productos</p>
+                    <p class="text-3xl font-bold text-[#C0A76B]">{{ analisis.total_productos }}</p>
+                </div>
+                <div class="bg-black bg-opacity-50 border border-green-400 rounded-xl p-6">
+                    <p class="text-gray-400 text-sm mb-2">Valor Total Inventario</p>
+                    <p class="text-3xl font-bold text-green-400">${{ analisis.valor_total_inventario|floatformat:0|intcomma }}</p>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="mb-8 flex gap-4">
+                <a href="{% url 'exportar_reporte_inventario' %}?formato=excel" 
+                   class="px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i> Descargar Excel (Polars)
+                </a>
+                <a href="{% url 'exportar_reporte_inventario' %}?formato=csv" 
+                   class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-file-csv"></i> Descargar CSV
+                </a>
+                <a href="{% url 'detectar_problemas_automatico' %}" 
+                   class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg transition flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i> Detectar Problemas
+                </a>
+            </div>
+
+            <!-- Problemas detectados -->
+            {% if problemas %}
+            <div class="mb-8 bg-red-900 bg-opacity-10 border border-red-400 rounded-xl p-6">
+                <h2 class="text-xl font-bold text-red-400 mb-4">
+                    <i class="fas fa-exclamation-triangle"></i> Problemas Detectados ({{ problemas|length }})
+                </h2>
+                <div class="space-y-3">
+                    {% for problema in problemas %}
+                    <div class="bg-black bg-opacity-50 rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-white font-semibold">{{ problema.titulo }}</h3>
+                            <span class="px-2 py-1 text-xs font-semibold rounded
+                                {% if problema.severidad == 'alta' %}bg-red-900 bg-opacity-20 text-red-400
+                                {% else %}bg-yellow-900 bg-opacity-20 text-yellow-400
+                                {% endif %}">
+                                {{ problema.severidad|title }}
+                            </span>
+                        </div>
+                        <p class="text-gray-400 text-sm">{{ problema.descripcion }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Análisis por nivel de stock -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-[#C0A76B] mb-4">Distribución de Stock</h2>
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-2 text-[#C0A76B]">Nivel</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Cantidad Productos</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Total Unidades</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in analisis.analisis_stock_list %}
+                            <tr class="border-b border-gray-800">
+                                <td class="py-3 text-white">{{ row.nivel_stock }}</td>
+                                <td class="py-3 text-right text-blue-400">{{ row.cantidad_productos }}</td>
+                                <td class="py-3 text-right text-green-400">{{ row.total_unidades }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Productos críticos -->
+            {% if analisis.productos_criticos_list %}
+            <div>
+                <h2 class="text-xl font-bold text-red-400 mb-4">
+                    <i class="fas fa-exclamation-circle"></i> Productos con Stock Crítico
+                </h2>
+                <div class="bg-black bg-opacity-50 rounded-lg p-6">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-700">
+                                <th class="text-left py-2 text-[#C0A76B]">ID</th>
+                                <th class="text-left py-2 text-[#C0A76B]">Producto</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Stock</th>
+                                <th class="text-right py-2 text-[#C0A76B]">Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in analisis.productos_criticos_list %}
+                            <tr class="border-b border-gray-800">
+                                <td class="py-3 text-gray-400">{{ row.id }}</td>
+                                <td class="py-3 text-white">{{ row.nombre }}</td>
+                                <td class="py-3 text-right">
+                                    <span class="px-2 py-1 rounded
+                                        {% if row.stock == 0 %}bg-red-900 bg-opacity-20 text-red-400
+                                        {% else %}bg-yellow-900 bg-opacity-20 text-yellow-400
+                                        {% endif %}">
+                                        {{ row.stock }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-right text-green-400">${{ row.precio|floatformat:0|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="text-center py-12 text-gray-400">
+                <i class="fas fa-boxes text-6xl mb-4 opacity-50"></i>
+                <p class="text-xl">No hay datos disponibles</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

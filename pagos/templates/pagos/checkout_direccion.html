@@ -1,0 +1,167 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de Envío - Glamoure</title>
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        }
+        
+        .glamour-card {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(192, 167, 107, 0.2);
+        }
+        
+        .glamour-gold {
+            background: linear-gradient(135deg, #C0A76B 0%, #D4AF37 100%);
+        }
+        
+        .elegant-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header-accent {
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 rounded-full glamour-gold mx-auto mb-6 flex items-center justify-center elegant-shadow">
+                <i class="fas fa-shipping-fast text-2xl text-black"></i>
+            </div>
+            <h1 class="header-accent text-3xl font-semibold text-white mb-2">Datos de Envío</h1>
+            <p class="text-gray-400">Necesitamos tus datos para completar la compra</p>
+        </div>
+
+        <!-- Mensajes -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-lg mb-3 {% if message.tags == 'success' %}bg-green-900/30 border border-green-500 text-green-400{% elif message.tags == 'error' %}bg-red-900/30 border border-red-500 text-red-400{% else %}bg-blue-900/30 border border-blue-500 text-blue-400{% endif %}">
+                <p>{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulario de Dirección -->
+        <div class="glamour-card rounded-2xl p-8 mb-6 elegant-shadow">
+            <h2 class="header-accent text-xl text-white mb-6 border-b border-gray-700 pb-4">
+                <i class="fas fa-map-marker-alt mr-2"></i>Información de Envío
+            </h2>
+            
+            <form method="POST" action="{% url 'pagos:checkout_carrito' %}" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Nombre Completo (solo lectura) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-user mr-2"></i>Nombre Completo
+                    </label>
+                    <input type="text" 
+                           value="{{ user.get_full_name|default:user.username }}" 
+                           disabled
+                           class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                </div>
+
+                <!-- Email (solo lectura) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email
+                    </label>
+                    <input type="email" 
+                           value="{{ user.email }}" 
+                           disabled
+                           class="w-full bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 text-white">
+                </div>
+
+                <!-- Teléfono -->
+                <div>
+                    <label for="telefono" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-phone mr-2"></i>Teléfono de Contacto *
+                    </label>
+                    <input type="tel" 
+                           id="telefono"
+                           name="telefono" 
+                           value="{{ user.telefono|default:'' }}"
+                           placeholder="Ej: 3001234567"
+                           required
+                           class="w-full bg-gray-900 border border-gray-600 focus:border-[#C0A76B] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#C0A76B]">
+                    <p class="text-xs text-gray-400 mt-1">Ingresa tu número de teléfono sin espacios</p>
+                </div>
+
+                <!-- Dirección -->
+                <div>
+                    <label for="direccion" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Dirección de Envío *
+                    </label>
+                    <textarea id="direccion"
+                              name="direccion" 
+                              rows="3"
+                              placeholder="Ej: Calle 123 #45-67, Apartamento 801, Torre 2, Bogotá"
+                              required
+                              class="w-full bg-gray-900 border border-gray-600 focus:border-[#C0A76B] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#C0A76B]">{{ user.direccion|default:'' }}</textarea>
+                    <p class="text-xs text-gray-400 mt-1">Incluye calle, número, apartamento/casa, barrio y ciudad</p>
+                </div>
+
+                <!-- Información Importante -->
+                <div class="bg-blue-900/20 border border-blue-500/50 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-info-circle text-blue-400 mt-1"></i>
+                        <div class="text-sm text-gray-300">
+                            <p class="font-medium text-blue-400 mb-2">Información importante:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Verifica que tu dirección esté completa y correcta</li>
+                                <li>Mantén tu teléfono disponible para coordinar la entrega</li>
+                                <li>El tiempo de entrega es de 3 a 5 días hábiles</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex gap-4 pt-4">
+                    <a href="{% url 'ver_carrito' %}" 
+                       class="flex-1 bg-gray-700 text-white font-semibold py-4 px-6 rounded-xl hover:bg-gray-600 transition-all text-center">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver al Carrito
+                    </a>
+                    <button type="submit" 
+                            class="flex-1 glamour-gold text-black font-semibold py-4 px-6 rounded-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300">
+                        <i class="fas fa-check mr-2"></i>Continuar al Pago
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Resumen Rápido del Carrito -->
+        <div class="glamour-card rounded-2xl p-6 elegant-shadow">
+            <h3 class="text-lg text-white mb-4 flex items-center justify-between">
+                <span><i class="fas fa-shopping-cart mr-2"></i>Resumen de Compra</span>
+                <span class="text-2xl font-bold" style="color: #D4AF37;">${{ total|floatformat:0|intcomma }}</span>
+            </h3>
+            <div class="space-y-2">
+                {% for item in items %}
+                <div class="flex justify-between text-sm text-gray-400">
+                    <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
+                    <span>${{ item.subtotal|floatformat:0|intcomma }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

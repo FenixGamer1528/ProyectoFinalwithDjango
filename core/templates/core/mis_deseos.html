@@ -1,0 +1,135 @@
+{% extends 'core/index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Mis Deseos - Glamoure{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+{% endblock %}
+
+{% block content %}
+  <!-- Espaciado para el header fijo -->
+  <div class="h-32"></div>
+
+  <!-- Sección principal -->
+  <section class="pt-16 pb-20 bg-gradient-to-b from-black via-[#111] to-black min-h-screen">
+    <div class="container mx-auto px-6">
+      <!-- Encabezado -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-[#C0A76B] mb-4 uppercase tracking-wide">
+          <i class="fa-solid fa-heart mr-3"></i>Mis Deseos
+        </h1>
+        <p class="text-gray-400 text-lg">Tus productos deseados en un solo lugar</p>
+        <div class="w-32 h-1 bg-[#C0A76B] mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      {% if productos %}
+      <!-- Grid de productos deseados -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for producto in productos %}
+        <div class="carousel-slide" id="deseo-{{ producto.id }}">
+          <!-- Badges dinámicos -->
+          {% if producto.destacado %}
+          <div class="top-badge">⭐ TOP</div>
+          {% elif producto.en_oferta %}
+          <div class="offer-badge">🔥 OFERTA</div>
+          {% endif %}
+          
+          <!-- Badge SIN STOCK -->
+          {% if not producto.tiene_stock_disponible and producto.stock == 0 %}
+          <div class="out-of-stock-badge" style="position: absolute; top: 50px; left: 10px; background: rgba(220, 38, 38, 0.95); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+            ❌ AGOTADO
+          </div>
+          {% endif %}
+          
+          <!-- Botón de eliminar deseo (corazón roto) -->
+          <button onclick="eliminarFavorito({{ producto.id }}, this)" 
+                  class="favorite-btn" 
+                  style="background: rgba(255, 255, 255, 0.95);"
+                  title="Eliminar de mis deseos"
+                  data-favorito="true">
+              <i class="fa-solid fa-heart-crack" style="color: #dc2626;"></i>
+          </button>
+          
+            {% if producto.imagen_url %}
+            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock_disponible and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
+            {% elif producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock_disponible and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
+            {% else %}
+            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
+          {% endif %}
+          
+          <div class="product-info">
+            <p class="product-name">{{ producto.nombre }}</p>
+            <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
+            <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')" class="product-btn">Ver detalles</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Botón volver -->
+      <div class="text-center mt-16">
+        <a href="{% url 'index' %}" class="inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition-all transform hover:scale-105">
+          <i class="fa-solid fa-arrow-left mr-2"></i>Volver a la tienda
+        </a>
+      </div>
+
+      {% else %}
+      <!-- Lista vacía -->
+      <div class="text-center py-20">
+        <div class="mb-6">
+          <i class="fa-regular fa-heart text-8xl text-gray-600"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-400 mb-4">Tu lista de deseos está vacía</h2>
+        <p class="text-gray-500 mb-8">¡Explora nuestra colección y agrega productos a tus deseos!</p>
+        <a href="{% url 'index' %}" class="inline-block bg-[#C0A76B] text-black font-semibold px-8 py-3 rounded-full hover:bg-yellow-400 transition-all transform hover:scale-105">
+          <i class="fa-solid fa-shopping-bag mr-2"></i>Explorar Productos
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    // Menú desplegable del usuario
+    function initUserMenu() {
+      const userMenuButton = document.getElementById('userMenuButton');
+      const userMenu = document.getElementById('userMenu');
+      const userMenuArrow = document.getElementById('userMenuArrow');
+
+      if (userMenuButton && userMenu) {
+        userMenuButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (userMenu.classList.contains('hidden')) {
+            userMenu.classList.remove('hidden');
+            if (userMenuArrow) userMenuArrow.classList.add('rotate-180');
+          } else {
+            userMenu.classList.add('hidden');
+            if (userMenuArrow) userMenuArrow.classList.remove('rotate-180');
+          }
+        });
+
+        document.addEventListener('click', function(e) {
+          if (userMenu && !userMenu.contains(e.target) && userMenuButton && !userMenuButton.contains(e.target)) {
+            userMenu.classList.add('hidden');
+            if (userMenuArrow) userMenuArrow.classList.remove('rotate-180');
+          }
+        });
+
+        userMenu.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initUserMenu();
+    });
+  </script>
+  
+  <!-- Las funciones eliminarFavorito y toggleFavorito están en modal.js -->
+{% endblock %}

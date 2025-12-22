@@ -1,0 +1,114 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Resultados de búsqueda - Glamoure{% endblock %}
+
+{% block content %}
+  <!-- Reemplaza TODO el contenido del bloque con el específico de resultados -->
+  <main class="flex-grow container mx-auto px-4 pt-24">
+    {% if productos %}
+      <div class="text-center mb-10">
+        <h2 class="text-4xl font-bold text-[#C0A76B] mb-3">Resultados de búsqueda</h2>
+        <p class="text-gray-400">Productos encontrados</p>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-6 px-6">
+        {% for producto in productos %}
+        <div class="w-[300px] bg-[#1a1a1a] rounded-xl p-4 shadow-md hover:shadow-[#C0A76B]/50 transition">
+          {% if producto.imagen_url %}
+            <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" 
+                class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
+          {% elif producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" 
+                class="w-full h-64 object-cover rounded-lg mb-3 hover:scale-105 transition">
+          {% else %}
+            <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" 
+                class="w-full h-64 object-cover rounded-lg mb-3">
+          {% endif %}
+
+          <h3 class="text-xl font-semibold text-[#C0A76B] mb-2">{{ producto.nombre }}</h3>
+          <p class="text-gray-300 mb-2">${{ producto.precio|floatformat:0|intcomma }}</p>
+          <button onclick="mostrarDetallesProducto('{{ producto.nombre }}', '{{ producto.precio }}', '{% if producto.imagen_url %}{{ producto.imagen_url }}{% elif producto.imagen %}{{ producto.imagen.url }}{% endif %}', '{{ producto.descripcion }}')" 
+                  class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition ver-detalles-btn">
+            Ver detalles
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Modal de Detalles del Producto -->
+      <div id="modalDetallesProducto" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-md w-[250px] mx-2 relative p-2">
+          <button onclick="cerrarDetallesProducto()" class="absolute top-1 right-1 text-sm font-bold">
+            <span class="text-black hover:text-gray-600">×</span>
+          </button>
+          <div class="flex flex-col gap-1">
+            <div class="w-full">
+              <img id="modalProductoImagen" src="" alt="" class="w-full h-[150px] object-cover rounded-md">
+            <div class="w-full space-y-0.5">
+              <h3 id="modalProductoNombre" class="text-xs font-bold text-black"></h3>
+              <p id="modalProductoPrecio" class="text-sm font-bold text-blue-600"></p>
+              <p id="modalProductoDescripcion" class="text-gray-600 text-xs"></p>
+              <div class="mt-1">
+                <label class="text-gray-700 text-xs">Cantidad:</label>
+                <input type="number" id="modalCantidad" value="1" min="1" 
+                    class="ml-1 w-10 px-1 py-0.5 border border-gray-300 rounded text-xs text-black">
+              </div>
+              <button onclick="agregarAlCarrito()" 
+                      class="w-full bg-black text-white py-1 rounded text-xs font-bold hover:bg-gray-800 transition-colors mt-1">
+                Agregar al carrito
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="text-center py-16">
+        <h2 class="text-4xl font-bold text-[#C0A76B] mb-4">No se encontraron resultados</h2>
+        <p class="text-gray-400 text-lg mb-8">No se encontraron productos que coincidan con tu búsqueda.</p>
+        <a href="{% url 'index' %}" 
+          class="inline-block bg-[#C0A76B] text-black font-semibold px-5 py-2 rounded-full hover:bg-yellow-400 transition">
+          Volver al inicio
+        </a>
+      </div>
+    {% endif %}
+  </main>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Scripts específicos para resultados de búsqueda -->
+  <script>
+    function mostrarDetallesProducto(nombre, precio, imagen, descripcion) {
+      document.getElementById('modalProductoNombre').textContent = nombre;
+      document.getElementById('modalProductoPrecio').textContent = precio;
+      document.getElementById('modalProductoImagen').src = imagen;
+      document.getElementById('modalProductoDescripcion').textContent = descripcion;
+      document.getElementById('modalDetallesProducto').classList.remove('hidden');
+      document.getElementById('modalDetallesProducto').classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarDetallesProducto() {
+      document.getElementById('modalDetallesProducto').classList.remove('flex');
+      document.getElementById('modalDetallesProducto').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function agregarAlCarrito() {
+      const cantidad = document.getElementById('modalCantidad').value;
+      if (cantidad > 0) {
+        // Aquí mantenemos la misma lógica de agregar al carrito que tienes en tu página principal
+        // Este código se conectará con tu backend
+        cerrarDetallesProducto();
+      }
+    }
+
+    // Cerrar el modal al hacer clic fuera de él
+    document.getElementById('modalDetallesProducto').addEventListener('click', function(e) {
+      if (e.target === this) {
+        cerrarDetallesProducto();
+      }
+    });
+  </script>
+{% endblock %}

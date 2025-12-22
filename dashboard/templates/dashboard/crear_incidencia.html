@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Incidencia - Glamoure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="shortcut icon" href="{% static 'imagenes/Simbolo-transparente.png' %}">
+</head>
+<body class="bg-black text-white min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+            <a href="{% url 'gestion_reportes' %}" class="text-[#C0A76B] hover:text-yellow-400 flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="bg-[#1a1a1a] border border-[#C0A76B] rounded-xl p-8">
+            <h1 class="text-3xl font-bold text-[#C0A76B] mb-6">
+                <i class="fas fa-exclamation-triangle"></i> Registrar Incidencia
+            </h1>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="titulo" class="block text-sm font-medium text-[#C0A76B] mb-2">Título *</label>
+                        <input type="text" name="titulo" id="titulo" required
+                            class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]">
+                    </div>
+
+                    <div>
+                        <label for="tipo" class="block text-sm font-medium text-[#C0A76B] mb-2">Tipo *</label>
+                        <select name="tipo" id="tipo" required
+                            class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]">
+                            {% for value, label in tipos_incidencia %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="severidad" class="block text-sm font-medium text-[#C0A76B] mb-2">Severidad *</label>
+                        <select name="severidad" id="severidad" required
+                            class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]">
+                            {% for value, label in severidades %}
+                            <option value="{{ value }}" {% if value == 'media' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="producto_afectado" class="block text-sm font-medium text-[#C0A76B] mb-2">Producto Afectado</label>
+                        <input type="text" name="producto_afectado" id="producto_afectado"
+                            class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]">
+                    </div>
+
+                    <div>
+                        <label for="cantidad_afectada" class="block text-sm font-medium text-[#C0A76B] mb-2">Cantidad Afectada</label>
+                        <input type="number" name="cantidad_afectada" id="cantidad_afectada" min="0"
+                            class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="descripcion" class="block text-sm font-medium text-[#C0A76B] mb-2">Descripción *</label>
+                    <textarea name="descripcion" id="descripcion" rows="6" required
+                        class="w-full px-4 py-3 bg-black border border-[#C0A76B] border-opacity-50 rounded-lg text-white focus:outline-none focus:border-[#C0A76B] focus:ring-1 focus:ring-[#C0A76B]"></textarea>
+                </div>
+
+                <div class="flex gap-4">
+                    <button type="submit" class="px-6 py-3 bg-[#C0A76B] hover:bg-yellow-400 text-black font-semibold rounded-lg transition duration-300">
+                        <i class="fas fa-save"></i> Registrar Incidencia
+                    </button>
+                    <a href="{% url 'gestion_reportes' %}" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition duration-300">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

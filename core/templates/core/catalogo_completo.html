@@ -1,0 +1,77 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Glamoure - Catálogo{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/carousel-ofertas.css' %}">
+{% endblock %}
+
+{% block content %}
+  <main class="container mx-auto px-6 py-10 flex-grow pt-28">
+    <h1 class="text-5xl font-bold text-[#C0A76B] mb-4 text-center uppercase tracking-wide">Catálogo Completo</h1>
+    <p class="text-gray-400 text-center mb-10 text-lg">Explora toda nuestra colección de productos</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {% for producto in productos %}
+      <div class="carousel-slide">
+        <!-- Badges dinámicos -->
+        {% if producto.destacado %}
+        <div class="top-badge">⭐ TOP</div>
+        {% elif producto.en_oferta %}
+        <div class="offer-badge">🔥 OFERTA</div>
+        {% endif %}
+        
+        <!-- Badge SIN STOCK -->
+        {% if not producto.tiene_stock_disponible and producto.stock == 0 %}
+        <div class="out-of-stock-badge" style="position: absolute; top: 50px; left: 10px; background: rgba(220, 38, 38, 0.95); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+          ❌ AGOTADO
+        </div>
+        {% endif %}
+        
+        <!-- Botón de favoritos -->
+        {% if user.is_authenticated %}
+        <button 
+          onclick="toggleFavorito({{ producto.id }}, this)" 
+          class="favorite-btn"
+          style="background: rgba(255, 255, 255, 0.95);"
+          title="{% if producto in user.favoritos.all %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
+          data-favorito="{% if producto in user.favoritos.all %}true{% else %}false{% endif %}">
+          <i class="fa-{% if producto in user.favoritos.all %}solid{% else %}regular{% endif %} fa-heart" 
+            style="color: {% if producto in user.favoritos.all %}#C0A76B{% else %}#666{% endif %};"></i>
+        </button>
+        {% endif %}
+        
+          {% if producto.imagen_url %}
+          <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock_disponible and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
+          {% elif producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" loading="lazy" {% if not producto.tiene_stock_disponible and producto.stock == 0 %}style="opacity: 0.6; filter: grayscale(50%);"{% endif %}>
+          {% else %}
+          <img src="{% static 'imagenes/sin-imagen.png' %}" alt="Sin imagen" loading="lazy">
+        {% endif %}
+        
+        <div class="product-info">
+          <p class="product-name">{{ producto.nombre }}</p>
+          <p class="product-price">${{ producto.precio|floatformat:0|intcomma }}</p>
+          {% if producto.tiene_stock_disponible or producto.stock > 0 %}
+          <button onclick="abrirProductoModal('{% url 'producto' producto.id %}')"
+                  class="product-btn">Ver detalles</button>
+          {% else %}
+          <button disabled class="product-btn" style="background: #666; cursor: not-allowed; opacity: 0.6;">No Disponible</button>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-span-full text-center py-20">
+        <i class="fas fa-box-open text-6xl text-gray-600 mb-4"></i>
+        <p class="text-gray-400 text-xl">No hay productos disponibles en este momento</p>
+      </div>
+      {% endfor %}
+    </div>
+  </main>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Las funciones de favoritos están en modal.js -->
+{% endblock %}
